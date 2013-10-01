@@ -46,7 +46,6 @@ class Player(Gtk.Box):
         self.adj_timeout = 0
         self.recommend_imgs = None
         self.curr_song = None
-        self.curr_mv_link = None
 
         # use this to keep Net.AsyncSong and Net.AsyncMV object
         self.async_song = None
@@ -281,10 +280,9 @@ class Player(Gtk.Box):
     def start_player(self, load=False):
         self.play_button.set_icon_name('media-playback-pause-symbolic')
         self.playbin.set_state(Gst.State.PLAYING)
-        print('volume:', self.app.conf['volume'], self.volume.get_value())
-        self.playbin.set_property('volume', self.app.conf['volume'])
         self.adj_timeout = GLib.timeout_add(250, self.sync_adjustment)
         if load:
+            self.playbin.set_property('volume', self.app.conf['volume'])
             GLib.timeout_add(1500, self.init_adjustment)
 
     def pause_player(self, stop=False):
@@ -470,20 +468,24 @@ class Player(Gtk.Box):
         self.scale.set_sensitive(True)
 
     def get_mv_link(self):
-        def _update_mv_link(mv_link, error=None):
-            self.show_mv_btn.set_sensitive(mv_link is not None)
-            if mv_link is None:
+        def _update_mv_link(mv_args, error=None):
+            mv_link, mv_path = mv_args
+            self.show_mv_btn.set_sensitive(mv_link is not False)
+            if mv_link is False:
                 return
-            self.curr_mv_link = mv_link
+            if mv_link is True:
+                # local mv exists, load it
+                GLib.idle_add(self._load_mv, mv_path)
+                self.scale.set_sensitive(True)
+                return
             if self.play_type == PlayType.MV:
-                self.async_mv = Net.AsyncMV(self.app)
+                self.async_mv = Net.AsyncMV()
                 self.async_mv.connect('can-play', self.on_mv_can_play)
                 self.async_mv.connect('downloaded', self.on_mv_downloaded)
-                self.async_mv.get_mv(mv_link)
+                self.async_mv.get_mv(mv_link, mv_path)
 
         Net.async_call(Net.get_song_link, _update_mv_link,
-                # rid, use-mkv, use-mv
-                self.curr_song['rid'], self.app.conf['use-mkv'], True)
+                self.curr_song, self.app.conf, True)
 
     def enable_bus_sync(self):
         self.bus.enable_sync_message_emission()

@@ -511,23 +511,15 @@ class PlayList(Gtk.Box):
         def do_export(button):
             num_songs = len(liststore)
             i = 0
+            export_dir = folder_chooser.get_filename()
             for item in liststore:
-                name = item[0]
-                artist = item[1]
-                album = item[2]
-                rid = item[3]
-                song_link = Net.get_song_link(rid)
-                song_name = os.path.split(song_link)[1]
-                song_path = os.path.join(self.app.conf['song-dir'], 
-                        song_name)
-                if not os.path.exists(song_path):
+                song = Widgets.song_row_to_dict(item, start=0)
+                song_link, song_path = Net.get_song_link(song, 
+                        self.app.conf)
+                if song_link is not True:
                     continue
-                export_song_name = '{0}_{1}{2}'.format(name, artist, 
-                        os.path.splitext(song_name)[1]).replace('/', '+')
-                export_song_path = os.path.join(
-                        folder_chooser.get_filename(), export_song_name)
+                shutil.copy(song_path, export_dir)
                 i += 1
-                shutil.copy(song_path, export_song_path)
                 export_prog.set_fraction(i / num_songs)
                 Gdk.Window.process_all_updates()
             dialog.destroy()

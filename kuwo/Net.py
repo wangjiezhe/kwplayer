@@ -702,19 +702,19 @@ def get_radio_songs(nid, offset):
     songs = Utils.parse_radio_songs(req_content.decode('gbk'))
     return songs
 
-def get_song_link(rid, high_res=False, use_mv=False):
+def _get_song_link_raw(song, conf, use_mv=False):
     if use_mv:
-        _format = 'mkv|mp4' if high_res else 'mp4'
+        ext = 'mkv|mp4' if conf['use-mkv'] else 'mp4'
     else:
-        _format = 'ape|mp3' if high_res else 'mp3'
+        ext = 'ape|mp3' if conf['use-ape'] else 'mp3'
     url = ''.join([
         SONG,
         'response=url&type=convert_url&format=',
-        _format,
+        ext,
         '&rid=MUSIC_',
-        str(rid),
+        str(song['rid']),
         ])
-    print('Net.get_song_link(), url', url)
+    print('Net._get_song_link_raw(), url', url)
     req_content = urlopen(url)
     if req_content is None:
         return None
@@ -723,7 +723,66 @@ def get_song_link(rid, high_res=False, use_mv=False):
         return None
     song_list = song_link.split('/')
     song_link = '/'.join(song_list[:3] + song_list[5:])
-    return song_link
+    song_name = os.path.split(song_link)[1]
+    if use_mv:
+        song_path = os.path.join(conf['mv-dir'], song_name)
+    else:
+        song_path = os.path.join(conf['song-dir'], song_name)
+    if os.path.exists(song_path):
+        return (True, song_path)
+    return (song_link, song_path)
+
+def get_song_link(song, conf, use_mv=False):
+    '''
+    song is song_info dict.
+    conf, is used to to read conf['use-ape'], conf['use-mkv'],
+    conf['song-dir'] and song['mv-dir'].
+    use_mv, default is False, which will get mp3 link.
+    Return:
+     @song_link: if is True, local song exists
+                 if is False, no available song_link
+                 if is str, this link can be downloaded.
+     @song_path: target abs-path this song will be cached.
+    '''
+    if use_mv:
+        ext = 'mkv|mp4' if conf['use-mkv'] else 'mp4'
+    else:
+        ext = 'ape|mp3' if conf['use-ape'] else 'mp3'
+    url = ''.join([
+        SONG,
+        'response=url&type=convert_url&format=',
+        ext,
+        '&rid=MUSIC_',
+        str(song['rid']),
+        ])
+    print('Net.get_song_link(), url', url)
+    song_name = (''.join([
+        song['artist'],
+        '-',
+        song['name'],
+        '.',
+        ext,
+        ])).replace('/', '+')
+    if use_mv:
+        song_path = os.path.join(conf['mv-dir'], song_name)
+    else:
+        song_path = os.path.join(conf['song-dir'], song_name)
+    if os.path.exists(song_path):
+        # if song/MV exists, just return it
+        return (True, song_path)
+    req_content = urlopen(url)
+    if req_content is None:
+        return (False, song_path)
+    song_link = req_content.decode()
+    if len(song_link) < 20:
+        return (False, song_path)
+    song_list = song_link.split('/')
+    song_link = '/'.join(song_list[:3] + song_list[5:])
+    song_path = os.path.splitext(song_path)[0] + os.path.splitext(
+            song_link)[1]
+    if os.path.exists(song_path):
+        return (True, song_path)
+    return (song_link, song_path)
 
 
 class AsyncSong(GObject.GObject):
@@ -784,7 +843,7 @@ class AsyncSong(GObject.GObject):
                 received_size += len(chunk)
                 percent = int(received_size/content_length * 100)
                 self.emit('chunk-received', percent)
-                print('percent:', percent)
+                print('percentage:', percent)
                 # this signal only emit once.
                 if (received_size > CHUNK_TO_PLAY or percent > 40) \
                         and not can_play_emited:
@@ -799,21 +858,19 @@ class AsyncSong(GObject.GObject):
             self.emit('downloaded', song_path)
             Utils.iconvtag(song_path, song)
 
-        song_link = get_song_link(song['rid'], self.app.conf['use-ape'])
-        if song_link is None:
+        #song_link = get_song_link(song['rid'], self.app.conf['use-ape'])
+        song_link, song_path = get_song_link(song, self.app.conf)
+        if song_link is False:
             self.emit('can-play', None)
             self.emit('downloaded', None)
             return None
-
-        song_path = os.path.join(self.app.conf['song-dir'], 
-                os.path.split(song_link)[1])
-        print('Net.AsyncSong, song_path:', song_path)
-        if os.path.exists(song_path): 
-            print('local song exists, signals will be emited')
+        if song_link is True:
+            print('local song exists, signals will be emited:', song_path)
             self.emit('can-play', song_path)
             self.emit('downloaded', song_path)
             return
         retried = 0
+        print('Net.AsyncSong, song will be downloaded:', song_path)
         while retried < MAXTIMES:
             try:
                 req = request.urlopen(song_link)
@@ -842,22 +899,14 @@ class AsyncMV(GObject.GObject):
             'downloaded': (GObject.SIGNAL_RUN_LAST, 
                 GObject.TYPE_NONE, (str, )),
             }
-    def __init__(self, app):
+    def __init__(self):
         super().__init__()
-        self.app = app
         self.force_quit = False
 
     def destroy(self):
         self.force_quit = True
 
-    def get_mv(self, mv_link):
-        mv_path = os.path.join(self.app.conf['mv-dir'],
-                os.path.split(mv_link)[1])
-
-        if os.path.exists(mv_path):
-            self.emit('can-play', mv_path)
-            self.emit('downloaded', mv_path)
-            return
+    def get_mv(self, mv_link, mv_path):
         async_call(self._download_mv, empty_func, mv_link, mv_path)
 
     def _download_mv(self, mv_link, mv_path):
@@ -876,7 +925,7 @@ class AsyncMV(GObject.GObject):
                 chunk = req.read(CHUNK)
                 received_size += len(chunk)
                 percent = int(received_size/content_length * 100)
-                print('percent:', percent)
+                print('percentage:', percent)
                 if (received_size > CHUNK_MV_TO_PLAY or percent > 20) \
                         and not can_play_emited:
                     can_play_emited = True
