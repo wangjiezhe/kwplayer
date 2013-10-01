@@ -7,11 +7,14 @@ kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音�
 ====
 可以直接运行kuwo.py, 而不需要安装. 但是仍然需要手动安装一些软件包, 它们是:
 
+* python3.3 - 因为mutagenx 依赖python3.3
 * python3-gi  -  gkt3的python3绑定;
 * python3-cairo -  cairo的python3绑定(用于实现显示特效);
 * python3-gi-cairo - 在GObject中用到的cairo的python3绑定;
-* gstreamer1.0-libav  -  gstreamer的编码/解码库.
-* python3-leveldb  -  leveldb的python3绑定(用于缓存数据, 可选);
+* gstreamer1.0-x - gtk的多媒体框架;
+* gstreamer1.0-libav  -  gstreamer的编码/解码库;
+* leveldb - 强大的NoSQL数据库(用于缓存数据, 可选);
+* python3-leveldb  -  leveldb的python3绑定;
 
 对于debian系列的发行版, 也可以直接运行build/下面的脚本, 生成deb包, 其中:
 
@@ -19,6 +22,18 @@ kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音�
 * generate_deb.sh 用于创建deb包, 由于使用了dpkg命令来打包, 这个脚本需要root权限
 
 最后, 生成的deb包可以用dpkg命令来安装: `# dpkg -i kwplayer.deb`
+
+已经测试通过的发行版:
+* Debian sid
+* Ubuntu 12.10
+* Ubuntu 13.10 Beta
+* Gentoo
+* Fedora 19
+
+已经测试失败的发行版:
+* Debian wheezy (软件包太旧)
+* Ubuntu 12.04 (软件包太旧)
+
 
 Q&A
 ===
