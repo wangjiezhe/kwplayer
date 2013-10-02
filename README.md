@@ -42,6 +42,7 @@ kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音�
 * Ubuntu 13.10 Beta
 * Gentoo
 * Fedora 19
+* Arch Linux
 
 已经测试失败的发行版:
 
