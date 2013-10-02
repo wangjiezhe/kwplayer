@@ -42,8 +42,10 @@ class App:
         self.window.props.hide_titlebar_when_maximized = True
         self.window.set_icon(self.theme['app-logo'])
         app.add_window(self.window)
-        self.window.connect('check-resize', self.on_main_window_resized)
-        self.window.connect('delete-event', self.on_main_window_deleted)
+        self.window.connect('check-resize',
+                self.on_main_window_resized)
+        self.window.connect('delete-event',
+                self.on_main_window_deleted)
 
         self.accel_group = Gtk.AccelGroup()
         self.window.add_accel_group(self.accel_group)
@@ -58,7 +60,7 @@ class App:
         self.notebook.props.tab_pos = Gtk.PositionType.BOTTOM
         self.notebook.get_style_context().add_class('main_tab')
         # Add 2 pix to left-margin to solve Fullscreen problem.
-        self.notebook.props.margin_left = 2
+        #self.notebook.props.margin_left = 2
         box.pack_start(self.notebook, True, True, 0)
 
         self.builder = Gtk.Builder()
@@ -74,9 +76,11 @@ class App:
         self.add_simple_action('quit', self.on_action_quit_activate)
 
     def on_app_activate(self, app):
-        # signal should be connected after all pages in notebook all added.
+        # signal should be connected after all pages in notebook
+        # all added.
         self.init_notebook()
-        self.notebook.connect('switch-page', self.on_notebook_switch_page)
+        self.notebook.connect('switch-page',
+                self.on_notebook_switch_page)
 
         # load styles
         self.load_styles()
@@ -114,7 +118,8 @@ class App:
         dialog.set_program_name(Config.APPNAME)
         dialog.set_logo(self.theme['app-logo'])
         dialog.set_version(Config.VERSION)
-        dialog.set_comments(_('A simple music player for Linux Desktop'))
+        dialog.set_comments(
+                _('A simple music player for Linux Desktop'))
         dialog.set_copyright('Copyright (c) 2013 LiuLang')
         dialog.set_website(Config.HOMEPAGE)
         dialog.set_license_type(Gtk.License.GPL_3_0)
@@ -187,12 +192,13 @@ class App:
                 )
 
     def init_status_icon(self):
-        # set status_icon as class property, to keep its life after function
-        # exited
+        # set status_icon as class property, to keep its life
+        # after function exited
         self.status_icon = Gtk.StatusIcon()
         self.status_icon.set_from_pixbuf(self.theme['app-logo'])
         # left click
-        self.status_icon.connect('activate', self.on_status_icon_activate)
+        self.status_icon.connect('activate',
+                self.on_status_icon_activate)
         # right click
         self.status_icon.connect('popup_menu', 
                 self.on_status_icon_popup_menu)
@@ -210,27 +216,32 @@ class App:
             event_time):
         menu = Gtk.Menu()
         show_item = Gtk.MenuItem(label=_('Show App') )
-        show_item.connect('activate', self.on_status_icon_show_app_activate)
+        show_item.connect('activate',
+                self.on_status_icon_show_app_activate)
         menu.append(show_item)
 
         pause_item = Gtk.MenuItem(label=_('Pause/Resume'))
-        pause_item.connect('activate', self.on_status_icon_pause_activate)
+        pause_item.connect('activate',
+                self.on_status_icon_pause_activate)
         menu.append(pause_item)
 
         next_item = Gtk.MenuItem(label=_('Next Song'))
-        next_item.connect('activate', self.on_status_icon_next_activate)
+        next_item.connect('activate',
+                self.on_status_icon_next_activate)
         menu.append(next_item)
 
         sep_item = Gtk.SeparatorMenuItem()
         menu.append(sep_item)
         
         quit_item = Gtk.MenuItem(label=_('Quit'))
-        quit_item.connect('activate', self.on_status_icon_quit_activate)
+        quit_item.connect('activate', 
+                self.on_status_icon_quit_activate)
         menu.append(quit_item)
 
         menu.show_all()
         menu.popup(None, None,
-                lambda a,b: Gtk.StatusIcon.position_menu(menu, status_icon),
+                lambda a,b: Gtk.StatusIcon.position_menu(menu,
+                    status_icon),
                 None, event_button, event_time)
 
     def on_status_icon_show_app_activate(self, menuitem):
