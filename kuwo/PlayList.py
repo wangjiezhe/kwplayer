@@ -297,10 +297,10 @@ class PlayList(Gtk.Box):
     def cache_song(self, song):
         rid = song['rid']
         # first, check if this song exists in cached_db
-        req = self.get_song_from_cached_db(rid)
-        if req is not None:
-            print('local cache exists, quit')
-            return
+        #req = self.get_song_from_cached_db(rid)
+        #if req is not None:
+        #    print('local cache exists, quit')
+        #    return
         # second, check song in caching_liststore.
         liststore = self.tabs['Caching'].liststore
         path = self.get_song_path_in_liststore(liststore, rid)

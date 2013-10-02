@@ -21,7 +21,8 @@ kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音�
 * build.sh 用于创建fakeroot目录, 需要普通用户权限;
 * generate_deb.sh 用于创建deb包, 由于使用了dpkg命令来打包, 这个脚本需要root权限
 
-最后, 生成的deb包可以用dpkg命令来安装: `# dpkg -i kwplayer.deb`
+最后, 生成的deb包可以用dpkg命令来安装: `# dpkg -i kwplayer.deb` , 如果
+不想手动打包的话, 在bin/目录里面有打包好的deb包, 也可以直接使用.
 
 对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
 

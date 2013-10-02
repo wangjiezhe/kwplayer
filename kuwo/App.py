@@ -202,8 +202,6 @@ class App:
         # right click
         self.status_icon.connect('popup_menu', 
                 self.on_status_icon_popup_menu)
-        #self.status_icon.set_screen(self.window.get_screen())
-        #self.status_icon.set_tooltip_text('tray icon')
 
     def on_status_icon_activate(self, status_icon):
         is_visible = self.window.is_visible()
