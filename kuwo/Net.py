@@ -14,12 +14,18 @@ from urllib import request
 from kuwo import Config
 from kuwo import Utils
 try:
-    import leveldb
+    # Debian: http://code.google.com/p/py-leveldb/
+    from leveldb import LevelDB
     leveldb_imported = True
 except ImportError as e:
-    leveldb_imported = False
-    print('Error:', e)
-    print('No leveldb module was found, http requests will not be cached!')
+    try:
+        # Fedora: https://github.com/wbolster/plyvel
+        from plyvel import DB as LevelDB
+        leveldb_imported = True
+    except ImportError as e:
+        leveldb_imported = False
+        print('Error:', e)
+        print('No leveldb/plyvel module was found, http requests will not be cached!')
 
 IMG_CDN = 'http://img4.kwcdn.kuwo.cn/'
 ARTIST = 'http://artistlistinfo.kuwo.cn/mb.slist?'
@@ -43,10 +49,9 @@ class Dict(dict):
 req_cache = Dict()
 
 # Using leveldb to cache urlrequest
+ldb = None
 if leveldb_imported:
-    ldb = leveldb.LevelDB(Config.CACHE_DB)
-else:
-    ldb = None
+    ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
 
 def empty_func(*args, **kwds):
     pass
