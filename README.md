@@ -8,13 +8,13 @@ kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音�
 可以直接运行kuwo.py, 而不需要安装. 但是仍然需要手动安装一些软件包, 它们是:
 
 * python3.3 - 因为mutagenx 依赖python3.3
-* python3-gi  -  gkt3的python3绑定;
+* python3-gi  -  gkt3的python3绑定(Fedora中叫做python3-gobject);
 * python3-cairo -  cairo的python3绑定(用于实现显示特效);
 * python3-gi-cairo - 在GObject中用到的cairo的python3绑定;
 * gstreamer1.0-x - gtk的多媒体框架;
 * gstreamer1.0-libav  -  gstreamer的编码/解码库;
 * leveldb - 强大的NoSQL数据库(用于缓存数据, 可选);
-* python3-leveldb  -  leveldb的python3绑定;
+* python3-leveldb  -  leveldb的python3绑定(Fedora中, 这个包的名称是python3-plyvel, 但因为使用了不同的模块名, 仍然无法使用);
 
 对于debian系列的发行版, 也可以直接运行build/下面的脚本, 生成deb包, 其中:
 
@@ -23,7 +23,18 @@ kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音�
 
 最后, 生成的deb包可以用dpkg命令来安装: `# dpkg -i kwplayer.deb`
 
+对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
+
+* 更新系统
+* 安装python3-cairo, 因为系统自带了python3-gobject.
+* 使用rpmfushion, 可以参考这篇文章:http://blog.csdn.net/sabalol/article/details/9286073
+* 安装gstreamer1-libav
+* 不需要安装gstreamer的其它组件, 因为它们都在安装系统时自动被安装了.
+
+我用的是mirrors.163.com这个更新源, 速度很好.
+
 已经测试通过的发行版:
+
 * Debian sid
 * Ubuntu 12.10
 * Ubuntu 13.10 Beta
@@ -31,6 +42,7 @@ kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音�
 * Fedora 19
 
 已经测试失败的发行版:
+
 * Debian wheezy (软件包太旧)
 * Ubuntu 12.04 (软件包太旧)
 
