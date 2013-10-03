@@ -46,7 +46,9 @@ Gentoo/Arch Linux的话, 也没什么好说的, 看一下上面的依赖包, 缺
 
 * Debian sid
 * Debian testing
+* Debian whezy
 * Ubuntu 12.10
+* Ubuntu 13.04
 * Ubuntu 13.10 Beta
 * Gentoo
 * Fedora 19
@@ -54,7 +56,6 @@ Gentoo/Arch Linux的话, 也没什么好说的, 看一下上面的依赖包, 缺
 
 已经测试失败的发行版:
 
-* Debian wheezy (正在测试)
 * Ubuntu 12.04 (软件包太旧)
 
 

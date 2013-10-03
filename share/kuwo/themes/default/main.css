@@ -1,8 +1,5 @@
-GtkWindow {
-}
 GtkTextView.lrc_tv {
     font-size: 24px;
-    /*font-family: Comic Sans;*/
     background-color: rgba(0, 0, 0, 0);
 }
 

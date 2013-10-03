@@ -179,7 +179,10 @@ class App:
         self.notebook.set_current_page(page)
 
     def load_styles(self):
-        style_file = os.path.join(self.conf['theme'], 'main.css')
+        if Gtk.MINOR_VERSION < 8:
+            style_file = os.path.join(self.conf['theme'], 'main-3.6.css')
+        else:
+            style_file = os.path.join(self.conf['theme'], 'main.css')
         with open(style_file, 'rb') as fh:
             css = fh.read()
 
