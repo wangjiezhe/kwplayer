@@ -139,6 +139,7 @@ class Player(Gtk.Box):
         self.scale = Gtk.Scale()
         self.adjustment = Gtk.Adjustment(0, 0, 100, 1, 10, 0)
         self.scale.set_adjustment(self.adjustment)
+        self.scale.set_restrict_to_fill_level(False)
         self.scale.props.draw_value = False
         self.scale.connect('change-value', self.on_scale_change_value)
         scale_box.pack_start(self.scale, True, True, 0)
@@ -164,10 +165,14 @@ class Player(Gtk.Box):
             self.async_mv.destroy()
 
     def load(self, song):
+        def _update_fill_level(value):
+            self.scale.set_fill_level(value)
+
         def _on_chunk_received(widget, percent):
-            pass
+            GLib.idle_add(_update_fill_level, percent)
 
         def _on_song_can_play(widget, song_path):
+            self.scale.set_show_fill_level(False)
             if song_path:
                 GLib.idle_add(self._load_song, song_path)
             else:
@@ -181,6 +186,8 @@ class Player(Gtk.Box):
         self.play_type = PlayType.SONG
         self.curr_song = song
         self.pause_player(stop=True)
+        self.scale.set_fill_level(0)
+        self.scale.set_show_fill_level(True)
         self.async_song = Net.AsyncSong(self.app)
         self.async_song.connect('chunk-received', _on_chunk_received)
         self.async_song.connect('can-play', _on_song_can_play)
@@ -446,25 +453,25 @@ class Player(Gtk.Box):
         self.play_type = PlayType.MV
         self.curr_song = song
         self.pause_player(stop=True)
-        self.show_mv_btn.set_sensitive(True)
-        self.show_mv_btn.handler_block(self.show_mv_sid)
-        self.show_mv_btn.set_active(True)
-        self.show_mv_btn.handler_unblock(self.show_mv_sid)
         self.get_mv_link()
 
     def _load_mv(self, mv_path):
+        self.update_player_info()
+        Gdk.Window.process_all_updates()
         self.playbin.set_property('uri', 'file://' + mv_path)
         self.app.lrc.show_mv()
         self.enable_bus_sync()
         self.start_player(load=True)
-        self.update_player_info()
 
     def on_mv_can_play(self, widget, mv_path):
         if mv_path:
             GLib.idle_add(self._load_mv, mv_path)
         else:
             # Failed to download MV,
-            # TODO: load next automatically
+            self.show_mv_btn.set_sensitive(False)
+            self.show_mv_btn.handler_block(self.show_mv_sid)
+            self.show_mv_btn.set_active(False)
+            self.show_mv_btn.handler_unblock(self.show_mv_sid)
             self.pause_player(stop=True)
 
     def on_mv_downloaded(self, widget, mv_path):
@@ -479,6 +486,9 @@ class Player(Gtk.Box):
             if mv_link is False:
                 self.load_next()
                 return
+            self.show_mv_btn.handler_block(self.show_mv_sid)
+            self.show_mv_btn.set_active(True)
+            self.show_mv_btn.handler_unblock(self.show_mv_sid)
             if mv_link is True:
                 # local mv exists, load it
                 GLib.idle_add(self._load_mv, mv_path)

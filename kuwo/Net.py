@@ -906,6 +906,9 @@ class AsyncMV(GObject.GObject):
     __gsignals__ = {
             'can-play': (GObject.SIGNAL_RUN_LAST, 
                 GObject.TYPE_NONE, (str, )),
+            'chunk-received': (GObject.SIGNAL_RUN_LAST,
+                GObject.TYPE_NONE, 
+                (int, )),
             'downloaded': (GObject.SIGNAL_RUN_LAST, 
                 GObject.TYPE_NONE, (str, )),
             }
@@ -935,6 +938,7 @@ class AsyncMV(GObject.GObject):
                 chunk = req.read(CHUNK)
                 received_size += len(chunk)
                 percent = int(received_size/content_length * 100)
+                self.emit('chunk-received', percent)
                 print('percentage:', percent)
                 if (received_size > CHUNK_MV_TO_PLAY or percent > 20) \
                         and not can_play_emited:
