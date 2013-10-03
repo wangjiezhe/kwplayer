@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # Generate deb package from source.
+# v1.1 - 2013.10.3
+# move deb package to ../bin
 # v1.0 -2013.9.4
 # project inited.
 
@@ -47,4 +49,4 @@ GROUP=$(stat -c%g "$0")
 chown $OWNER:$GROUP $DEB
 echo 'file owner and group owner changed..'
 
-mv $DEB ../
+mv -vf $DEB ../bin
