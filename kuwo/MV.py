@@ -28,6 +28,13 @@ class MV(Gtk.Box):
         self.label = Gtk.Label('')
         self.buttonbox.pack_start(self.label, False, False, 0)
 
+        # pic, name, artist, album, rid, artistid, albumid
+        self.liststore_songs = Gtk.ListStore(GdkPixbuf.Pixbuf, str, str, 
+                str, int, int, int)
+        self.mv_control_box = Widgets.MVControlBox(self.liststore_songs,
+                self.app)
+        self.buttonbox.pack_end(self.mv_control_box, False, False, 0)
+
         self.scrolled_nodes = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_nodes, True, True, 0)
         # logo, name, nid, info
@@ -40,9 +47,6 @@ class MV(Gtk.Box):
 
         self.scrolled_songs = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_songs, True, True, 0)
-        # pic, name, artist, album, rid, artistid, albumid
-        self.liststore_songs = Gtk.ListStore(GdkPixbuf.Pixbuf, str, str, 
-                str, int, int, int)
         iconview_songs = Widgets.IconView(self.liststore_songs, info_pos=2)
         iconview_songs.connect('item_activated', 
                 self.on_iconview_songs_item_activated)

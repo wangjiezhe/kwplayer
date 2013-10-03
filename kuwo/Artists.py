@@ -83,6 +83,14 @@ class Artists(Gtk.Box):
                 self.artist_songs_liststore, app)
         self.buttonbox.pack_end(self.artist_control_box, False, False, 0)
 
+        # control box for artist's mv
+        # pic, name, artist, album, rid, artistid, albumid
+        self.artist_mv_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, 
+                str, str, int, int, int)
+        self.artist_mv_control_box = Widgets.MVControlBox(
+                self.artist_mv_liststore, self.app)
+        self.buttonbox.pack_end(self.artist_mv_control_box, False, False, 0)
+
         # control box for artist's albums
         # checked, name, artist, album, rid, artistid, albumid
         self.album_songs_liststore = Gtk.ListStore(bool, str, str, str,
@@ -186,9 +194,6 @@ class Artists(Gtk.Box):
         self.artist_mv_tab = Gtk.ScrolledWindow()
         self.artist_notebook.append_page(self.artist_mv_tab, 
                 Gtk.Label(_('MV')))
-        # pic, name, artist, album, rid, artistid, albumid
-        self.artist_mv_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, 
-                str, str, int, int, int)
         artist_mv_iconview = Widgets.IconView(self.artist_mv_liststore,
                 info_pos=2)
         artist_mv_iconview.connect('item_activated',
@@ -259,15 +264,15 @@ class Artists(Gtk.Box):
         artist_info_textview.set_buffer(self.artist_info_textbuffer)
         artist_info_box.pack_start(artist_info_textview, True, True, 0)
 
-        self.show_all()
-        self.buttonbox.hide()
-
         # Album tab (tab 2)
         album_songs_tab = Gtk.ScrolledWindow()
         self.notebook.append_page(album_songs_tab, Gtk.Label(_('Album')))
         album_songs_treeview = Widgets.TreeViewSongs(
                 self.album_songs_liststore, app)
         album_songs_tab.add(album_songs_treeview)
+
+        self.show_all()
+        self.buttonbox.hide()
 
         prefs = ((_('All'), ''),
                 ('A', 'a'), ('B', 'b'), ('C', 'c'), ('D', 'd'),
@@ -365,6 +370,7 @@ class Artists(Gtk.Box):
 
         self.buttonbox.show_all()
         self.artist_button.hide()
+        self.artist_mv_control_box.hide()
         self.album_control_box.hide()
         self.label.set_label(artist)
         # switch to `songs` tab
@@ -375,6 +381,8 @@ class Artists(Gtk.Box):
 
     def show_artist_songs(self):
         self.artist_control_box.show_all()
+        self.album_control_box.hide()
+        self.artist_mv_control_box.hide()
         if self.artist_songs_inited:
             return
         self.artist_songs_inited = True
@@ -406,6 +414,7 @@ class Artists(Gtk.Box):
             return
         self.artist_albums_inited = True
         self.artist_control_box.hide()
+        self.artist_mv_control_box.hide()
         self.append_artist_albums(init=True)
 
     def append_artist_albums(self, init=False):
@@ -443,6 +452,8 @@ class Artists(Gtk.Box):
             return
         self.artist_mv_inited = True
         self.artist_control_box.hide()
+        self.album_control_box.hide()
+        self.artist_mv_control_box.show_all()
         self.append_artist_mv(init=True)
 
     def append_artist_mv(self, init=False):
@@ -473,6 +484,8 @@ class Artists(Gtk.Box):
             return
         self.artist_similar_inited = True
         self.artist_control_box.hide()
+        self.artist_mv_control_box.hide()
+        self.album_control_box.hide()
         self.append_artist_similar(init=True)
 
     def append_artist_similar(self, init=False):
@@ -504,6 +517,8 @@ class Artists(Gtk.Box):
             return
         self.artist_info_inited = True
         self.artist_control_box.hide()
+        self.artist_mv_control_box.hide()
+        self.album_control_box.hide()
         self.append_artist_info()
 
     def append_artist_info(self):
@@ -560,11 +575,14 @@ class Artists(Gtk.Box):
         self.label.set_label(album)
         self.buttonbox.show_all()
         self.artist_control_box.hide()
+        self.artist_mv_control_box.hide()
         self.notebook.set_current_page(2)
         self.append_album_songs()
     
     def append_album_songs(self):
+        print('Artists.append_album_songs()')
         def _append_album_songs(songs, error=None):
+            print('_append_album_songs()')
             if songs is None:
                 return
             for song in songs:

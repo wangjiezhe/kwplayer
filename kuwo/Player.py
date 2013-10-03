@@ -171,6 +171,7 @@ class Player(Gtk.Box):
             if song_path:
                 GLib.idle_add(self._load_song, song_path)
             else:
+                # may be we need to play next song automatically
                 self.pause_player(stop=True)
 
         def _on_song_downloaded(widget, song_path):
@@ -193,7 +194,6 @@ class Player(Gtk.Box):
         self.app.lrc.show_music()
         self.update_player_info()
         self.get_lrc()
-        self.show_mv_btn.set_sensitive(False)
         self.get_mv_link()
         self.get_recommend_lists()
 
@@ -256,13 +256,14 @@ class Player(Gtk.Box):
                 self.play_type == PlayType.NONE:
             return
         _repeat = self.repeat_btn.get_active()
-        _shuffle = self.shuffle_btn.get_active()
-        # TODO: pause current song
-        prev_song = self.app.playlist.get_prev_song(repeat=_repeat, 
-                shuffle=_shuffle)
-        if prev_song is not None:
-            # TODO, FIXME: check PlayType
+        self.pause_player(stop=True)
+        prev_song = self.app.playlist.get_prev_song(repeat=_repeat)
+        if prev_song is None:
+            return
+        if self.play_type == PlayType.SONG:
             self.load(prev_song)
+        elif self.play_type == PlayType.MV:
+            self.load_mv(prev_song)
 
     def on_play_button_clicked(self, button):
         if self.play_type == PlayType.NONE:
@@ -282,7 +283,6 @@ class Player(Gtk.Box):
         self.playbin.set_state(Gst.State.PLAYING)
         self.adj_timeout = GLib.timeout_add(250, self.sync_adjustment)
         if load:
-            self.playbin.set_property('volume', self.app.conf['volume'])
             GLib.timeout_add(1500, self.init_adjustment)
 
     def pause_player(self, stop=False):
@@ -303,23 +303,23 @@ class Player(Gtk.Box):
             self.adj_timeout = 0
 
     def load_next(self):
-        # use EOS to load next song.
         self.on_eos(None, None)
 
     def on_scale_change_value(self, scale, scroll_type, value):
         '''
         When user move the scale, pause play and seek audio position.
-        Delay 200 miliseconds to increase responce spead
+        Delay 500 miliseconds to increase responce spead
         '''
         if self.play_type == PlayType.NONE:
             return
+
         self.pause_player()
         self.playbin.seek_simple(Gst.Format.TIME, 
                 Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT,
                 self.adjustment.get_value())
         self.sync_label_by_adjustment()
         self.player_timestamp = time.time()
-        GLib.timeout_add(200, self._delay_play, self.player_timestamp)
+        GLib.timeout_add(500, self._delay_play, self.player_timestamp)
 
     def _delay_play(self, local_timestamp):
         if self.player_timestamp == local_timestamp:
@@ -382,9 +382,6 @@ class Player(Gtk.Box):
         Net.async_call(Net.get_recommend_image, _update_background, url)
 
     def on_eos(self, bus, msg):
-        '''
-        When EOS is reached, try to fetch next song.
-        '''
         self.pause_player(stop=True)
         _repeat = self.repeat_btn.get_active()
         _shuffle = self.shuffle_btn.get_active()
@@ -393,9 +390,13 @@ class Player(Gtk.Box):
         elif self.play_type == PlayType.SONG:
             next_song = self.app.playlist.get_next_song(repeat=_repeat, 
                     shuffle=_shuffle)
-            print('next song:', next_song)
             if next_song is not None:
                 self.load(next_song)
+        elif self.play_type == PlayType.MV:
+            next_mv = self.app.playlist.get_next_song(repeat=_repeat, 
+                    shuffle=_shuffle)
+            if next_mv is not None:
+                self.load_mv(next_mv)
 
     def on_error(self, bus, msg):
         print('on_error():', msg.parse_error())
@@ -434,6 +435,7 @@ class Player(Gtk.Box):
             self.app.lrc.show_mv()
             self.enable_bus_sync()
             self.load_mv(self.curr_song)
+            self.app.popup_page(self.app.lrc.app_page)
         else:
             self.app.lrc.show_music()
             self.load(self.curr_song)
@@ -462,6 +464,7 @@ class Player(Gtk.Box):
             GLib.idle_add(self._load_mv, mv_path)
         else:
             # Failed to download MV,
+            # TODO: load next automatically
             self.pause_player(stop=True)
 
     def on_mv_downloaded(self, widget, mv_path):
@@ -471,18 +474,20 @@ class Player(Gtk.Box):
         def _update_mv_link(mv_args, error=None):
             mv_link, mv_path = mv_args
             self.show_mv_btn.set_sensitive(mv_link is not False)
+            if self.play_type != PlayType.MV:
+                return
             if mv_link is False:
+                self.load_next()
                 return
             if mv_link is True:
                 # local mv exists, load it
                 GLib.idle_add(self._load_mv, mv_path)
                 self.scale.set_sensitive(True)
                 return
-            if self.play_type == PlayType.MV:
-                self.async_mv = Net.AsyncMV()
-                self.async_mv.connect('can-play', self.on_mv_can_play)
-                self.async_mv.connect('downloaded', self.on_mv_downloaded)
-                self.async_mv.get_mv(mv_link, mv_path)
+            self.async_mv = Net.AsyncMV()
+            self.async_mv.connect('can-play', self.on_mv_can_play)
+            self.async_mv.connect('downloaded', self.on_mv_downloaded)
+            self.async_mv.get_mv(mv_link, mv_path)
 
         Net.async_call(Net.get_song_link, _update_mv_link,
                 self.curr_song, self.app.conf, True)
@@ -498,7 +503,6 @@ class Player(Gtk.Box):
 
     def on_sync_message(self, bus, msg):
         if msg.get_structure().get_name() == 'prepare-window-handle':
-            #print('prepare-window-handle')
             msg.src.set_window_handle(self.app.lrc.xid)
 
     # Fullscreen

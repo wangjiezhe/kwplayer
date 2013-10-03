@@ -186,7 +186,6 @@ class PlayList(Gtk.Box):
         names = [list(p) for p in self.liststore_left]
         # There must be at least 4 playlists.
         if len(names) < 4:
-            print('Error: no enough playlists were found!')
             return
         playlists = {'_names_': names}
         for name in names:
@@ -286,7 +285,6 @@ class PlayList(Gtk.Box):
         liststore.append(Widgets.song_dict_to_row(song))
 
     def add_songs_to_playlist(self, songs, list_name='Default'):
-        print('PlayList.add_songs_to_playlist()')
         for song in songs:
             self.add_song_to_playlist(song, list_name=list_name)
 
@@ -303,10 +301,9 @@ class PlayList(Gtk.Box):
         #    return
         # second, check song in caching_liststore.
         liststore = self.tabs['Caching'].liststore
-        path = self.get_song_path_in_liststore(liststore, rid)
-        if path is not None:
-            print('song is already in caching list, do nothing.')
-            return
+        #path = self.get_song_path_in_liststore(liststore, rid)
+        #if path is not None:
+        #    return
         liststore.append(Widgets.song_dict_to_row(song))
 
     def cache_songs(self, songs):
@@ -379,8 +376,7 @@ class PlayList(Gtk.Box):
         self.cache_next_async_song = Net.AsyncSong(self.app)
         self.cache_next_async_song.get_song(song)
 
-    def get_prev_song(self, repeat=False, shuffle=False):
-        print('get prev song()')
+    def get_prev_song(self, repeat=False):
         list_name = self.curr_playing[0]
         if list_name is None:
             return
@@ -389,18 +385,17 @@ class PlayList(Gtk.Box):
         song_nums = len(liststore)
         if song_nums == 0:
             return None
-        if shuffle:
-            path = random.randint(0, song_nums-1)
-        elif path == 0:
-            # Already reach top of the list, maybe we can repeat from bottom
-            path = 0
+        if path == 0:
+            if repeat:
+                path = song_nums - 1
+            else:
+                path = 0
         else:
             path = path - 1
         self.curr_playing[1] = path
         return Widgets.song_row_to_dict(liststore[path], start=0)
 
     def get_next_song(self, repeat=False, shuffle=False):
-        print('get next song()')
         list_name = self.curr_playing[0]
         liststore = self.tabs[list_name].liststore
         path = self.curr_playing[1]
@@ -413,7 +408,6 @@ class PlayList(Gtk.Box):
         elif path == song_nums - 1:
             if repeat is False:
                 return None
-            # repeat from the first song
             path = 0
         else:
             path = path + 1

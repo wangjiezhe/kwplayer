@@ -25,8 +25,7 @@ except ImportError as e:
         leveldb_imported = True
     except ImportError as e:
         leveldb_imported = False
-        print('Error:', e)
-        print('No leveldb/plyvel module was found, http requests will not be cached!')
+        print(_('Warning: No leveldb/plyvel module was found, http requests will not be cached!'))
 
 IMG_CDN = 'http://img4.kwcdn.kuwo.cn/'
 ARTIST = 'http://artistlistinfo.kuwo.cn/mb.slist?'
@@ -56,7 +55,7 @@ if leveldb_imported:
         ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
     except Exception as e:
         print(e, type(e))
-        print('Error: Only one process can run at a time, quit!')
+        print('Warning: Only one process can run at a time, quit!')
         sys.exit(1)
 
 def empty_func(*args, **kwds):

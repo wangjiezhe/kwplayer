@@ -160,6 +160,20 @@ class ControlBox(Gtk.Box):
         songs = [song_row_to_dict(s) for s in self.liststore if s[0]]
         self.app.playlist.cache_songs(songs)
 
+class MVControlBox(Gtk.Box):
+    def __init__(self, liststore, app):
+        super().__init__()
+        self.liststore = liststore
+        self.app = app
+
+        button_add = Gtk.Button(_('Add to Playlist'))
+        button_add.connect('clicked', self.on_button_add_clicked)
+        self.pack_start(button_add, False, False, 0)
+
+    def on_button_add_clicked(self, btn):
+        songs = [song_row_to_dict(s) for s in self.liststore]
+        self.app.playlist.popup_playlist_menu(btn, songs)
+
 
 class IconView(Gtk.IconView):
     def __init__(self, liststore, info_pos=3, tooltip=None):
