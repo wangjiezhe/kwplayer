@@ -10,13 +10,3 @@ GtkTextView.lrc_tv {
   color: rgb(136, 139, 132);
   font-size: 9px;
 }
-
-/*
-GtkNotebook.main_tab {
-  -GtkWidget-focus-line-width: 0;
-  padding: 10px 10px 10px 20px;
-  -GtkNotebook-tab-overlap: 0;
-  border-width: 1px;
-  border-radius: 15px;
-}
-*/

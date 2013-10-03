@@ -66,6 +66,7 @@ Q&A
 TODO
 ====
 * 支持Debian stable
+* 为Ubuntu创建PPA
 * 优化歌词的显示效果
 * 将播放列表中的音乐导出到其它目录, 也可以导出到手机中(已完成)
 * 自动修复mp3的tag编码 (已完成)
@@ -96,3 +97,10 @@ MV:
 
 其它的:
 <img src="screenshot/others.png?raw=true" title="其他的" />
+
+THANKS
+======
+`mutagenx(mutagen)` 模块来自https://github.com/LordSputnik/mutagen
+这个模块被集成过来, 主要是为了方便朋友们安装, 因为debian/fedora中集成了
+python2 的版本(http://code.google.com/p/mutagen). 当然了, 也可以从github
+得到最新的mutagen(python3)代码, 安装也很方便.

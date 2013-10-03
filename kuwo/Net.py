@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import os
+import sys
 import threading
 import urllib.error
 from urllib import parse
@@ -51,7 +52,12 @@ req_cache = Dict()
 # Using leveldb to cache urlrequest
 ldb = None
 if leveldb_imported:
-    ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
+    try:
+        ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
+    except Exception as e:
+        print(e, type(e))
+        print('Error: Only one process can run at a time, quit!')
+        sys.exit(1)
 
 def empty_func(*args, **kwds):
     pass

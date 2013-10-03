@@ -285,6 +285,8 @@ class Radio(Gtk.Box):
 
     def dump_playlists(self):
         filepath = Config.RADIO_JSON
+        if self.playlists is None:
+            return
         with open(filepath, 'w') as fh:
             fh.write(json.dumps(self.playlists))
 

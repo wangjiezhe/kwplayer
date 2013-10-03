@@ -186,10 +186,8 @@ class App:
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(css)
         Gtk.StyleContext.add_provider_for_screen(
-                Gdk.Screen.get_default(),
-                style_provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-                )
+                Gdk.Screen.get_default(), style_provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def init_status_icon(self):
         # set status_icon as class property, to keep its life
