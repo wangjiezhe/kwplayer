@@ -163,8 +163,16 @@ class PlayList(Gtk.Box):
         pass
 
     def init_ui(self):
+        def commit_db():
+            self.conn.commit()
+            return True
+
         self.init_table()
         self.load_playlists()
+        # dump playlists to dist every 5 minites
+        GLib.timeout_add(300, self.dump_playlists)
+        # commit to sqlite db
+        GLib.timeout_add(300, commit_db)
         return False
 
     def init_table(self):
@@ -186,7 +194,7 @@ class PlayList(Gtk.Box):
         names = [list(p) for p in self.liststore_left]
         # There must be at least 4 playlists.
         if len(names) < 4:
-            return
+            return True
         playlists = {'_names_': names}
         for name in names:
             list_name = name[1]
@@ -196,6 +204,7 @@ class PlayList(Gtk.Box):
             playlists[list_name] = [list(p) for p in liststore]
         with open(filepath, 'w') as fh:
             fh.write(json.dumps(playlists))
+        return True
 
     def load_playlists(self):
         filepath = Config.PLS_JSON
@@ -255,8 +264,11 @@ class PlayList(Gtk.Box):
 
     # Open API for others to call.
     def play_song(self, song, list_name='Default'):
+        print('PlayList.play_song:', song, list_name)
         if not song:
             return
+        if list_name is None:
+            list_name = 'Default'
         liststore = self.tabs[list_name].liststore
         rid = song['rid']
         path = self.get_song_path_in_liststore(liststore, rid)
@@ -356,6 +368,7 @@ class PlayList(Gtk.Box):
 
     # Others
     def on_song_downloaded(self, play=False):
+        print('Playlist.on_song_downloaded:', play, self.curr_playing)
         # copy this song from current playing list to cached_list.
         list_name = self.curr_playing[0]
         liststore = self.tabs[list_name].liststore
