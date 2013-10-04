@@ -63,17 +63,17 @@ class App:
         #self.notebook.props.margin_left = 2
         box.pack_start(self.notebook, True, True, 0)
 
-        self.builder = Gtk.Builder()
-        for ui in Config.UI_FILES:
-            self.builder.add_from_file(ui)
-        self.builder.connect_signals(self)
-        appmenu = self.builder.get_object('appmenu')
-        app.set_app_menu(appmenu)
-        
-        self.add_simple_action('preferences', 
-                self.on_action_preferences_activate)
-        self.add_simple_action('about', self.on_action_about_activate)
-        self.add_simple_action('quit', self.on_action_quit_activate)
+#        self.builder = Gtk.Builder()
+#        for ui in Config.UI_FILES:
+#            self.builder.add_from_file(ui)
+#        self.builder.connect_signals(self)
+#        appmenu = self.builder.get_object('appmenu')
+#        app.set_app_menu(appmenu)
+#        
+#        self.add_simple_action('preferences', 
+#                self.on_action_preferences_activate)
+#        self.add_simple_action('about', self.on_action_about_activate)
+#        self.add_simple_action('quit', self.on_action_quit_activate)
 
     def on_app_activate(self, app):
         # signal should be connected after all pages in notebook
@@ -108,32 +108,32 @@ class App:
         window.hide()
         return True
 
-    def on_action_preferences_activate(self, action, param):
-        dialog = Preferences(self)
-        dialog.run()
-        dialog.destroy()
-
-    def on_action_about_activate(self, action, param):
-        dialog = Gtk.AboutDialog()
-        dialog.set_program_name(Config.APPNAME)
-        dialog.set_logo(self.theme['app-logo'])
-        dialog.set_version(Config.VERSION)
-        dialog.set_comments(
-                _('A simple music player for Linux Desktop'))
-        dialog.set_copyright('Copyright (c) 2013 LiuLang')
-        dialog.set_website(Config.HOMEPAGE)
-        dialog.set_license_type(Gtk.License.GPL_3_0)
-        dialog.set_authors(Config.AUTHORS)
-        dialog.run()
-        dialog.destroy()
-
-    def on_action_quit_activate(self, action, param):
-        self.quit()
-
-    def add_simple_action(self, name, callback):
-        action = Gio.SimpleAction.new(name, None)
-        action.connect('activate', callback)
-        self.app.add_action(action)
+#    def on_action_preferences_activate(self, action, param):
+#        dialog = Preferences(self)
+#        dialog.run()
+#        dialog.destroy()
+#
+#    def on_action_about_activate(self, action, param):
+#        dialog = Gtk.AboutDialog()
+#        dialog.set_program_name(Config.APPNAME)
+#        dialog.set_logo(self.theme['app-logo'])
+#        dialog.set_version(Config.VERSION)
+#        dialog.set_comments(
+#                _('A simple music player for Linux Desktop'))
+#        dialog.set_copyright('Copyright (c) 2013 LiuLang')
+#        dialog.set_website(Config.HOMEPAGE)
+#        dialog.set_license_type(Gtk.License.GPL_3_0)
+#        dialog.set_authors(Config.AUTHORS)
+#        dialog.run()
+#        dialog.destroy()
+#
+#    def on_action_quit_activate(self, action, param):
+#        self.quit()
+#
+#    def add_simple_action(self, name, callback):
+#        action = Gio.SimpleAction.new(name, None)
+#        action.connect('activate', callback)
+#        self.app.add_action(action)
 
     def init_notebook(self):
         self.lrc = Lrc(self)

@@ -12,11 +12,15 @@ import threading
 
 from kuwo import Config
 from kuwo import Net
+from kuwo.Preferences import Preferences
 from kuwo import Widgets
 
 _ = Config._
 # Gdk.EventType.2BUTTON_PRESS is an invalid variable
 GDK_2BUTTON_PRESS = 5
+
+# set toolbar icon size to Gtk.IconSize.DND
+ICON_SIZE = 5
 
 # init Gst so that play works ok.
 Gst.init(None)
@@ -74,7 +78,7 @@ class Player(Gtk.Box):
         toolbar.get_style_context().add_class(
                 Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
         toolbar.set_show_arrow(False)
-        toolbar.set_icon_size(5)
+        toolbar.set_icon_size(ICON_SIZE)
         control_box.pack_start(toolbar, False, False, 0)
 
         prev_button = Gtk.ToolButton()
@@ -127,6 +131,36 @@ class Player(Gtk.Box):
         self.fullscreen_btn.connect('clicked', 
                 self.on_fullscreen_button_clicked)
         toolbar.insert(self.fullscreen_btn, 7)
+
+        menu_tool_item = Gtk.ToolItem()
+        toolbar.insert(menu_tool_item, 8)
+        toolbar.child_set_property(menu_tool_item, 'expand', True)
+
+        menu_btn = Gtk.MenuButton()
+        menu_tool_item.add(menu_btn)
+        menu_btn.props.halign = Gtk.Align.END
+        main_menu = Gtk.Menu()
+        menu_btn.set_popup(main_menu)
+        menu_btn.set_always_show_image(True)
+        menu_btn.props.halign = Gtk.Align.END
+        menu_image = Gtk.Image()
+        menu_image.set_from_icon_name('view-list-symbolic', ICON_SIZE)
+        menu_btn.set_image(menu_image)
+        pref_item = Gtk.MenuItem(label=_('Preferences'))
+        pref_item.connect('activate',
+                self.on_main_menu_pref_activate)
+        main_menu.append(pref_item)
+        sep_item = Gtk.SeparatorMenuItem()
+        main_menu.append(sep_item)
+        about_item = Gtk.MenuItem(label=_('About'))
+        about_item.connect('activate',
+                self.on_main_menu_about_activate)
+        main_menu.append(about_item)
+        quit_item = Gtk.MenuItem(label=_('Quit'))
+        quit_item.connect('activate', 
+                self.on_main_menu_quit_activate)
+        main_menu.append(quit_item)
+        main_menu.show_all()
 
         self.label = Gtk.Label('<b>{0}</b> <i>by {0}</i>'.format(
             _('Unknown')))
@@ -543,3 +577,26 @@ class Player(Gtk.Box):
                 self.fullscreen_sid > 0:
             self.app.notebook.set_show_tabs(False)
             self.hide()
+
+    # menu button
+    def on_main_menu_pref_activate(self, menu_item):
+        dialog = Preferences(self.app)
+        dialog.run()
+        dialog.destroy()
+
+    def on_main_menu_about_activate(self, menu_item):
+        dialog = Gtk.AboutDialog()
+        dialog.set_program_name(Config.APPNAME)
+        dialog.set_logo(self.app.theme['app-logo'])
+        dialog.set_version(Config.VERSION)
+        dialog.set_comments(
+                _('A simple music player for Linux Desktop'))
+        dialog.set_copyright('Copyright (c) 2013 LiuLang')
+        dialog.set_website(Config.HOMEPAGE)
+        dialog.set_license_type(Gtk.License.GPL_3_0)
+        dialog.set_authors(Config.AUTHORS)
+        dialog.run()
+        dialog.destroy()
+
+    def on_main_menu_quit_activate(self, menu_item):
+        self.app.quit()
