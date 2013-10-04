@@ -67,7 +67,6 @@ def check_first():
             os.mkdir(_default_conf['mv-dir'])
         except Exception as e:
             print('Error', e)
-check_first()
 
 def load_conf():
     if os.path.exists(_conf_file):

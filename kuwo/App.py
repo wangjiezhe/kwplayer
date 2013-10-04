@@ -8,6 +8,8 @@ import os
 import sys
 
 from kuwo import Config
+Config.check_first()
+
 from kuwo.Artists import Artists
 from kuwo.Lrc import Lrc
 from kuwo.MV import MV
