@@ -73,7 +73,8 @@ Q&A
 
 TODO
 ====
-* 支持Debian stable (正在测试)
+* 加入dbus.
+* 支持Debian stable (已支持)
 * 为Ubuntu创建PPA (已放弃, 因为它不能保证与debian等发行版的兼容性)
 * 优化歌词的显示效果
 * 将播放列表中的音乐导出到其它目录, 也可以导出到手机中(已完成)
