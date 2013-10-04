@@ -100,39 +100,39 @@ msgstr "歌手訊息"
 
 #: ../kuwo/Artists.py:240
 msgid "Name"
-msgstr ""
+msgstr "姓名"
 
 #: ../kuwo/Artists.py:242
 msgid "Birthday"
-msgstr ""
+msgstr "生日"
 
 #: ../kuwo/Artists.py:244
 msgid "Birthplace"
-msgstr ""
+msgstr "出生地"
 
 #: ../kuwo/Artists.py:246
 msgid "Height"
-msgstr ""
+msgstr "身高"
 
 #: ../kuwo/Artists.py:248
 msgid "Weight"
-msgstr ""
+msgstr "體重"
 
 #: ../kuwo/Artists.py:250
 msgid "Country"
-msgstr ""
+msgstr "國籍"
 
 #: ../kuwo/Artists.py:252
 msgid "Language"
-msgstr ""
+msgstr "語言"
 
 #: ../kuwo/Artists.py:254
 msgid "Gender"
-msgstr ""
+msgstr "性別"
 
 #: ../kuwo/Artists.py:256
 msgid "Constellation"
-msgstr ""
+msgstr "星座"
 
 #: ../kuwo/Artists.py:269
 msgid "Album"
