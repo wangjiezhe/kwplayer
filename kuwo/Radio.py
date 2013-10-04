@@ -2,6 +2,7 @@
 
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
+from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Pango
 import json
@@ -273,6 +274,8 @@ class Radio(Gtk.Box):
             radio_item = RadioItem(radio, self.app)
             self.box_myradio.pack_start(radio_item, False, False, 0)
 
+        GLib.timeout_add(300000, self.dump_playlists)
+
     def load_playlists(self):
         filepath = Config.RADIO_JSON
         _default = []
@@ -285,10 +288,10 @@ class Radio(Gtk.Box):
 
     def dump_playlists(self):
         filepath = Config.RADIO_JSON
-        if self.playlists is None:
-            return
-        with open(filepath, 'w') as fh:
-            fh.write(json.dumps(self.playlists))
+        if self.playlists is not None:
+            with open(filepath, 'w') as fh:
+                fh.write(json.dumps(self.playlists))
+        return True
 
     def do_destroy(self):
         self.dump_playlists()
