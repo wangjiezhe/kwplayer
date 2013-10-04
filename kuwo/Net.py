@@ -51,12 +51,13 @@ req_cache = Dict()
 # Using leveldb to cache urlrequest
 ldb = None
 if leveldb_imported:
-    try:
-        ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
-    except Exception as e:
-        print(e, type(e))
-        print('Warning: Only one process can run at a time, quit!')
-        sys.exit(1)
+    ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
+#    try:
+#        ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
+#    except Exception as e:
+#        print(e, type(e))
+#        print('Warning: Only one process can run at a time, quit!')
+#        sys.exit(1)
 
 def empty_func(*args, **kwds):
     pass
@@ -88,19 +89,25 @@ def urlopen(_url, use_cache=True):
     url = _url.replace(':81', '')
     # hash the url to accelerate string compare speed in db.
     key = hash_byte(url)
-    if use_cache and leveldb_imported:
-        try:
-            req = ldb.Get(key)
-            return req
-        except KeyError:
-            req = None
+    if use_cache:
+        if leveldb_imported:
+            try:
+                return ldb.Get(key)
+            except KeyError:
+                pass
+        else:
+            if key in req_cache:
+                return req_cache[key]
     retried = 0
     while retried < MAXTIMES:
         try:
             req = request.urlopen(url, timeout=TIMEOUT)
             req_content = req.read()
-            if use_cache and leveldb_imported:
-                ldb.Put(key, req_content)
+            if use_cache:
+                if leveldb_imported:
+                    ldb.Put(key, req_content)
+                else:
+                    req_cache[key] = req_content
             return req_content
         except Exception as e:
             print('Error: Net.urlopen', e, 'url:', url)

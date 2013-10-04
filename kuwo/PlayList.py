@@ -164,15 +164,18 @@ class PlayList(Gtk.Box):
 
     def init_ui(self):
         def commit_db():
-            self.conn.commit()
+            try:
+                self.conn.commit()
+            except sqlite3.ProgramingError as e:
+                pass
             return True
 
         self.init_table()
         self.load_playlists()
         # dump playlists to dist every 5 minites
-        GLib.timeout_add(300, self.dump_playlists)
+        GLib.timeout_add(300000, self.dump_playlists)
         # commit to sqlite db
-        GLib.timeout_add(300, commit_db)
+        GLib.timeout_add(300000, commit_db)
         return False
 
     def init_table(self):
