@@ -225,6 +225,7 @@ class Radio(Gtk.Box):
         super().__init__()
         self.app = app
         self.first_show = False
+        self.playlists = None
         self.load_playlists()
 
     def first(self):
