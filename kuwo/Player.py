@@ -8,6 +8,7 @@ from gi.repository import Gst
 from gi.repository import GstVideo
 from gi.repository import Gtk
 import time
+import threading
 
 from kuwo import Config
 from kuwo import Net
@@ -165,19 +166,12 @@ class Player(Gtk.Box):
             self.async_mv.destroy()
 
     def load(self, song):
-        def _update_fill_level(value):
-            self.scale.set_fill_level(value)
-
-        def _on_chunk_received(widget, percent):
-            GLib.idle_add(_update_fill_level, percent)
-
         def _on_song_can_play(widget, song_path):
             self.scale.set_show_fill_level(False)
             if song_path:
                 GLib.idle_add(self._load_song, song_path)
             else:
-                # may be we need to play next song automatically
-                self.pause_player(stop=True)
+                self.load_next()
 
         def _on_song_downloaded(widget, song_path):
             if song_path:
@@ -189,7 +183,7 @@ class Player(Gtk.Box):
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
         self.async_song = Net.AsyncSong(self.app)
-        self.async_song.connect('chunk-received', _on_chunk_received)
+        self.async_song.connect('chunk-received', self.on_chunk_received)
         self.async_song.connect('can-play', _on_song_can_play)
         self.async_song.connect('downloaded', _on_song_downloaded)
         self.async_song.get_song(song)
@@ -449,22 +443,37 @@ class Player(Gtk.Box):
             # TODO, FIXME
             #self.disable_bus_sync()
 
+    def on_chunk_received(self, widget, percent):
+        def _update_fill_level(value):
+            self.scale.set_fill_level(value)
+        GLib.idle_add(_update_fill_level, percent)
+
     def load_mv(self, song):
         self.play_type = PlayType.MV
         self.curr_song = song
         self.pause_player(stop=True)
-        self.get_mv_link()
+        #self.scale.set_fill_level(0)
+        #self.scale.set_show_fill_level(True)
+        self.async_mv = Net.AsyncMV(self.app)
+        #self.async_mv.connect('chunk-received', self.on_chunk_received)
+        self.async_mv.connect('can-play', self.on_mv_can_play)
+        self.async_mv.connect('downloaded', self.on_mv_downloaded)
+        self.async_mv.get_mv(song)
 
     def _load_mv(self, mv_path):
         self.update_player_info()
-        Gdk.Window.process_all_updates()
         self.playbin.set_property('uri', 'file://' + mv_path)
         self.app.lrc.show_mv()
         self.enable_bus_sync()
         self.start_player(load=True)
 
     def on_mv_can_play(self, widget, mv_path):
+        #self.scale.set_show_fill_level(True)
         if mv_path:
+            self.show_mv_btn.set_sensitive(True)
+            self.show_mv_btn.handler_block(self.show_mv_sid)
+            self.show_mv_btn.set_active(True)
+            self.show_mv_btn.handler_unblock(self.show_mv_sid)
             GLib.idle_add(self._load_mv, mv_path)
         else:
             # Failed to download MV,
@@ -472,33 +481,18 @@ class Player(Gtk.Box):
             self.show_mv_btn.handler_block(self.show_mv_sid)
             self.show_mv_btn.set_active(False)
             self.show_mv_btn.handler_unblock(self.show_mv_sid)
-            self.pause_player(stop=True)
+            self.load_next()
 
     def on_mv_downloaded(self, widget, mv_path):
-        self.scale.set_sensitive(True)
+        def _set_scale_sensitive():
+            self.scale.set_sensitive(True)
+        GLib.idle_add(_set_scale_sensitive)
 
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
+            print('_update mv link:', mv_args)
             mv_link, mv_path = mv_args
             self.show_mv_btn.set_sensitive(mv_link is not False)
-            if self.play_type != PlayType.MV:
-                return
-            if mv_link is False:
-                self.load_next()
-                return
-            self.show_mv_btn.handler_block(self.show_mv_sid)
-            self.show_mv_btn.set_active(True)
-            self.show_mv_btn.handler_unblock(self.show_mv_sid)
-            if mv_link is True:
-                # local mv exists, load it
-                GLib.idle_add(self._load_mv, mv_path)
-                self.scale.set_sensitive(True)
-                return
-            self.async_mv = Net.AsyncMV()
-            self.async_mv.connect('can-play', self.on_mv_can_play)
-            self.async_mv.connect('downloaded', self.on_mv_downloaded)
-            self.async_mv.get_mv(mv_link, mv_path)
-
         Net.async_call(Net.get_song_link, _update_mv_link,
                 self.curr_song, self.app.conf, True)
 

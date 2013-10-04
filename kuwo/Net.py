@@ -853,7 +853,7 @@ class AsyncSong(GObject.GObject):
                 received_size += len(chunk)
                 percent = int(received_size/content_length * 100)
                 self.emit('chunk-received', percent)
-                print('percentage:', percent)
+                #print('percentage:', percent)
                 # this signal only emit once.
                 if (received_size > CHUNK_TO_PLAY or percent > 40) \
                         and not can_play_emited:
@@ -868,7 +868,6 @@ class AsyncSong(GObject.GObject):
             self.emit('downloaded', song_path)
             Utils.iconvtag(song_path, song)
 
-        #song_link = get_song_link(song['rid'], self.app.conf['use-ape'])
         song_link, song_path = get_song_link(song, self.app.conf)
         if song_link is False:
             self.emit('can-play', None)
@@ -912,17 +911,18 @@ class AsyncMV(GObject.GObject):
             'downloaded': (GObject.SIGNAL_RUN_LAST, 
                 GObject.TYPE_NONE, (str, )),
             }
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
+        self.app = app
         self.force_quit = False
 
     def destroy(self):
         self.force_quit = True
 
-    def get_mv(self, mv_link, mv_path):
-        async_call(self._download_mv, empty_func, mv_link, mv_path)
+    def get_mv(self, song):
+        async_call(self._download_mv, empty_func, song)
 
-    def _download_mv(self, mv_link, mv_path):
+    def _download_mv(self, song):
         def _wrap(req):
             received_size = 0
             can_play_emited = False
@@ -939,7 +939,7 @@ class AsyncMV(GObject.GObject):
                 received_size += len(chunk)
                 percent = int(received_size/content_length * 100)
                 self.emit('chunk-received', percent)
-                print('percentage:', percent)
+                #print('percentage:', percent)
                 if (received_size > CHUNK_MV_TO_PLAY or percent > 20) \
                         and not can_play_emited:
                     can_play_emited = True
@@ -952,7 +952,18 @@ class AsyncMV(GObject.GObject):
             print('mv downloaded')
             self.emit('downloaded', mv_path)
 
+        mv_link, mv_path = get_song_link(song, self.app.conf, True)
+        if mv_link is False:
+            self.emit('can-play', None)
+            self.emit('downloaded', None)
+            return None
+        if mv_link is True:
+            print('local song exists, signals will be emited:', mv_path)
+            self.emit('can-play', mv_path)
+            self.emit('downloaded', mv_path)
+            return
         retried = 0
+        print('Net.AsyncSong, mv will be downloaded:', mv_path)
         while retried < MAXTIMES:
             try:
                 req = request.urlopen(mv_link)
