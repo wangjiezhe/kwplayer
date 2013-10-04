@@ -371,7 +371,6 @@ class PlayList(Gtk.Box):
 
     # Others
     def on_song_downloaded(self, play=False):
-        print('Playlist.on_song_downloaded:', play, self.curr_playing)
         # copy this song from current playing list to cached_list.
         list_name = self.curr_playing[0]
         liststore = self.tabs[list_name].liststore

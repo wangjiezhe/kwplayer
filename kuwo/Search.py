@@ -15,13 +15,6 @@ class Search(Gtk.Box):
     def __init__(self, app):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.app = app
-        self.first_show = False
-
-    def first(self):
-        if self.first_show:
-            return
-        self.first_show = True
-        app = self.app
 
         self.songs_tab_inited = False
         self.artists_tab_inited = False
@@ -95,8 +88,11 @@ class Search(Gtk.Box):
                 self.on_iconview_albums_item_activated)
         albums_tab.add(iconview_albums)
 
-        self.show_all()
+    def after_init(self):
         self.control_box.hide()
+
+    def first(self):
+        pass
 
     def switch_notebook_page(self, radiobtn, page):
         state = radiobtn.get_active()

@@ -90,6 +90,7 @@ class App:
         # make some changes after main window is shown.
         self.lrc.after_init()
         self.player.after_init()
+        self.search.after_init()
 
     def run(self, argv):
         self.app.run(argv)

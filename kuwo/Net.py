@@ -89,25 +89,18 @@ def urlopen(_url, use_cache=True):
     url = _url.replace(':81', '')
     # hash the url to accelerate string compare speed in db.
     key = hash_byte(url)
-    if use_cache:
-        if leveldb_imported:
-            try:
-                return ldb.Get(key)
-            except KeyError:
-                pass
-        else:
-            if key in req_cache:
-                return req_cache[key]
+    if use_cache and leveldb_imported:
+        try:
+            return ldb.Get(key)
+        except KeyError:
+            pass
     retried = 0
     while retried < MAXTIMES:
         try:
             req = request.urlopen(url, timeout=TIMEOUT)
             req_content = req.read()
-            if use_cache:
-                if leveldb_imported:
-                    ldb.Put(key, req_content)
-                else:
-                    req_cache[key] = req_content
+            if use_cache and leveldb_imported:
+                ldb.Put(key, req_content)
             return req_content
         except Exception as e:
             print('Error: Net.urlopen', e, 'url:', url)
