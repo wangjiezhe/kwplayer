@@ -82,6 +82,7 @@ Q&A
 
 TODO
 ====
+* 播放列表支持歌曲的拖放.
 * 加入dbus.
 * 支持Debian stable (已支持)
 * 为Ubuntu创建PPA (已放弃, 因为它不能保证与debian等发行版的兼容性)
