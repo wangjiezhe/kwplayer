@@ -13,7 +13,7 @@ if py_version.major >= 3 and py_version.minor >= 3:
     from mutagenx.easyid3 import EasyID3
     from mutagenx.apev2 import APEv2File
 else:
-    print(_('Warning: Python3 version is lower than 3.3, mutagenx is not supported'))
+    print('Warning: Python3 version is lower than 3.3, mutagenx is not supported')
 
 
 def decode_lrc_content(lrc, is_lrcx=False):
