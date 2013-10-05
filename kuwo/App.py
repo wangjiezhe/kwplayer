@@ -8,6 +8,7 @@ import os
 import sys
 
 from kuwo import Config
+# ~/.config/kuwo and ~/.cache/kuwo need to be created at first time
 Config.check_first()
 
 from kuwo.Artists import Artists

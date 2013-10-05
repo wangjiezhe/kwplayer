@@ -64,12 +64,16 @@ def check_first():
     if not os.path.exists(_conf_file):
         try:
             os.makedirs(os.path.dirname(_conf_file))
+        except Exception as e:
+            print(e)
+    if not os.path.exists(CACHE_DIR):
+        try:
             os.makedirs(IMG_DIR)
             os.mkdir(IMG_LARGE_DIR)
             os.mkdir(_default_conf['song-dir'])
             os.mkdir(_default_conf['mv-dir'])
         except Exception as e:
-            print('Error', e)
+            print(e)
 
 def load_conf():
     if os.path.exists(_conf_file):
