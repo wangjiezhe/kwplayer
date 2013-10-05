@@ -47,7 +47,7 @@ class Lrc(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.app = app
         self.lrc_obj = None
-        self.lrc_default_background = os.path.join(app.conf['theme'],
+        self.lrc_default_background = os.path.join(Config.THEME_DIR,
                 'lrc-background.jpg')
         self.lrc_background = None
 

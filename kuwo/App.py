@@ -35,7 +35,7 @@ class App:
         self.app.connect('shutdown', self.on_app_shutdown)
 
         self.conf = Config.load_conf()
-        self.theme = Config.load_theme(self.conf['theme'])
+        self.theme = Config.load_theme()
 
     def on_app_startup(self, app):
         self.window = Gtk.ApplicationWindow(application=app)
@@ -144,9 +144,9 @@ class App:
 
     def load_styles(self):
         if Gtk.MINOR_VERSION < 8:
-            style_file = os.path.join(self.conf['theme'], 'main-3.6.css')
+            style_file = Config.THEME_MAIN_STYLE_3_6
         else:
-            style_file = os.path.join(self.conf['theme'], 'main.css')
+            style_file = Config.THEME_MAIN_STYLE
         with open(style_file, 'rb') as fh:
             css = fh.read()
 

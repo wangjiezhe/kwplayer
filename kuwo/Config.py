@@ -43,13 +43,16 @@ PLS_JSON = os.path.join(CACHE_DIR, 'pls.json')
 # store radio playlist.
 RADIO_JSON = os.path.join(CACHE_DIR, 'radio.json')
 
+THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
+THEME_MAIN_STYLE = os.path.join(THEME_DIR, 'main.css')
+THEME_MAIN_STYLE_3_6 = os.path.join(THEME_DIR, 'main-3.6.css')
+
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')
 _default_conf = {
         'window-size': (840, 580),
         'song-dir': os.path.join(CACHE_DIR, 'song'),
         'mv-dir': os.path.join(CACHE_DIR, 'mv'),
-        'theme': os.path.join(PREF, 'kuwo', 'themes', 'default'),
         'volume': 0.08,
         'use-ape': False,
         'use-mkv': False,
@@ -79,8 +82,8 @@ def dump_conf(conf):
     with open(_conf_file, 'w') as fh:
         fh.write(json.dumps(conf))
 
-def load_theme(theme_dir):
-    theme_file = os.path.join(theme_dir, 'images.json')
+def load_theme():
+    theme_file = os.path.join(THEME_DIR, 'images.json')
     try:
         with open(theme_file) as fh:
             theme = json.loads(fh.read())
@@ -90,7 +93,7 @@ def load_theme(theme_dir):
 
     theme_pix = {}
     for key in theme:
-        filename = os.path.join(theme_dir, theme[key])
+        filename = os.path.join(THEME_DIR, theme[key])
         if os.path.exists(filename):
             theme_pix[key] = GdkPixbuf.Pixbuf.new_from_file(filename)
         else:
