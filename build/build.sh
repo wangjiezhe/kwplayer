@@ -12,7 +12,7 @@ APP='kwplayer'
 
 mkdir -vp fakeroot/usr/bin fakeroot/DEBIAN $PYLIB
 
-cp -v ../kuwo.py fakeroot/usr/bin/kwplayer
+cp -v ../kwplayer fakeroot/usr/bin/
 cp -rvf ../kuwo $PYLIB/
 rm -rvf $PYLIB/kuwo/__pycache__
 cp -rvf ../mutagenx $PYLIB/

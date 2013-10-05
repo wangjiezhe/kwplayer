@@ -24,6 +24,7 @@ ICON_SIZE = 5
 
 # init Gst so that play works ok.
 Gst.init(None)
+GST_LOWER_THAN_1 = (Gst.version()[0] < 1)
 
 class PlayType:
     NONE = -1
@@ -132,20 +133,11 @@ class Player(Gtk.Box):
                 self.on_fullscreen_button_clicked)
         toolbar.insert(self.fullscreen_btn, 7)
 
+        # contro menu
         menu_tool_item = Gtk.ToolItem()
         toolbar.insert(menu_tool_item, 8)
         toolbar.child_set_property(menu_tool_item, 'expand', True)
-
-        menu_btn = Gtk.MenuButton()
-        menu_tool_item.add(menu_btn)
-        menu_btn.props.halign = Gtk.Align.END
         main_menu = Gtk.Menu()
-        menu_btn.set_popup(main_menu)
-        menu_btn.set_always_show_image(True)
-        menu_btn.props.halign = Gtk.Align.END
-        menu_image = Gtk.Image()
-        menu_image.set_from_icon_name('view-list-symbolic', ICON_SIZE)
-        menu_btn.set_image(menu_image)
         pref_item = Gtk.MenuItem(label=_('Preferences'))
         pref_item.connect('activate',
                 self.on_main_menu_pref_activate)
@@ -161,6 +153,20 @@ class Player(Gtk.Box):
                 self.on_main_menu_quit_activate)
         main_menu.append(quit_item)
         main_menu.show_all()
+        menu_image = Gtk.Image()
+        menu_image.set_from_icon_name('view-list-symbolic', ICON_SIZE)
+        if Gtk.MINOR_VERSION < 6:
+            menu_btn = Gtk.Button()
+            menu_btn.connect('clicked', 
+                self.on_main_menu_button_clicked, main_menu)
+        else:
+            menu_btn = Gtk.MenuButton()
+            menu_btn.set_popup(main_menu)
+            menu_btn.set_always_show_image(True)
+        menu_btn.props.halign = Gtk.Align.END
+        menu_btn.props.halign = Gtk.Align.END
+        menu_btn.set_image(menu_image)
+        menu_tool_item.add(menu_btn)
 
         self.label = Gtk.Label('<b>{0}</b> <i>by {0}</i>'.format(
             _('Unknown')))
@@ -250,20 +256,34 @@ class Player(Gtk.Box):
         self.adjustment.set_lower(0.0)
         # when song is not totally downloaded but can play, query_duration
         # might give incorrect/inaccurate result.
-        status, upper = self.playbin.query_duration(Gst.Format.TIME)
+        if GST_LOWER_THAN_1:
+            status, _type, upper = self.playbin.query_duration(
+                Gst.Format.TIME)
+        else:
+            status, upper = self.playbin.query_duration(Gst.Format.TIME)
         if status and upper > 0:
             self.adjustment.set_upper(upper)
             return False
         return True
 
     def sync_adjustment(self):
-        status, curr = self.playbin.query_position(Gst.Format.TIME)
+        if GST_LOWER_THAN_1:
+            status, _type, curr = self.playbin.query_position(
+                Gst.Format.TIME)
+        else:
+            status, curr = self.playbin.query_position(Gst.Format.TIME)
         if not status:
             return True
-        status, total = self.playbin.query_duration(Gst.Format.TIME)
+        if GST_LOWER_THAN_1:
+            status, _type, total = self.playbin.query_duration(
+                Gst.Format.TIME)
+        else:
+            status, total = self.playbin.query_duration(Gst.Format.TIME)
         self.adjustment.set_value(curr)
         self.adjustment.set_upper(total)
         self.sync_label_by_adjustment()
+        if curr >= total:
+            self.load_next()
         if self.play_type == PlayType.MV:
             return True
         self.app.lrc.sync_lrc(curr)
@@ -417,6 +437,7 @@ class Player(Gtk.Box):
         Net.async_call(Net.get_recommend_image, _update_background, url)
 
     def on_eos(self, bus, msg):
+        print('on eos()')
         self.pause_player(stop=True)
         _repeat = self.repeat_btn.get_active()
         _shuffle = self.shuffle_btn.get_active()
@@ -425,6 +446,7 @@ class Player(Gtk.Box):
         elif self.play_type == PlayType.SONG:
             next_song = self.app.playlist.get_next_song(repeat=_repeat, 
                     shuffle=_shuffle)
+            print('next song:', next_song)
             if next_song is not None:
                 self.load(next_song)
         elif self.play_type == PlayType.MV:
@@ -526,6 +548,7 @@ class Player(Gtk.Box):
         def _update_mv_link(mv_args, error=None):
             print('_update mv link:', mv_args)
             mv_link, mv_path = mv_args
+            print('mv_link, mv_path:', mv_link, mv_path)
             self.show_mv_btn.set_sensitive(mv_link is not False)
         Net.async_call(Net.get_song_link, _update_mv_link,
                 self.curr_song, self.app.conf, True)
@@ -579,6 +602,10 @@ class Player(Gtk.Box):
             self.hide()
 
     # menu button
+    def on_main_menu_button_clicked(self, button, main_menu):
+        main_menu.popup(None, None, None, None, 1, 
+            Gtk.get_current_event_time())
+
     def on_main_menu_pref_activate(self, menu_item):
         dialog = Preferences(self.app)
         dialog.run()
@@ -586,6 +613,8 @@ class Player(Gtk.Box):
 
     def on_main_menu_about_activate(self, menu_item):
         dialog = Gtk.AboutDialog()
+        dialog.set_modal(True)
+        dialog.set_transient_for(self.app.window)
         dialog.set_program_name(Config.APPNAME)
         dialog.set_logo(self.app.theme['app-logo'])
         dialog.set_version(Config.VERSION)

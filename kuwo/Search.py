@@ -23,7 +23,10 @@ class Search(Gtk.Box):
         box_top = Gtk.Box(spacing=5)
         self.pack_start(box_top, False, False, 0)
 
-        self.search_entry = Gtk.SearchEntry()
+        if Gtk.MINOR_VERSION < 6:
+            self.search_entry = Gtk.Entry()
+        else:
+            self.search_entry = Gtk.SearchEntry()
         self.search_entry.set_placeholder_text(_('Search Songs, Artists..'))
         self.search_entry.props.width_chars = 30
         self.search_entry.connect('activate', self.on_search_entry_activate)

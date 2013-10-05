@@ -13,8 +13,12 @@ debian系列的, 需要手动安装一些依赖包, 它们是:
 * python3-gi-cairo - 在GObject中用到的cairo的python3绑定;
 * gstreamer1.0-x - gtk的多媒体框架;
 * gstreamer1.0-libav  -  gstreamer的编码/解码库;
+* gstreamer1.0-plugins-base - gstreamer的基本核心包
+* gir1.2-gstreamer-1.0, gir1.2-gst-plugins-base-1.0 - 这两个是gst的gobject
+绑定, 这样就可以解决ImportError: cannot import name GstVideo 之类的错误.
 * leveldb - 强大的NoSQL数据库(用于缓存数据);
 * python3-leveldb  -  leveldb的python3绑定(Fedora中是python3-plyvel);
+* 安装好gstreamer后, 可能需要重启一下系统, 至少在我这里测试时需要这样.
 
 也可以直接运行build/下面的脚本, 生成deb包, 它会自动处理依赖关系, 不需要手动
 安装上面列出的那些软件包, 需要以下的操作:
@@ -27,6 +31,14 @@ debian系列的, 需要手动安装一些依赖包, 它们是:
 * 一切无误的话, 会在kwplayer/bin/目录下生成kwplayer.deb, 生成的deb包可以用dpkg命令来安装: `# dpkg -i kwplayer.deb`.
 
 如果不想手动打包的话, 在bin/目录里面有我打包好的kwplayer.deb, 也可以直接使用.
+
+对于Debian Wheezy和Ubuntu 12.04, 因为软件源里面的包都比较旧, 需要对上述操作
+做一些修改, 比如gstreamer1.0-libav要改为gstreamer0.1-ffmpeg, 将gstreamer的
+1.0版都改为0.1版. 如果ubuntu 12.04中找不到gstreamer0.1-ffmpeg, 这说明你的软
+件源中没有启用multiverse源, 可以在software-center里面进行设置. 另外, 由于
+gstreamer0.1中不能直接把视频渲染到DrawingArea上, 在播放MV时视频窗口被被弹出,
+这个bug我暂时不打算修复; ubuntu 12.04的gnome-icon-theme-symbolic包里面少了一
+个video-x-generic-symbolic.svg这个图标, 所以工具栏上的MV按纽不能直接显示.
 
 
 对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
@@ -47,16 +59,13 @@ Gentoo/Arch Linux的话, 也没什么好说的, 看一下上面的依赖包, 缺
 * Debian sid
 * Debian testing
 * Debian whezy
-* Ubuntu 12.10
-* Ubuntu 13.04
 * Ubuntu 13.10 Beta
+* Ubuntu 13.04
+* Ubuntu 12.10
+* Ubuntu 12.04
 * Gentoo
 * Fedora 19
 * Arch Linux
-
-已经测试失败的发行版:
-
-* Ubuntu 12.04 (软件包太旧)
 
 
 Q&A

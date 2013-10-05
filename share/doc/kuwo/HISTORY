@@ -1,0 +1,6 @@
+
+v2.3 - 2013.10.5
+* Support Ubuntu 12.04
+* add transient parent window for about_dialog and preference dialog
+* Remove gettext from Net.py and Utils.py
+* Add a check for eos in Player.sync_adjustment()

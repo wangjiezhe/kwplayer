@@ -215,6 +215,8 @@ class Artists(Gtk.Box):
 
         # Info tab for artist (tab 4)
         artist_info_tab = Gtk.ScrolledWindow()
+        artist_info_tab_vp = Gtk.Viewport()
+        artist_info_tab.add(artist_info_tab_vp)
         artist_info_tab.props.margin_left = 20
         artist_info_tab.props.margin_top = 5
         self.artist_notebook.append_page(artist_info_tab,
@@ -223,7 +225,7 @@ class Artists(Gtk.Box):
                 orientation=Gtk.Orientation.VERTICAL)
         artist_info_box.props.margin_right = 10
         artist_info_box.props.margin_bottom = 10
-        artist_info_tab.add(artist_info_box)
+        artist_info_tab_vp.add(artist_info_box)
 
         artist_info_hbox = Gtk.Box(spacing=20)
         artist_info_box.pack_start(artist_info_hbox, False, False, 0)

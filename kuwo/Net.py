@@ -25,7 +25,7 @@ except ImportError as e:
         leveldb_imported = True
     except ImportError as e:
         leveldb_imported = False
-        print(_('Warning: No leveldb/plyvel module was found, http requests will not be cached!'))
+        print('Warning: No leveldb/plyvel module was found, http requests will not be cached!')
 
 IMG_CDN = 'http://img4.kwcdn.kuwo.cn/'
 ARTIST = 'http://artistlistinfo.kuwo.cn/mb.slist?'

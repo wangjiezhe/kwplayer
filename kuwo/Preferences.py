@@ -103,6 +103,9 @@ class Preferences(Gtk.Dialog):
     def __init__(self, app):
         super().__init__(_('Preferences'), app.window, 0,
                 (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE,))
+        self.set_modal(True)
+        self.set_transient_for(app.window)
+
         self.app = app
         self.set_default_size(600, 320)
         self.set_border_width(5)
