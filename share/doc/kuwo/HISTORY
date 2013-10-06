@@ -1,3 +1,7 @@
+v2.4 - 2013.10.6
+* Add drop and drop support in playlists
+* Fixed: failed to load next song in background on Ubuntu 12.04
+* Add a video-x-generic-symbolic icon for Ubuntu 12.04
 
 v2.3 - 2013.10.5
 * Support Ubuntu 12.04
