@@ -20,6 +20,13 @@ from kuwo import Widgets
 _ = Config._
 
 
+DRAG_TARGETS = [
+        ('text/plain', Gtk.TargetFlags.SAME_APP, 0),
+        ('TEXT', Gtk.TargetFlags.SAME_APP, 1),
+        ('STRING', Gtk.TargetFlags.SAME_APP, 2),
+        ]
+DRAG_ACTION = Gdk.DragAction.DEFAULT | Gdk.DragAction.COPY
+
 class NormalSongTab(Gtk.ScrolledWindow):
     def __init__(self, app, list_name):
         super().__init__()
@@ -34,6 +41,11 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.treeview.set_search_column(0)
         self.treeview.props.reorderable = True
         self.treeview.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
+        self.treeview.enable_model_drag_source(
+                Gdk.ModifierType.BUTTON1_MASK,
+                DRAG_TARGETS,
+                DRAG_ACTION)
+        self.treeview.connect('drag-data-get', self.on_drag_data_get)
         self.treeview.connect('row_activated', 
                 self.on_treeview_row_activated)
         self.add(self.treeview)
@@ -77,6 +89,18 @@ class NormalSongTab(Gtk.ScrolledWindow):
         elif index == 3:
             model.remove(model[path].iter)
 
+    def on_drag_data_get(self, treeview, drag_context, sel_data, info, 
+            time):
+        selection = treeview.get_selection()
+        # use get_selected_rows because of MULTIPLE_SELECTIONS
+        model, paths = selection.get_selected_rows()
+        songs = []
+        for path in paths:
+            song = [i for i in model[path]]
+            songs.append(song)
+        sel_data.set_text(json.dumps(songs), -1)
+
+
 class PlayList(Gtk.Box):
     def __init__(self, app):
         super().__init__()
@@ -115,6 +139,10 @@ class PlayList(Gtk.Box):
         self.treeview_left.append_column(col_name)
         tree_sel = self.treeview_left.get_selection()
         tree_sel.connect('changed', self.on_tree_selection_left_changed)
+        self.treeview_left.enable_model_drag_dest(
+                DRAG_TARGETS, DRAG_ACTION)
+        self.treeview_left.connect('drag-data-received',
+                self.on_treeview_left_drag_data_received)
         box_left.pack_start(self.treeview_left, True, True, 0)
 
         toolbar = Gtk.Toolbar()
@@ -264,6 +292,22 @@ class PlayList(Gtk.Box):
         path = model.get_path(tree_iter)
         index = path.get_indices()[0]
         self.notebook.set_current_page(index)
+
+    def on_treeview_left_drag_data_received(self, treeview, drag_context,
+            x, y, sel_data, info, event_time):
+        model = treeview.get_model()
+        data = sel_data.get_text()
+        if len(data) == 0:
+            return
+        drop_info = treeview.get_dest_row_at_pos(x, y)
+        if drop_info is None:
+            return
+        path = drop_info[0]
+        songs = json.loads(data)
+        list_name = model[path][1]
+        liststore = self.tabs[list_name].liststore
+        for song in songs:
+            liststore.append(song)
 
     # Open API for others to call.
     def play_song(self, song, list_name='Default'):
