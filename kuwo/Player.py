@@ -32,6 +32,11 @@ class PlayType:
     RADIO = 1
     MV = 2
 
+class RepeatType:
+    NONE = 0
+    ALL = 1
+    ONE = 2
+
 def delta(nanosec_float):
     _seconds = nanosec_float // 10**9
     mm, ss = divmod(_seconds, 60)
@@ -108,9 +113,11 @@ class Player(Gtk.Box):
         self.shuffle_btn.set_icon_name('media-playlist-shuffle-symbolic')
         toolbar.insert(self.shuffle_btn, 4)
 
+        self.repeat_type = RepeatType.NONE
         self.repeat_btn = Gtk.ToggleToolButton()
         self.repeat_btn.set_label(_('Repeat'))
         self.repeat_btn.set_icon_name('media-playlist-repeat-symbolic')
+        self.repeat_btn.connect('clicked', self.on_repeat_button_clicked)
         toolbar.insert(self.repeat_btn, 5)
 
         self.show_mv_btn = Gtk.ToggleToolButton()
@@ -309,10 +316,11 @@ class Player(Gtk.Box):
 
     def on_prev_button_clicked(self, button):
         if self.play_type == PlayType.RADIO or \
-                self.play_type == PlayType.NONE:
+                self.play_type == PlayType.NONE or \
+                self.repeat_type == RepeatType.ONE:
             return
-        _repeat = self.repeat_btn.get_active()
         self.pause_player(stop=True)
+        _repeat = self.repeat_btn.get_active()
         prev_song = self.app.playlist.get_prev_song(repeat=_repeat)
         if prev_song is None:
             return
@@ -333,6 +341,20 @@ class Player(Gtk.Box):
         if self.play_type == PlayType.NONE:
             return
         self.load_next()
+
+    def on_repeat_button_clicked(self, button):
+        if self.repeat_type == RepeatType.NONE:
+            self.repeat_type = RepeatType.ALL
+            button.set_active(True)
+            button.set_icon_name('media-playlist-repeat-symbolic')
+        elif self.repeat_type == RepeatType.ALL:
+            self.repeat_type = RepeatType.ONE
+            button.set_active(True)
+            button.set_icon_name('media-playlist-repeat-song-symbolic')
+        elif self.repeat_type == RepeatType.ONE:
+            self.repeat_type = RepeatType.NONE
+            button.set_active(False)
+            button.set_icon_name('media-playlist-repeat-symbolic')
 
     def start_player(self, load=False):
         self.play_button.set_icon_name('media-playback-pause-symbolic')
@@ -439,18 +461,25 @@ class Player(Gtk.Box):
 
     def on_eos(self, bus, msg):
         self.pause_player(stop=True)
+        if self.repeat_type == RepeatType.ONE:
+            if self.play_type == PlayType.MV:
+                self.load_mv(self.curr_song)
+            else:
+                self.load(self.curr_song)
+            return
+
         _repeat = self.repeat_btn.get_active()
         _shuffle = self.shuffle_btn.get_active()
         if self.play_type == PlayType.RADIO:
             self.curr_radio_item.play_next_song()
         elif self.play_type == PlayType.SONG:
-            next_song = self.app.playlist.get_next_song(repeat=_repeat, 
-                    shuffle=_shuffle)
+            next_song = self.app.playlist.get_next_song(
+                    repeat=_repeat, shuffle=_shuffle)
             if next_song is not None:
                 self.load(next_song)
         elif self.play_type == PlayType.MV:
-            next_mv = self.app.playlist.get_next_song(repeat=_repeat, 
-                    shuffle=_shuffle)
+            next_mv = self.app.playlist.get_next_song(
+                    repeat=_repeat, shuffle=_shuffle)
             if next_mv is not None:
                 self.load_mv(next_mv)
 
@@ -617,8 +646,7 @@ class Player(Gtk.Box):
         dialog.set_program_name(Config.APPNAME)
         dialog.set_logo(self.app.theme['app-logo'])
         dialog.set_version(Config.VERSION)
-        dialog.set_comments(
-                _('A simple music player for Linux Desktop'))
+        dialog.set_comments(_('A simple music player for Linux Desktop'))
         dialog.set_copyright('Copyright (c) 2013 LiuLang')
         dialog.set_website(Config.HOMEPAGE)
         dialog.set_license_type(Gtk.License.GPL_3_0)
