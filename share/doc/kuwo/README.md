@@ -39,6 +39,8 @@ debian系列的, 需要手动安装一些依赖包, 它们是:
 gstreamer0.1中不能直接把视频渲染到DrawingArea上, 在播放MV时视频窗口被被弹出,
 这个bug我暂时不打算修复; ubuntu 12.04的gnome-icon-theme-symbolic包里面少了一
 个video-x-generic-symbolic.svg这个图标, 所以工具栏上的MV按纽不能直接显示.
+解决方法是把kwplayer/share/kuwo/themes/default/video-x-generic-symbolic.svg
+复制到/usr/share/icons/gnome/scalable/mimetypes/目录里.
 
 
 对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
