@@ -382,9 +382,9 @@ class Artists(Gtk.Box):
             self.artist_songs_button.set_active(True)
 
     def show_artist_songs(self):
-        self.artist_control_box.show_all()
         self.album_control_box.hide()
         self.artist_mv_control_box.hide()
+        self.artist_control_box.show_all()
         if self.artist_songs_inited:
             return
         self.artist_songs_inited = True
@@ -412,15 +412,17 @@ class Artists(Gtk.Box):
                 self.curr_artist_id, self.artist_songs_page)
 
     def show_artist_albums(self):
+        self.artist_control_box.hide()
+        self.album_control_box.hide()
+        self.artist_mv_control_box.hide()
         if self.artist_albums_inited:
             return
         self.artist_albums_inited = True
-        self.artist_control_box.hide()
-        self.artist_mv_control_box.hide()
         self.append_artist_albums(init=True)
 
     def append_artist_albums(self, init=False):
         def _append_artist_albums(albums_args, error=None):
+            print('_append artist_albums:', albums_args)
             albums, self.artist_albums_total = albums_args
             if self.artist_albums_total == 0:
                 return
@@ -450,12 +452,12 @@ class Artists(Gtk.Box):
                 self.curr_artist_id, self.artist_albums_page)
 
     def show_artist_mv(self):
-        if self.artist_mv_inited:
-            return
-        self.artist_mv_inited = True
         self.artist_control_box.hide()
         self.album_control_box.hide()
         self.artist_mv_control_box.show_all()
+        if self.artist_mv_inited:
+            return
+        self.artist_mv_inited = True
         self.append_artist_mv(init=True)
 
     def append_artist_mv(self, init=False):
@@ -482,12 +484,12 @@ class Artists(Gtk.Box):
                 self.curr_artist_id, self.artist_mv_page)
 
     def show_artist_similar(self):
-        if self.artist_similar_inited:
-            return
-        self.artist_similar_inited = True
         self.artist_control_box.hide()
         self.artist_mv_control_box.hide()
         self.album_control_box.hide()
+        if self.artist_similar_inited:
+            return
+        self.artist_similar_inited = True
         self.append_artist_similar(init=True)
 
     def append_artist_similar(self, init=False):
@@ -515,17 +517,16 @@ class Artists(Gtk.Box):
                 self.curr_artist_id, self.artist_similar_page)
 
     def show_artist_info(self):
-        if self.artist_info_inited:
-            return
-        self.artist_info_inited = True
         self.artist_control_box.hide()
         self.artist_mv_control_box.hide()
         self.album_control_box.hide()
+        if self.artist_info_inited:
+            return
+        self.artist_info_inited = True
         self.append_artist_info()
 
     def append_artist_info(self):
         def _append_artist_info(info, error=None):
-            print('info:', info)
             if info and info['pic'] and len(info['pic']) > 0:
                 self.artist_info_pic.set_from_file(info['pic'])
             self.artist_info_name.set(info, 'name')

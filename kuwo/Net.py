@@ -321,7 +321,7 @@ def get_artist_songs(artist, page):
         return (None, 0)
     try:
         songs_wrap = Utils.json_loads_single(req_content.decode())
-    except Error as e:
+    except Exception as e:
         print('Error: Net.get_artist_songs:', e, 'with url:', url)
         return (None, 0)
     songs = songs_wrap['abslist']
@@ -347,7 +347,7 @@ def get_artist_songs_by_id(artistid, page):
         return (None, 0)
     try:
         songs_wrap = Utils.json_loads_single(req_content.decode())
-    except Error as e:
+    except Exception as e:
         print('Error: Net.get-artist_songs_by_id:', e, 'with url:', url)
         return (None, 0)
     songs = songs_wrap['musiclist']
@@ -372,8 +372,8 @@ def get_artist_albums(artistid, page):
         return (None, 0)
     try:
         albums_wrap = Utils.json_loads_single(req_content.decode())
-    except Error as e:
-        print('Error: Net.get_artist_albums:', e, 'with url:', url)
+    except Exception as e:
+        print('Error:', e)
         return (None, 0)
     albums = albums_wrap['albumlist']
     pages = math.ceil(int(albums_wrap['total']) / ICON_NUM)
@@ -398,7 +398,7 @@ def get_artist_mv(artistid, page):
         return (None, 0)
     try:
         mvs_wrap = Utils.json_loads_single(req_content.decode())
-    except Error as e:
+    except Exception as e:
         print('Error: Net.get_artist_mv:', e, 'with url:', url)
         return (None, 0)
     mvs = mvs_wrap['mvlist']
@@ -595,7 +595,7 @@ def get_index_nodes(nid):
         return None
     try:
         nodes_wrap = json.loads(req_content.decode())
-    except Error as e:
+    except Exception as e:
         print('Error: Net.get_index_nodes():', e, 'with url:', url)
         return None
     return nodes_wrap
