@@ -448,6 +448,7 @@ class PlayList(Gtk.Box):
             left_path += 1
         selection_left = self.treeview_left.get_selection()
         selection_left.select_path(left_path)
+        self.app.popup_page(self.app_page)
 
     # DB operations
     def append_cached_song(self, song):
