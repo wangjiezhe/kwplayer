@@ -6,9 +6,8 @@ import sys
 from urllib import parse
 import zlib
 
-py_version = sys.version_info
 is_py33 = False
-if py_version.major >= 3 and py_version.minor >= 3:
+if sys.version_info.major >= 3 and sys.version_info.minor >= 3:
     is_y33 = True
     from mutagenx.easyid3 import EasyID3
     from mutagenx.apev2 import APEv2File
@@ -20,7 +19,7 @@ def decode_lrc_content(lrc, is_lrcx=False):
     '''
     lrc currently is bytes.
     '''
-    if len(lrc) < 80:
+    if lrc[:10] != b'tp=content':
         return None
     index = lrc.index(b'\r\n\r\n')
     lrc_bytes = lrc[index+4:]
@@ -62,7 +61,8 @@ def encode_lrc_url(rid):
     will get:
     DBYAHlRcXUlcUVRYXUI0MDYlKjBYV1dLXUdbQhIQEgNbX19LSwAUDEMlDigQHwAMSAsAFBkMHBocF1gABgwPFQ0KHx1JHBwUWF1PHAEXAgsNBApTtMqhhk8OHA0MFhhUrbDNlra/Tx0HHVgoOTomLSZXVltRWF1fCRcPEVJf
     '''
-    param = 'user=12345,web,web,web&requester=localhost&req=1&rid=MUSIC_' + rid
+    param = ('user=12345,web,web,web&requester=localhost&req=1&rid=MUSIC_' +
+            str(rid))
     str_bytes = xor_bytes(param.encode())
     output = base64.encodebytes(str_bytes).decode()
     return output.replace('\n', '')

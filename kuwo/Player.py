@@ -282,8 +282,9 @@ class Player(Gtk.Box):
         self.adjustment.set_value(curr)
         self.adjustment.set_upper(total)
         self.sync_label_by_adjustment()
-        if curr >= total:
+        if curr >= total - 800000000:
             self.load_next()
+            return False
         if self.play_type == PlayType.MV:
             return True
         self.app.lrc.sync_lrc(curr)
@@ -437,7 +438,6 @@ class Player(Gtk.Box):
         Net.async_call(Net.get_recommend_image, _update_background, url)
 
     def on_eos(self, bus, msg):
-        print('on eos()')
         self.pause_player(stop=True)
         _repeat = self.repeat_btn.get_active()
         _shuffle = self.shuffle_btn.get_active()
@@ -446,7 +446,6 @@ class Player(Gtk.Box):
         elif self.play_type == PlayType.SONG:
             next_song = self.app.playlist.get_next_song(repeat=_repeat, 
                     shuffle=_shuffle)
-            print('next song:', next_song)
             if next_song is not None:
                 self.load(next_song)
         elif self.play_type == PlayType.MV:
