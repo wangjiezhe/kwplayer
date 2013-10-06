@@ -61,9 +61,9 @@ _default_conf = {
         }
 
 def check_first():
-    if not os.path.exists(_conf_file):
+    if not os.path.exists(CONF_DIR):
         try:
-            os.makedirs(os.path.dirname(_conf_file))
+            os.mkdir(CONF_DIR)
         except Exception as e:
             print(e)
     if not os.path.exists(CACHE_DIR):

@@ -7,6 +7,7 @@ from gi.repository import GObject
 from gi.repository import Gst
 from gi.repository import GstVideo
 from gi.repository import Gtk
+import sys
 import time
 import threading
 
@@ -63,6 +64,9 @@ class Player(Gtk.Box):
         self.async_mv = None
 
         self.playbin = Gst.ElementFactory.make('playbin', None)
+        if self.playbin is None:
+            print('Error: playbin failed to inited!')
+            sys.exit(1)
         self.bus = self.playbin.get_bus()
         self.bus.add_signal_watch()
         self.bus.connect('message::eos', self.on_eos)
