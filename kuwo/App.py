@@ -36,6 +36,9 @@ class App:
         self.app.connect('shutdown', self.on_app_shutdown)
 
         self.conf = Config.load_conf()
+        if 'use-status-icon' not in self.conf:
+            self.conf['use-status-icon'] = True
+
         self.theme = Config.load_theme()
 
     def on_app_startup(self, app):
@@ -97,8 +100,11 @@ class App:
         self.conf['window-size'] = window.get_size()
 
     def on_main_window_deleted(self, window, event):
-        window.hide()
-        return True
+        if self.conf['use-status-icon']:
+            window.hide()
+            return True
+        else:
+            return False
 
     def init_notebook(self):
         self.lrc = Lrc(self)

@@ -84,7 +84,7 @@ def hash_byte(_str):
 def hash_str(_str):
     return hashlib.sha1(_str.encode()).hexdigest()
 
-def urlopen(_url, use_cache=True):
+def urlopen(_url, use_cache=True, retries=MAXTIMES):
     # set host port from 81 to 80, to fix image problem
     url = _url.replace(':81', '')
     # hash the url to accelerate string compare speed in db.
@@ -95,7 +95,7 @@ def urlopen(_url, use_cache=True):
         except KeyError:
             pass
     retried = 0
-    while retried < MAXTIMES:
+    while retried < retries:
         try:
             req = request.urlopen(url, timeout=TIMEOUT)
             req_content = req.read()
@@ -436,7 +436,8 @@ def get_lrc(_rid):
     def _parse_lrc():
         url = ('http://newlyric.kuwo.cn/newlyric.lrc?' + 
                 Utils.encode_lrc_url(rid))
-        req_content = urlopen(url, use_cache=False)
+        print('Net._parse_lrc(), url:', url)
+        req_content = urlopen(url, use_cache=False, retries=8)
         if req_content is None:
             return None
         try:

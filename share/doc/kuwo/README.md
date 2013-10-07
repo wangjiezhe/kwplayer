@@ -24,7 +24,7 @@ debian系列的, 需要手动安装一些依赖包, 它们是:
 安装上面列出的那些软件包, 需要以下的操作:
 
 * 更新系统
-* `git clone https://github.com/LiuLang/kwplayer`
+* 下载本页面右侧的zip压缩包
 * 进入kwplayer/build目录
 * 运行build.sh, 用于创建fakeroot目录, 需要普通用户权限;
 * 运行generate_deb.sh 用于创建deb包, 由于使用了dpkg命令来打包, 这个脚本需要root权限

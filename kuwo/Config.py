@@ -56,6 +56,7 @@ _default_conf = {
         'volume': 0.08,
         'use-ape': False,
         'use-mkv': False,
+        'use-status-icon': True,
         'lrc-img-back-color': 'rgba(0, 0, 0, 1)',
         'lrc-word-back-color': 'rgba(237, 221, 221, 0.28)',
         }

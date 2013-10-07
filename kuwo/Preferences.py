@@ -115,6 +115,15 @@ class Preferences(Gtk.Dialog):
         notebook = Gtk.Notebook()
         box.pack_start(notebook, True, True, 0)
 
+        # generic tab
+        generic_box = NoteTab()
+        notebook.append_page(generic_box, Gtk.Label(_('Generic')))
+
+        status_button = Gtk.CheckButton(_('Close to system tray'))
+        status_button.set_active(app.conf['use-status-icon'])
+        status_button.connect('toggled', self.on_status_button_toggled)
+        generic_box.pack_start(status_button, False, False, 0)
+
         # format tab
         format_box = NoteTab()
         notebook.append_page(format_box, Gtk.Label(_('Format')))
@@ -214,6 +223,9 @@ class Preferences(Gtk.Dialog):
     def on_destroy(self):
         print('dialog.on_destroy()')
         Config.dump_conf(self.app.conf)
+
+    def on_status_button_toggled(self, button):
+        self.app.conf['use-status-icon'] = button.get_active()
 
     def on_audio_toggled(self, radiobtn):
         self.app.conf['use-ape'] = radiobtn.get_group()[0].get_active()
