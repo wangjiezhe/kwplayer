@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-07 12:53+0800\n"
+"POT-Creation-Date: 2013-10-07 15:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,8 +43,8 @@ msgid "MV"
 msgstr ""
 
 #: ../kuwo/App.py:136 ../kuwo/Artists.py:68 ../kuwo/Artists.py:109
-#: ../kuwo/Search.py:39 ../kuwo/Search.py:71 ../kuwo/Search.py:156
-#: ../kuwo/Search.py:158 ../kuwo/Search.py:203
+#: ../kuwo/Search.py:39 ../kuwo/Search.py:71 ../kuwo/Search.py:159
+#: ../kuwo/Search.py:162 ../kuwo/Search.py:220
 msgid "Artists"
 msgstr ""
 
@@ -68,7 +68,7 @@ msgstr ""
 msgid "Next Song"
 msgstr ""
 
-#: ../kuwo/App.py:206 ../kuwo/Player.py:162 menus.ui.h:3
+#: ../kuwo/App.py:206 ../kuwo/Player.py:161 menus.ui.h:3
 msgid "Quit"
 msgstr ""
 
@@ -77,13 +77,14 @@ msgid "Artist"
 msgstr ""
 
 #: ../kuwo/Artists.py:156 ../kuwo/Artists.py:174 ../kuwo/Search.py:35
-#: ../kuwo/Search.py:64 ../kuwo/Search.py:138 ../kuwo/Search.py:202
+#: ../kuwo/Search.py:64 ../kuwo/Search.py:135 ../kuwo/Search.py:138
+#: ../kuwo/Search.py:219
 msgid "Songs"
 msgstr ""
 
 #: ../kuwo/Artists.py:157 ../kuwo/Artists.py:183 ../kuwo/Search.py:44
-#: ../kuwo/Search.py:84 ../kuwo/Search.py:178 ../kuwo/Search.py:180
-#: ../kuwo/Search.py:204
+#: ../kuwo/Search.py:84 ../kuwo/Search.py:186 ../kuwo/Search.py:189
+#: ../kuwo/Search.py:221
 msgid "Albums"
 msgstr ""
 
@@ -235,47 +236,47 @@ msgstr ""
 msgid "Only cached songs will be exported"
 msgstr ""
 
-#: ../kuwo/Player.py:95
+#: ../kuwo/Player.py:94
 msgid "Previous"
 msgstr ""
 
-#: ../kuwo/Player.py:101 ../kuwo/Radio.py:59 ../kuwo/Widgets.py:132
+#: ../kuwo/Player.py:100 ../kuwo/Radio.py:59 ../kuwo/Widgets.py:132
 msgid "Play"
 msgstr ""
 
-#: ../kuwo/Player.py:107 ../kuwo/Radio.py:65
+#: ../kuwo/Player.py:106 ../kuwo/Radio.py:65
 msgid "Next"
 msgstr ""
 
-#: ../kuwo/Player.py:116
+#: ../kuwo/Player.py:115
 msgid "Shuffle"
 msgstr ""
 
-#: ../kuwo/Player.py:122
+#: ../kuwo/Player.py:121
 msgid "Repeat"
 msgstr ""
 
-#: ../kuwo/Player.py:128
+#: ../kuwo/Player.py:127
 msgid "Show MV"
 msgstr ""
 
-#: ../kuwo/Player.py:136
+#: ../kuwo/Player.py:135
 msgid "Fullscreen"
 msgstr ""
 
-#: ../kuwo/Player.py:152 ../kuwo/Preferences.py:104 menus.ui.h:1
+#: ../kuwo/Player.py:151 ../kuwo/Preferences.py:104 menus.ui.h:1
 msgid "Preferences"
 msgstr ""
 
-#: ../kuwo/Player.py:158 menus.ui.h:2
+#: ../kuwo/Player.py:157 menus.ui.h:2
 msgid "About"
 msgstr ""
 
-#: ../kuwo/Player.py:183 ../kuwo/Player.py:433 ../kuwo/Player.py:437
+#: ../kuwo/Player.py:182 ../kuwo/Player.py:432 ../kuwo/Player.py:436
 msgid "Unknown"
 msgstr ""
 
-#: ../kuwo/Player.py:653
+#: ../kuwo/Player.py:651
 msgid "A simple music player for Linux Desktop"
 msgstr ""
 
