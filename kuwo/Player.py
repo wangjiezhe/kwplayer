@@ -9,7 +9,6 @@ from gi.repository import GstVideo
 from gi.repository import Gtk
 import sys
 import time
-import threading
 
 from kuwo import Config
 from kuwo import Net
@@ -537,15 +536,24 @@ class Player(Gtk.Box):
         GLib.idle_add(_update_fill_level, percent)
 
     def load_mv(self, song):
+        def _on_mv_can_play(widget, mv_path):
+            if mv_path:
+                GLib.idle_add(self.on_mv_can_play, mv_path)
+            else:
+                self.load_next()
+        def _on_mv_downloaded(widget, mv_path):
+            if mv_path:
+                GLib.idle_add(self.on_mv_downloaded, mv_path)
+
         self.play_type = PlayType.MV
         self.curr_song = song
         self.pause_player(stop=True)
-        #self.scale.set_fill_level(0)
-        #self.scale.set_show_fill_level(True)
+        self.scale.set_fill_level(0)
+        self.scale.set_show_fill_level(True)
         self.async_mv = Net.AsyncMV(self.app)
-        #self.async_mv.connect('chunk-received', self.on_chunk_received)
-        self.async_mv.connect('can-play', self.on_mv_can_play)
-        self.async_mv.connect('downloaded', self.on_mv_downloaded)
+        self.async_mv.connect('chunk-received', self.on_chunk_received)
+        self.async_mv.connect('can-play', _on_mv_can_play)
+        self.async_mv.connect('downloaded', _on_mv_downloaded)
         self.async_mv.get_mv(song)
 
     def _load_mv(self, mv_path):
@@ -555,26 +563,16 @@ class Player(Gtk.Box):
         self.enable_bus_sync()
         self.start_player(load=True)
 
-    def on_mv_can_play(self, widget, mv_path):
-        #self.scale.set_show_fill_level(True)
-        if mv_path:
-            self.show_mv_btn.set_sensitive(True)
-            self.show_mv_btn.handler_block(self.show_mv_sid)
-            self.show_mv_btn.set_active(True)
-            self.show_mv_btn.handler_unblock(self.show_mv_sid)
-            GLib.idle_add(self._load_mv, mv_path)
-        else:
-            # Failed to download MV,
-            self.show_mv_btn.set_sensitive(False)
-            self.show_mv_btn.handler_block(self.show_mv_sid)
-            self.show_mv_btn.set_active(False)
-            self.show_mv_btn.handler_unblock(self.show_mv_sid)
-            self.load_next()
+    def on_mv_can_play(self, mv_path):
+        self.scale.set_show_fill_level(False)
+        self.show_mv_btn.set_sensitive(True)
+        self.show_mv_btn.handler_block(self.show_mv_sid)
+        self.show_mv_btn.set_active(True)
+        self.show_mv_btn.handler_unblock(self.show_mv_sid)
+        self._load_mv(mv_path)
 
-    def on_mv_downloaded(self, widget, mv_path):
-        def _set_scale_sensitive():
-            self.scale.set_sensitive(True)
-        GLib.idle_add(_set_scale_sensitive)
+    def on_mv_downloaded(self, mv_path):
+        self.scale.set_sensitive(True)
 
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
