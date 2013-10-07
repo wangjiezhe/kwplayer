@@ -2,7 +2,7 @@ Package: kwplayer
 Version: 2.4
 Architecture: all
 Maintainer: LiuLang<gsushzhsosgsu@gmail.com>
-Installed-Size: 984k
+Installed-Size: 980k
 Depends: python3-gi, gstreamer1.0-libav|gstreamer0.10-ffmpeg, gstreamer1.0-plugins-base|gstreamer0.10-plugins-base, gir1.2-gstreamer-1.0|gir1.2-gstreamer-0.10, gir1.2-gst-plugins-base-1.0|gir1.2-gst-plugins-base-0.10, python3-cairo, python3-gi-cairo, gnome-icon-theme-symbolic
 Suggests: python3-leveldb
 Section: gnome
