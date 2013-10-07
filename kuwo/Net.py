@@ -940,7 +940,7 @@ class AsyncMV(GObject.GObject):
                 received_size += len(chunk)
                 percent = int(received_size/content_length * 100)
                 self.emit('chunk-received', percent)
-                print('percentage:', percent)
+                #print('percentage:', percent)
                 if (received_size > CHUNK_MV_TO_PLAY or percent > 20) \
                         and not can_play_emited:
                     can_play_emited = True

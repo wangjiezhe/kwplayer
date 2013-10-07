@@ -127,72 +127,89 @@ class Search(Gtk.Box):
             self.show_albums(reset_status)
 
     def show_songs(self, reset_status=False):
+        def _append_songs(songs_args, error=None):
+            songs, hit, self.songs_total = songs_args
+            if not songs or hit == 0:
+                if reset_status:
+                    self.songs_button.set_label(
+                            '{0} (0)'.format(_('Songs')))
+                return
+            self.songs_button.set_label(
+                    '{0} ({1})'.format(_('Songs'), hit))
+            for song in songs:
+                self.liststore_songs.append([self.app.theme['anonymous'],
+                    song['SONGNAME'], song['ARTIST'], song['ALBUM'],
+                    int(song['MUSICRID'][6:]), int(song['ARTISTID']),
+                    int(song['ALBUMID']), ])
+
         keyword = self.search_entry.get_text()
         if len(keyword) == 0:
             return
         if reset_status:
             self.liststore_songs.clear()
-        songs, hit, self.songs_total = Net.search_songs(keyword, 
-                self.songs_page)
-        if not songs or hit == 0:
-            self.songs_button.set_label('{0} (0)'.format(_('Songs')))
-            return
-        self.songs_button.set_label('Songs ({0})'.format(hit))
-        for song in songs:
-            self.liststore_songs.append([self.app.theme['anonymous'],
-                song['SONGNAME'], song['ARTIST'], song['ALBUM'],
-                int(song['MUSICRID'][6:]), int(song['ARTISTID']),
-                int(song['ALBUMID']), ])
+        Net.async_call(Net.search_songs, _append_songs,
+                keyword, self.songs_page)
 
     def show_artists(self, reset_status=False):
+        def _append_artists(artists_args, error=None):
+            artists, hit, self.artists_total = artists_args
+            if hit == 0:
+                if reset_status:
+                    self.artists_button.set_label(
+                            '{0} (0)'.format(_('Artists')))
+                return
+            self.artists_button.set_label(
+                    '{0} ({1})'.format(_('Artists'), hit))
+            i = len(self.liststore_artists)
+            for artist in artists:
+                self.liststore_artists.append([self.app.theme['anonymous'],
+                    artist['ARTIST'], int(artist['ARTISTID']), 
+                    artist['COUNTRY'], ])
+                Net.update_artist_logo(self.liststore_artists, i, 0,
+                        artist['PICPATH'])
+                i += 1
+
         keyword = self.search_entry.get_text()
         if len(keyword) == 0:
             return
         if reset_status:
             self.liststore_artists.clear()
-        artists, hit, self.artists_total = Net.search_artists(keyword,
-            self.artists_page)
-        if hit == 0:
-            self.artists_button.set_label('{0} (0)'.format(_('Artists')))
-            return
-        self.artists_button.set_label('{0} ({1})'.format(_('Artists'), hit))
-        i = len(self.liststore_artists)
-        for artist in artists:
-            self.liststore_artists.append([self.app.theme['anonymous'],
-                artist['ARTIST'], int(artist['ARTISTID']), 
-                artist['COUNTRY'], ])
-            Net.update_artist_logo(self.liststore_artists, i, 0,
-                    artist['PICPATH'])
-            i += 1
+        Net.async_call(Net.search_artists, _append_artists,
+                keyword, self.artists_page)
 
     def show_albums(self, reset_status=False):
+        def _append_albums(albums_args, error=None):
+            albums, hit, self.albums_total = albums_args
+            if hit == 0:
+                if reset_status:
+                    self.albums_button.set_label(
+                            '{0} (0)'.format(_('Albums')))
+                return
+            self.albums_button.set_label(
+                    '{0} ({1})'.format(_('Albums'), hit))
+            i = len(self.liststore_albums)
+            for album in albums:
+                if len(album['info']) == 0:
+                    tooltip = Widgets.tooltip(album['name'])
+                else:
+                    tooltip = '<b>{0}</b>\n{1}'.format(
+                            Widgets.tooltip(album['name']),
+                            Widgets.tooltip(album['info']))
+                self.liststore_albums.append([self.app.theme['anonymous'],
+                    album['name'], int(album['albumid']), 
+                    album['artist'], int(album['artistid']),
+                    tooltip, ])
+                Net.update_album_covers(self.liststore_albums,
+                        i, 0, album['pic'])
+                i += 1
+
         keyword = self.search_entry.get_text()
         if len(keyword) == 0:
             return
         if reset_status:
             self.liststore_albums.clear()
-
-        albums, hit, self.albums_total = Net.search_albums(keyword,
-                self.albums_page)
-        if hit == 0:
-            self.albums_button.set_label('{0} (0)'.format(_('Albums')))
-            return
-        self.albums_button.set_label('{0} ({1})'.format(_('Albums'), hit))
-        i = len(self.liststore_albums)
-        for album in albums:
-            if len(album['info']) == 0:
-                tooltip = Widgets.tooltip(album['name'])
-            else:
-                tooltip = '<b>{0}</b>\n{1}'.format(
-                        Widgets.tooltip(album['name']),
-                        Widgets.tooltip(album['info']))
-            self.liststore_albums.append([self.app.theme['anonymous'],
-                album['name'], int(album['albumid']), 
-                album['artist'], int(album['artistid']),
-                tooltip, ])
-            Net.update_album_covers(self.liststore_albums, i, 0,
-                    album['pic'])
-            i += 1
+        Net.async_call(Net.search_albums, _append_albums,
+                keyword, self.albums_page)
 
     def reset_search_status(self):
         self.songs_tab_inited = False
