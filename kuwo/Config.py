@@ -69,10 +69,16 @@ def check_first():
             print(e)
     if not os.path.exists(CACHE_DIR):
         try:
-            os.makedirs(IMG_DIR)
+            os.mkdir(CACHE_DIR)
+            os.mkdir(IMG_DIR)
             os.mkdir(IMG_LARGE_DIR)
             os.mkdir(_default_conf['song-dir'])
             os.mkdir(_default_conf['mv-dir'])
+        except Exception as e:
+            print(e)
+    if not os.path.exists(LRC_DIR):
+        try:
+            os.mkdir(LRC_DIR)
         except Exception as e:
             print(e)
 

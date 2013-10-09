@@ -378,6 +378,8 @@ class PlayList(Gtk.Box):
             self.cache_timeout = GLib.timeout_add(5000, 
                     self.start_cache_daemon)
         else:
+            #if self.cache_job:
+                #self.cache_job.destroy()
             self.cache_enabled = False
             if self.cache_timeout > 0:
                 GLib.source_remove(self.cache_timeout)

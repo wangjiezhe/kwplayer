@@ -455,8 +455,11 @@ def get_lrc(_rid):
 
     lrc = _parse_lrc()
     if lrc is not None:
-        with open(filepath, 'w') as fh:
-            fh.write(lrc)
+        try:
+            with open(filepath, 'w') as fh:
+                fh.write(lrc)
+        except Exception as e:
+            print('Error: Net.get_lrc(): ', e)
         return lrc
     return None
 
