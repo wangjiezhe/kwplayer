@@ -70,8 +70,7 @@ def encode_lrc_url(rid):
 def decode_lrc_url(url):
     str_bytes = base64.decodebytes(url.encode())
     output = xor_bytes(str_bytes)
-    #print(output.decode('gb2312'))
-    return output.decode('gb2312')
+    return output.decode('gb18030')
 
 def json_loads_single(_str):
     '''
