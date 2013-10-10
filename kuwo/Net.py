@@ -432,7 +432,19 @@ def get_artist_similar(artistid, page):
     pages = math.ceil(int(artists_wrap['total']) / ICON_NUM)
     return (artists, pages)
 
-def get_lrc(_rid):
+def get_lrc_path(song):
+    rid = str(song['rid'])
+    oldname = rid + '.lrc'
+    oldpath = os.path.join(Config.LRC_DIR, oldname)
+    newname = '{0}-{1}.lrc'.format(song['artist'], song['name'])
+    newpath = os.path.join(Config.LRC_DIR, newname)
+    if os.path.exists(oldpath):
+        os.rename(oldpath, newpath)
+    if os.path.exists(newpath):
+        return (newpath, True)
+    return (newpath, False)
+
+def get_lrc(song):
     def _parse_lrc():
         url = ('http://newlyric.kuwo.cn/newlyric.lrc?' + 
                 Utils.encode_lrc_url(rid))
@@ -442,26 +454,27 @@ def get_lrc(_rid):
             return None
         try:
             lrc = Utils.decode_lrc_content(req_content)
+            return lrc
         except Exception as e:
             print('Error: Net.get_lrc:', e, 'with url:', url)
             return None
-        return lrc
 
-    rid = str(_rid)
-    filepath = os.path.join(Config.LRC_DIR, rid + '.lrc')
-    if os.path.exists(filepath):
-        with open(filepath) as fh:
+    rid = str(song['rid'])
+    (lrc_path, lrc_cached) = get_lrc_path(song)
+    if lrc_cached:
+        with open(lrc_path) as fh:
             return fh.read()
 
     lrc = _parse_lrc()
-    if lrc is not None:
-        try:
-            with open(filepath, 'w') as fh:
-                fh.write(lrc)
-        except Exception as e:
-            print('Error: Net.get_lrc(): ', e)
+    if lrc is None:
+        return None
+    try:
+        with open(lrc_path, 'w') as fh:
+            fh.write(lrc)
         return lrc
-    return None
+    except Exception as e:
+        print('Error: Net.get_lrc(): ', e)
+        return None
 
 def get_recommend_lists(artist):
     url = ''.join([

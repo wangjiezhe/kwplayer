@@ -568,13 +568,20 @@ class PlayList(Gtk.Box):
             num_songs = len(liststore)
             i = 0
             export_dir = folder_chooser.get_filename()
+            export_lrc = with_lrc.get_active()
             for item in liststore:
                 song = Widgets.song_row_to_dict(item, start=0)
                 song_link, song_path = Net.get_song_link(song, 
                         self.app.conf)
                 if song_link is not True:
                     continue
+                print('Will export:', song)
                 shutil.copy(song_path, export_dir)
+
+                if export_lrc:
+                    (lrc_path, lrc_cached) = Net.get_lrc_path(song)
+                    if lrc_cached:
+                        shutil.copy(lrc_path, export_dir)
                 i += 1
                 export_prog.set_fraction(i / num_songs)
                 Gdk.Window.process_all_updates()
@@ -600,7 +607,13 @@ class PlayList(Gtk.Box):
         box.pack_start(folder_label, False, True, 0)
 
         folder_chooser = Widgets.FolderChooser(self.app.window)
+        folder_chooser.props.margin_left = 20
         box.pack_start(folder_chooser, False, True, 0)
+
+        with_lrc = Gtk.CheckButton(_('With lyrics'))
+        with_lrc.set_tooltip_text(_('Export lyrics to the same folder'))
+        with_lrc.props.margin_top = 20
+        box.pack_start(with_lrc, False, False, 0)
 
         export_box = Gtk.Box(spacing=5)
         export_box.props.margin_top = 20

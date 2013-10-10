@@ -444,7 +444,7 @@ class Player(Gtk.Box):
     def get_lrc(self):
         def _update_lrc(lrc_text, error=None):
             self.app.lrc.set_lrc(lrc_text)
-        Net.async_call(Net.get_lrc, _update_lrc, self.curr_song['rid'])
+        Net.async_call(Net.get_lrc, _update_lrc, self.curr_song)
 
     def get_recommend_lists(self):
         self.recommend_imgs = None
