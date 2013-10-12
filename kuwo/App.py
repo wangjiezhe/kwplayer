@@ -155,11 +155,10 @@ class App:
         # CssProvider needs bytecode
         font_size = str(self.conf['lrc-text-size'])
         if Gtk.MINOR_VERSION > 6:
-            font_size += 'px;'
             css = '\n'.join([
                 'GtkTextView.lrc_tv {',
-                    'font-size: ' + font_size,
-                    'color: ' + self.conf['lrc-text-color'] + ';',
+                    'font-size: {0}px;'.format(font_size),
+                    'color: {0};'.format(self.conf['lrc-text-color']),
                     'background-color: rgba(0, 0, 0, 0);',
                 '}',
                 '.info-label {',
@@ -170,8 +169,8 @@ class App:
         else:
             css = '\n'.join([
                 'GtkTextView.lrc_tv {',
-                    'font-size: ' + font_size,
-                    'color: ' + self.conf['lrc-text-color'] + ';',
+                    'font-size: {0};'.format(font_size),
+                    'color: {0};'.format(self.conf['lrc-text-color']),
                     'background-color: rgba(0, 0, 0, 0);',
                 '}',
                 '.info-label {',
