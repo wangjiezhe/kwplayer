@@ -268,3 +268,22 @@ class TreeViewSongs(Gtk.TreeView):
             self.app.playlist.add_song_to_playlist(song)
         elif index == 6:
             self.app.playlist.cache_song(song)
+
+def network_error(parent, msg):
+    dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.MODAL,
+            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
+            msg)
+    dialog.format_secondary_text(
+            _('Please check network connection and try again'))
+    dialog.run()
+    dialog.destroy()
+
+def filesystem_error(parent, path):
+    msg = _('Failed to open file or direcotry')
+    dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.MODAL,
+            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
+            msg)
+    dialog.format_secondary_text(
+            _('Please check {0} exists').format(path))
+    dialog.run()
+    dialog.destroy()

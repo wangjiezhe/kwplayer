@@ -60,7 +60,7 @@ class Player(Gtk.Box):
 
         # use this to keep Net.AsyncSong and Net.AsyncMV object
         self.async_song = None
-        self.async_mv = None
+        self.async_next_song = None
 
         self.playbin = Gst.ElementFactory.make('playbin', None)
         if self.playbin is None:
@@ -212,21 +212,10 @@ class Player(Gtk.Box):
         self.playbin.set_state(Gst.State.NULL)
         if self.async_song:
             self.async_song.destroy()
-        if self.async_mv:
-            self.async_mv.destroy()
+        if self.async_next_song:
+            self.async_next_song.destroy()
 
     def load(self, song):
-        def _on_song_can_play(widget, song_path):
-            self.scale.set_show_fill_level(False)
-            if song_path:
-                GLib.idle_add(self._load_song, song_path)
-            else:
-                self.load_next()
-
-        def _on_song_downloaded(widget, song_path):
-            if song_path:
-                GLib.idle_add(self.on_song_downloaded, song_path)
-
         self.play_type = PlayType.SONG
         self.curr_song = song
         self.pause_player(stop=True)
@@ -234,28 +223,86 @@ class Player(Gtk.Box):
         self.scale.set_show_fill_level(True)
         self.async_song = Net.AsyncSong(self.app)
         self.async_song.connect('chunk-received', self.on_chunk_received)
-        self.async_song.connect('can-play', _on_song_can_play)
-        self.async_song.connect('downloaded', _on_song_downloaded)
+        self.async_song.connect('can-play', self.on_song_can_play)
+        self.async_song.connect('downloaded', self.on_song_downloaded)
         self.async_song.get_song(song)
 
-    def _load_song(self, song_path):
-        print('Player._load_song()', song_path)
-        self.playbin.set_property('uri', 'file://' + song_path)
-        self.start_player(load=True)
-        self.app.lrc.show_music()
-        self.update_player_info()
-        self.get_lrc()
-        self.get_mv_link()
-        self.get_recommend_lists()
+    def failed_to_download(self, song_path, status):
+        print('Player.failed_to_download()')
+        self.pause_player()
+        
+        if status == 'FileNotFoundError':
+            Widgets.filesystem_error(self.app.window, song_path)
+        elif status == 'URLError':
+            if self.play_type == PlayType.MV:
+                msg = _('Failed to download MV')
+            elif self.play_type in (PlayType.SONG, PlayType.RADIO):
+                msg = _('Failed to download song')
+            Widgets.network_error(self.app.window, msg)
 
-    def on_song_downloaded(self, song_path):
-        self.init_adjustment()
-        self.scale.set_sensitive(True)
-        if self.play_type == PlayType.SONG:
-            self.app.playlist.on_song_downloaded(play=True)
-            shuffle = self.shuffle_btn.get_active()
-            if not shuffle:
-                self.app.playlist.cache_next_song()
+    def on_chunk_received(self, widget, percent):
+        def _update_fill_level(value):
+            self.scale.set_fill_level(value)
+        GLib.idle_add(_update_fill_level, percent)
+
+    def on_song_can_play(self, widget, song_path, status):
+        def _on_song_can_play():
+            uri = 'file://' + song_path
+            self.scale.set_show_fill_level(False)
+            if self.play_type in (PlayType.SONG, PlayType.RADIO):
+                self.app.lrc.show_music()
+                self.get_lrc()
+                self.get_mv_link()
+                self.get_recommend_lists()
+            elif self.play_type == PlayType.MV:
+                self.show_mv_btn.set_sensitive(True)
+                self.show_mv_btn.handler_block(self.show_mv_sid)
+                self.show_mv_btn.set_active(True)
+                self.show_mv_btn.handler_unblock(self.show_mv_sid)
+                self.app.lrc.show_mv()
+                self.enable_bus_sync()
+            self.playbin.set_property('uri', uri)
+            self.start_player(load=True)
+            self.update_player_info()
+        def _load_next():
+            self.load_next()
+
+        if status == 'OK':
+            GLib.idle_add(_on_song_can_play)
+        elif status == 'URLError':
+            print('current song has no link download, will get net song')
+            GLib.idle_add(self.failed_to_download, song_path, status)
+
+    def on_song_downloaded(self, widget, song_path):
+        def _on_song_download():
+            self.init_adjustment()
+            self.scale.set_sensitive(True)
+            if self.play_type in (PlayType.SONG, PlayType.MV):
+                self.app.playlist.on_song_downloaded(play=True)
+                _repeat = self.repeat_btn.get_active()
+                _shuffle = self.shuffle_btn.get_active()
+                self.next_song = self.app.playlist.get_next_song(
+                        shuffle=_shuffle, repeat=_repeat)
+            elif self.play_type == PlayType.RADIO:
+                self.next_song = self.curr_radio_item.get_next_song()
+            if self.next_song:
+                self.cache_next_song()
+
+        if song_path:
+            GLib.idle_add(_on_song_download)
+        else:
+            #GLib.idle_add(self.failed_to_download, song_path)
+            pass
+
+    def cache_next_song(self):
+        print('Player.cache_next_song():', self.next_song)
+        if self.play_type == PlayType.MV:
+            # NOTE:if next song has no MV, cache will be failed
+            self.async_next_song= Net.AsyncMV(self.app)
+            self.async_next_song.get_mv(self.next_song)
+        elif self.play_type in (PlayType.SONG, PlayType.RADIO):
+            self.async_next_song = Net.AsyncSong(self.app)
+            self.async_next_song.get_song(self.next_song)
 
     def is_playing(self):
         state = self.playbin.get_state(5)
@@ -319,18 +366,14 @@ class Player(Gtk.Box):
 
     def on_prev_button_clicked(self, button):
         if self.play_type == PlayType.RADIO or \
-                self.play_type == PlayType.NONE or \
-                self.repeat_type == RepeatType.ONE:
+                self.play_type == PlayType.NONE:
             return
         self.pause_player(stop=True)
         _repeat = self.repeat_btn.get_active()
-        prev_song = self.app.playlist.get_prev_song(repeat=_repeat)
-        if prev_song is None:
-            return
         if self.play_type == PlayType.SONG:
-            self.load(prev_song)
+            self.app.playlist.play_prev_song(repeat=_repeat, use_mv=False)
         elif self.play_type == PlayType.MV:
-            self.load_mv(prev_song)
+            self.app.playlist.play_prev_song(repeat=_repeat, use_mv=True)
 
     def on_play_button_clicked(self, button):
         if self.play_type == PlayType.NONE:
@@ -473,18 +516,15 @@ class Player(Gtk.Box):
 
         _repeat = self.repeat_btn.get_active()
         _shuffle = self.shuffle_btn.get_active()
+        if self.next_song is None:
+            return
         if self.play_type == PlayType.RADIO:
+            #self.load_radio(self.next_song, self.curr_radio_item)
             self.curr_radio_item.play_next_song()
         elif self.play_type == PlayType.SONG:
-            next_song = self.app.playlist.get_next_song(
-                    repeat=_repeat, shuffle=_shuffle)
-            if next_song is not None:
-                self.load(next_song)
+            self.app.playlist.play_next_song(repeat=_repeat, use_mv=False)
         elif self.play_type == PlayType.MV:
-            next_mv = self.app.playlist.get_next_song(
-                    repeat=_repeat, shuffle=_shuffle)
-            if next_mv is not None:
-                self.load_mv(next_mv)
+            self.app.playlist.play_next_song(repeat=_repeat, use_mv=True)
 
     def on_error(self, bus, msg):
         print('on_error():', msg.parse_error())
@@ -495,21 +535,15 @@ class Player(Gtk.Box):
         song from radio, only contains name, artist, rid, artistid
         Remember to update its information.
         '''
-        def _on_radio_can_play(widget, song):
-            GLib.idle_add(self._load_song, song)
-
-        def _on_radio_downloaded(*args):
-            self.scale.set_sensitive(True)
-            self.curr_radio_item.cache_next_song()
-
         self.play_type = PlayType.RADIO
         self.pause_player(stop=True)
         self.curr_radio_item = radio_item
         self.curr_song = song
         self.scale.set_sensitive(False)
         self.async_song = Net.AsyncSong(self.app)
-        self.async_song.connect('can-play', _on_radio_can_play)
-        self.async_song.connect('downloaded', _on_radio_downloaded)
+        self.async_song.connect('chunk-received', self.on_chunk_received)
+        self.async_song.connect('can-play', self.on_song_can_play)
+        self.async_song.connect('downloaded', self.on_song_downloaded)
         self.async_song.get_song(song)
 
 
@@ -530,49 +564,17 @@ class Player(Gtk.Box):
             # TODO, FIXME
             #self.disable_bus_sync()
 
-    def on_chunk_received(self, widget, percent):
-        def _update_fill_level(value):
-            self.scale.set_fill_level(value)
-        GLib.idle_add(_update_fill_level, percent)
-
     def load_mv(self, song):
-        def _on_mv_can_play(widget, mv_path):
-            if mv_path:
-                GLib.idle_add(self.on_mv_can_play, mv_path)
-            else:
-                self.load_next()
-        def _on_mv_downloaded(widget, mv_path):
-            if mv_path:
-                GLib.idle_add(self.on_mv_downloaded, mv_path)
-
         self.play_type = PlayType.MV
         self.curr_song = song
         self.pause_player(stop=True)
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
-        self.async_mv = Net.AsyncMV(self.app)
-        self.async_mv.connect('chunk-received', self.on_chunk_received)
-        self.async_mv.connect('can-play', _on_mv_can_play)
-        self.async_mv.connect('downloaded', _on_mv_downloaded)
-        self.async_mv.get_mv(song)
-
-    def _load_mv(self, mv_path):
-        self.update_player_info()
-        self.playbin.set_property('uri', 'file://' + mv_path)
-        self.app.lrc.show_mv()
-        self.enable_bus_sync()
-        self.start_player(load=True)
-
-    def on_mv_can_play(self, mv_path):
-        self.scale.set_show_fill_level(False)
-        self.show_mv_btn.set_sensitive(True)
-        self.show_mv_btn.handler_block(self.show_mv_sid)
-        self.show_mv_btn.set_active(True)
-        self.show_mv_btn.handler_unblock(self.show_mv_sid)
-        self._load_mv(mv_path)
-
-    def on_mv_downloaded(self, mv_path):
-        self.scale.set_sensitive(True)
+        self.async_song = Net.AsyncMV(self.app)
+        self.async_song.connect('chunk-received', self.on_chunk_received)
+        self.async_song.connect('can-play', self.on_song_can_play)
+        self.async_song.connect('downloaded', self.on_song_downloaded)
+        self.async_song.get_mv(song)
 
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):

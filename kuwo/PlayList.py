@@ -113,13 +113,11 @@ class PlayList(Gtk.Box):
         # use curr_playing to locate song in treeview
         self.curr_playing = [None, None]
 
+        # control cache job
         self.cache_enabled = False
         self.cache_job = None
         self.cache_timeout = 0
 
-        self.cache_next_async_song = None
-
-        #self.playlist_menu_model = Gio.Menu()
         self.playlist_menu = Gtk.Menu()
 
         self.conn = sqlite3.connect(Config.SONG_DB)
@@ -184,8 +182,6 @@ class PlayList(Gtk.Box):
         self.dump_playlists()
         if self.cache_job:
             self.cache_job.destroy()
-        if self.cache_next_async_song:
-            self.cache_next_async_song.destroy()
 
     def first(self):
         pass
@@ -398,10 +394,24 @@ class PlayList(Gtk.Box):
             self.append_cached_song(song)
             liststore.remove(liststore[path].iter)
             Gdk.Window.process_all_updates()
+        def _failed_to_download(song_path, status):
+            self.cache_enabled = False
+            if status == 'URLError':
+                Widget.network_error(self.app.window,
+                        _('Failed to cache song'))
+            elif status == 'FileNotFoundError':
+                Widgets.filesystem_error(self.app.window, song_path)
+
+        def _on_can_play(widget, song_path, status, error=None):
+            if status == 'OK':
+                return
+            GLib.idle_add(_failed_to_download)
 
         def _on_downloaded(widget, song_path, error=None):
             self.cache_job = None
-            GLib.idle_add(_move_song)
+            if song_path:
+                GLib.idle_add(_move_song)
+                return
 
         list_name = 'Caching'
         liststore = self.tabs[list_name].liststore
@@ -412,6 +422,7 @@ class PlayList(Gtk.Box):
         song = Widgets.song_row_to_dict(liststore[path], start=0)
         print('song dict to download:', song)
         self.cache_job = Net.AsyncSong(self.app)
+        self.cache_job.connect('can-play', _on_can_play)
         self.cache_job.connect('downloaded', _on_downloaded)
         self.cache_job.get_song(song)
 
@@ -424,18 +435,6 @@ class PlayList(Gtk.Box):
         song = Widgets.song_row_to_dict(liststore[path], start=0)
         self.append_cached_song(song)
         Gdk.Window.process_all_updates()
-
-    def cache_next_song(self):
-        list_name = self.curr_playing[0]
-        liststore = self.tabs[list_name].liststore
-        path = self.curr_playing[1]
-        if path == len(liststore) - 1:
-            return
-        path += 1
-        song = Widgets.song_row_to_dict(liststore[path], start=0)
-        print('next song to cache:', song)
-        self.cache_next_async_song = Net.AsyncSong(self.app)
-        self.cache_next_async_song.get_song(song)
 
     def get_prev_song(self, repeat=False):
         list_name = self.curr_playing[0]
@@ -453,7 +452,7 @@ class PlayList(Gtk.Box):
                 path = 0
         else:
             path = path - 1
-        self.curr_playing[1] = path
+        self.prev_playing = path
         return Widgets.song_row_to_dict(liststore[path], start=0)
 
     def get_next_song(self, repeat=False, shuffle=False):
@@ -472,8 +471,25 @@ class PlayList(Gtk.Box):
             path = 0
         else:
             path = path + 1
-        self.curr_playing[1] = path
+
+        self.next_playing = path
         return Widgets.song_row_to_dict(liststore[path], start=0)
+
+    def play_prev_song(self, repeat, use_mv=False):
+        prev_song = self.get_prev_song(repeat=repeat)
+        self.curr_playing[1] = self.prev_playing
+        if use_mv:
+            self.app.player.load_mv(prev_song)
+        else:
+            self.app.player.load(prev_song)
+
+    def play_next_song(self, repeat, use_mv=False):
+        next_song = self.get_next_song(repeat=repeat)
+        self.curr_playing[1] = self.next_playing
+        if use_mv:
+            self.app.player.load_mv(next_song)
+        else:
+            self.app.player.load(next_song)
 
     def locate_curr_song(self):
         '''

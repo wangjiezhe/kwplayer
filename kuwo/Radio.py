@@ -17,6 +17,7 @@ _ = Config._
 class RadioItem(Gtk.EventBox):
     def __init__(self, radio_info, app):
         super().__init__()
+        print('Radio.RadioItem.__init__()')
         self.app = app
         self.playlists = app.radio.playlists
         self.connect('button-press-event', self.on_button_pressed)
@@ -61,24 +62,23 @@ class RadioItem(Gtk.EventBox):
         button_play.connect('clicked', self.on_button_play_clicked)
         self.toolbar.insert(button_play, 0)
 
-        button_next = Gtk.ToolButton()
-        button_next.set_label(_('Next'))
-        button_next.set_icon_name('media-skip-forward-symbolic')
-        button_next.connect('clicked', self.on_button_next_clicked)
-        self.toolbar.insert(button_next, 1)
-
+#        button_next = Gtk.ToolButton()
+#        button_next.set_label(_('Next'))
+#        button_next.set_icon_name('media-skip-forward-symbolic')
+#        button_next.connect('clicked', self.on_button_next_clicked)
+#        self.toolbar.insert(button_next, 1)
+#
         button_favorite = Gtk.ToolButton()
         button_favorite.set_label(_('Favorite'))
         button_favorite.set_icon_name('emblem-favorite-symbolic')
         button_favorite.connect('clicked', self.on_button_favorite_clicked)
-        self.toolbar.insert(button_favorite, 2)
+        self.toolbar.insert(button_favorite, 1)
 
         button_delete = Gtk.ToolButton()
         button_delete.set_label(_('Delete'))
-        #button_delete.set_icon_name('edit-delete-symbolic')
         button_delete.set_icon_name('user-trash-symbolic')
         button_delete.connect('clicked', self.on_button_delete_clicked)
-        self.toolbar.insert(button_delete, 3)
+        self.toolbar.insert(button_delete, 2)
 
         self.show_all()
         self.label.hide()
@@ -99,16 +99,12 @@ class RadioItem(Gtk.EventBox):
             Net.async_call(Net.get_radio_songs, _update_songs, 
                     self.radio_info['radio_id'], self.radio_info['offset'])
     
-    def load_more_songs(self, callback):
-        print('load more song()')
+    def load_more_songs(self):
         def _on_more_songs_loaded(songs, error=None):
-            print('_update_songs()')
-            if songs is None:
-                return
-            index = self.get_index()
-            # merge next list of songs to current list
-            self.playlists[index]['songs'] += songs
-            callback()
+            if songs:
+                # merge next list of songs to current list
+                index = self.get_index()
+                self.playlists[index]['songs'] += songs
         index = self.get_index()
         offset = self.playlists[index]['offset'] + 1
         self.playlists[index]['offset'] = offset
@@ -155,9 +151,6 @@ class RadioItem(Gtk.EventBox):
     def play_song(self):
         index = self.get_index()
         radio = self.playlists[index]
-        #if radio['curr_song'] >= len(radio['songs'])-1:
-            #self.load_more_songs(self.play_song)
-            #return
         if radio['curr_song'] > 19:
             radio['curr_song'] = 0
             radio['songs'] = radio['songs'][20:]
@@ -168,25 +161,36 @@ class RadioItem(Gtk.EventBox):
     def play_next_song(self):
         index = self.get_index()
         self.playlists[index]['curr_song'] += 1
-        self.update_label()
         self.play_song()
 
-    def cache_next_song(self):
-        print('cache_next_song()')
-        def _cache_next_song(*args):
-            print('_cache_next_song():', args)
-            song = radio['songs'][radio['curr_song'] + 1]
-            print('next song to cache:', song)
-            parse_song = Net.AsyncSong(self.app)
-            parse_song.get_song(song)
+    def get_next_song(self):
         index = self.get_index()
         radio = self.playlists[index]
-        # TODO: check curr_song > 19
-        if radio['curr_song'] == 19:
-            print('curr_song is 19, load next list')
-            self.load_more_songs(_cache_next_song)
-            return
-        _cache_next_song()
+        if radio['curr_song'] == 10:
+            self.load_more_songs()
+        if radio['curr_song'] > 19:
+            radio['curr_song'] = 0
+            radio['songs'] = radio['songs'][20:]
+        print('Radio.get_next_song():', radio['curr_song'])
+        return radio['songs'][radio['curr_song'] + 1]
+
+#    def cache_next_song(self):
+#        print('cache_next_song()')
+#        def _cache_next_song(*args):
+#            print('_cache_next_song():', args)
+#            song = radio['songs'][radio['curr_song'] + 1]
+#            print('next song to cache:', song)
+#            parse_song = Net.AsyncSong(self.app)
+#            parse_song.get_song(song)
+#        index = self.get_index()
+#        radio = self.playlists[index]
+#        # TODO: check curr_song > 19
+#        if radio['curr_song'] == 19:
+#            print('curr_song is 19, load next list')
+#            self.load_more_songs(_cache_next_song)
+#            return
+#        _cache_next_song()
+#        # TODO: will not use it
 
     def on_button_pressed(self, widget, event):
         parent = self.get_parent()
@@ -199,17 +203,18 @@ class RadioItem(Gtk.EventBox):
     def on_button_play_clicked(self, btn):
         self.play_song()
 
-    def on_button_next_clicked(self, btn):
-        print('on_button_next_clicked()')
-        index = self.get_index()
-        radio = self.playlists[index]
-        self.playlists[index]['curr_song'] += 1
-        if radio['curr_song'] >= len(radio['songs'])-1:
-            self.load_more_songs(self.update_label)
-        self.update_label()
+#    def on_button_next_clicked(self, btn):
+#        print('on_button_next_clicked()')
+#        index = self.get_index()
+#        radio = self.playlists[index]
+#        self.playlists[index]['curr_song'] += 1
+#        if radio['curr_song'] >= len(radio['songs'])-1:
+#            self.load_more_songs(self.update_label)
+#        self.update_label()
         #Gdk.Window.process_all_updates()
 
     def on_button_favorite_clicked(self, btn):
+        # TODO: change button image
         index = self.get_index()
         radio = self.playlists[index]
         song = radio['songs'][radio['curr_song']]
@@ -310,10 +315,13 @@ class Radio(Gtk.Box):
         self.append_radio(radio_info)
 
     def append_radio(self, radio_info):
+        print('Radio.append_radio():', radio_info)
         for radio in self.playlists:
             # check if this radio already exists
             if radio['radio_id'] == radio_info['radio_id']:
+                print('this radio is already in playlist , ignore it.')
                 return
         self.playlists.append(radio_info)
         radio_item = RadioItem(radio_info, self.app)
+        print('will pack new radio item to box')
         self.box_myradio.pack_start(radio_item, False, False, 0)

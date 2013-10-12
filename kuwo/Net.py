@@ -826,7 +826,7 @@ class AsyncSong(GObject.GObject):
     __gsignals__ = {
             'can-play': (GObject.SIGNAL_RUN_LAST, 
                 # sogn_path
-                GObject.TYPE_NONE, (str, )),
+                GObject.TYPE_NONE, (str, str)),
             'chunk-received': (GObject.SIGNAL_RUN_LAST,
                 GObject.TYPE_NONE, 
                 # percent
@@ -870,13 +870,13 @@ class AsyncSong(GObject.GObject):
                 received_size += len(chunk)
                 percent = int(received_size/content_length * 100)
                 self.emit('chunk-received', percent)
-                #print('percentage:', percent)
+                print('percentage:', percent)
                 # this signal only emit once.
                 if (received_size > CHUNK_TO_PLAY or percent > 40) \
                         and not can_play_emited:
                     print('song can be played now')
                     can_play_emited = True
-                    self.emit('can-play', song_path)
+                    self.emit('can-play', song_path, 'OK')
                 if not chunk:
                     break
                 fh.write(chunk)
@@ -887,12 +887,13 @@ class AsyncSong(GObject.GObject):
 
         song_link, song_path = get_song_link(song, self.app.conf)
         if song_link is False:
-            self.emit('can-play', None)
+            # this song has no link to download
+            self.emit('can-play', song_path, 'URLError')
             self.emit('downloaded', None)
             return None
         if song_link is True:
             print('local song exists, signals will be emited:', song_path)
-            self.emit('can-play', song_path)
+            self.emit('can-play', song_path, 'OK')
             self.emit('downloaded', song_path)
             return
         retried = 0
@@ -912,7 +913,9 @@ class AsyncSong(GObject.GObject):
             # If failed to download, partial mp3 file needs to be deleted
             if os.path.exists(song_path):
                 os.remove(song_path)
-            self.emit('can-play', None)
+                self.emit('can-play', song_path, 'URLError')
+            else:
+                self.emit('can-play', song_path, 'FileNotFoundError')
             self.emit('downloaded', None)
             return None
 GObject.type_register(AsyncSong)
@@ -921,7 +924,7 @@ GObject.type_register(AsyncSong)
 class AsyncMV(GObject.GObject):
     __gsignals__ = {
             'can-play': (GObject.SIGNAL_RUN_LAST, 
-                GObject.TYPE_NONE, (str, )),
+                GObject.TYPE_NONE, (str, str)),
             'chunk-received': (GObject.SIGNAL_RUN_LAST,
                 GObject.TYPE_NONE, 
                 (int, )),
@@ -961,7 +964,7 @@ class AsyncMV(GObject.GObject):
                         and not can_play_emited:
                     can_play_emited = True
                     print('mv can play now')
-                    self.emit('can-play', mv_path)
+                    self.emit('can-play', mv_path, 'OK')
                 if not chunk:
                     break
                 fh.write(chunk)
@@ -971,12 +974,12 @@ class AsyncMV(GObject.GObject):
 
         mv_link, mv_path = get_song_link(song, self.app.conf, True)
         if mv_link is False:
-            self.emit('can-play', None)
+            self.emit('can-play', mv_path, 'URLError')
             self.emit('downloaded', None)
             return None
         if mv_link is True:
             print('local song exists, signals will be emited:', mv_path)
-            self.emit('can-play', mv_path)
+            self.emit('can-play', mv_path, 'OK')
             self.emit('downloaded', mv_path)
             return
         retried = 0
@@ -991,10 +994,12 @@ class AsyncMV(GObject.GObject):
                 print('AsyncMV.getmv()', e, 'with mv_link:', mv_link)
                 retried += 1
         if retried == MAXTIMES:
+            print('mv failed to download, please check link', mv_link)
             if os.path.exists(mv_path):
                 os.rm(mv_path)
-            print('mv failed to download, please check link', mv_link)
-            self.emit('can-play', None)
+                self.emit('can-play', mv_path, 'URLError')
+            else:
+                self.emit('can-play', mv_path, 'FileNotFoundError')
             self.emit('downloaded', None)
             return None
 GObject.type_register(AsyncMV)
