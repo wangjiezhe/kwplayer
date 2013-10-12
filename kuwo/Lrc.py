@@ -57,8 +57,13 @@ class Lrc(Gtk.Box):
 
         self.lrc_buf = Gtk.TextBuffer()
         self.lrc_buf.set_text('')
-        self.tag_centered = self.lrc_buf.create_tag('blue_fg', 
-                foreground='blue')
+        fore_rgba = Gdk.RGBA()
+        fore_rgba.parse(app.conf['lrc-highlighted-text-color'])
+        font_size = app.conf['lrc-highlighted-text-size']
+        # Need to use size_points, not size property
+        self.highlighted_tag = self.lrc_buf.create_tag(
+                size_points=font_size, foreground_rgba=fore_rgba)
+
         self.lrc_tv = Gtk.TextView(buffer=self.lrc_buf)
         self.lrc_tv.get_style_context().add_class('lrc_tv')
         self.lrc_tv.props.editable = False
@@ -77,6 +82,12 @@ class Lrc(Gtk.Box):
 
     def first(self):
         pass
+
+    def update_highlighted_tag(self):
+        fore_rgba = Gdk.RGBA()
+        fore_rgba.parse(self.app.conf['lrc-highlighted-text-color'])
+        self.highlighted_tag.props.size_points = self.app.conf['lrc-highlighted-text-size']
+        self.highlighted_tag.props.foreground_rgba = fore_rgba
 
     def set_lrc(self, lrc_txt):
         self.lrc_background = None
@@ -106,14 +117,15 @@ class Lrc(Gtk.Box):
             return
         if self.old_line >= 0 and self.old_line_iter and \
                 len(self.old_line_iter) == 2:
-            self.lrc_buf.remove_tag(self.tag_centered, *self.old_line_iter)
+            self.lrc_buf.remove_tag(self.highlighted_tag,
+                    *self.old_line_iter)
         while len(self.lrc_obj) > line_num and \
                 timestamp > self.lrc_obj[line_num][0]:
             line_num += 1
         line_num -= 1
         iter_start = self.lrc_buf.get_iter_at_line(line_num)
         iter_end = self.lrc_buf.get_iter_at_line(line_num+1)
-        self.lrc_buf.apply_tag(self.tag_centered, iter_start, iter_end)
+        self.lrc_buf.apply_tag(self.highlighted_tag, iter_start, iter_end)
         self.lrc_tv.scroll_to_iter(iter_start, 0, True, 0, 0.5)
         self.old_line_iter = (iter_start, iter_end)
         self.old_line = line_num

@@ -19,6 +19,57 @@ class NoteTab(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.set_border_width(10)
 
+class ColorButton(Gtk.ColorButton):
+    def __init__(self, color):
+        super().__init__()
+
+class ColorBox(Gtk.Box):
+    def __init__(self, label, conf, color_name, use_margin=False):
+        super().__init__()
+        self.conf = conf
+        self.color_name = color_name
+        left_label = Gtk.Label(label)
+        self.pack_start(left_label, False, True, 0)
+
+        color_button = Gtk.ColorButton()
+        color_button.set_use_alpha(True)
+        color_rgba = Gdk.RGBA()
+        color_rgba.parse(conf[color_name])
+        color_button.set_rgba(color_rgba)
+        color_button.connect('color-set', self.on_color_set)
+        self.pack_end(color_button, False, True, 0)
+
+        if use_margin:
+            self.props.margin_left = 20
+
+    def on_color_set(self, color_button):
+        color_rgba = color_button.get_rgba()
+        if color_rgba.alpha == 1:
+            color_rgba.alpha = 0.999
+        self.conf[self.color_name] = color_rgba.to_string()
+
+class FontBox(Gtk.Box):
+    def __init__(self, label, conf, font_name, use_margin=True):
+        super().__init__()
+        self.conf = conf
+        self.font_name = font_name
+        left_label = Gtk.Label(label)
+        self.pack_start(left_label, False, True, 0)
+
+        font_button = Gtk.SpinButton()
+        adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10)
+        adjustment.connect('value-changed', self.on_font_set)
+        font_button.set_adjustment(adjustment)
+        font_button.set_value(conf[font_name])
+        self.pack_end(font_button, False, True, 0)
+
+        if use_margin:
+            self.props.margin_left = 20
+
+    def on_font_set(self, adjustment):
+        self.conf[self.font_name] = adjustment.get_value()
+
+
 class ChooseFolder(Gtk.Box):
     def __init__(self, parent, conf_name, toggle_label):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
@@ -159,45 +210,39 @@ class Preferences(Gtk.Dialog):
         lrc_box = NoteTab()
         notebook.append_page(lrc_box, Gtk.Label(_('Lyrics')))
 
-        lrc_word_back_color_box = Gtk.Box()
-        lrc_box.pack_start(lrc_word_back_color_box, False, False, 0)
+        lrc_normal_text_label = Widgets.BoldLabel(_('Normal Text'))
+        lrc_box.pack_start(lrc_normal_text_label, False, True, 0)
 
-        lrc_word_back_color_label = Widgets.BoldLabel(
-                _('Lyric Word Background color'))
-        lrc_word_back_color_box.pack_start(lrc_word_back_color_label, 
-                False, False, 0)
+        lrc_normal_text_size = FontBox(_('text size'),
+                app.conf, 'lrc-text-size', use_margin=True)
+        lrc_box.pack_start(lrc_normal_text_size, False, True, 0)
 
-        lrc_word_back_color = Gtk.ColorButton()
-        lrc_word_back_color.set_use_alpha(True)
-        lrc_word_back_rgba = Gdk.RGBA()
-        lrc_word_back_rgba.parse(app.conf['lrc-word-back-color'])
-        lrc_word_back_color.set_rgba(lrc_word_back_rgba)
-        lrc_word_back_color.connect('color-set',
-                self.on_lrc_word_back_color_set)
-        lrc_word_back_color.set_title(
-                _('Choose color for Lyrics background'))
-        lrc_word_back_color_box.pack_start(lrc_word_back_color,
-                False, False, 20)
-        
-        lrc_img_back_color_box = Gtk.Box()
-        lrc_box.pack_start(lrc_img_back_color_box, False, False, 0)
+        lrc_normal_text_color = ColorBox(_('text color'),
+                app.conf, 'lrc-text-color', use_margin=True)
+        lrc_box.pack_start(lrc_normal_text_color, False, True, 0)
+        lrc_normal_text_color.props.margin_bottom = 10
 
-        lrc_img_back_color_label = Widgets.BoldLabel(
-                _('Lyric Image Background color'))
-        lrc_img_back_color_box.pack_start(lrc_img_back_color_label,
-                False, False, 0)
+        lrc_highlighted_text_label = Widgets.BoldLabel(
+                _('Highlighted Text'))
+        lrc_box.pack_start(lrc_highlighted_text_label, False, True, 0)
 
-        lrc_img_back_color = Gtk.ColorButton()
-        lrc_img_back_color.set_use_alpha(True)
-        lrc_img_back_rgba = Gdk.RGBA()
-        lrc_img_back_rgba.parse(app.conf['lrc-img-back-color'])
-        lrc_img_back_color.set_rgba(lrc_img_back_rgba)
-        lrc_img_back_color.connect('color-set', 
-                self.on_lrc_img_back_color_set)
-        lrc_img_back_color.set_title(
-                _('Choose color for Lyrics background'))
-        lrc_img_back_color_box.pack_start(lrc_img_back_color,
-                False, False, 20)
+        lrc_highlighted_text_size = FontBox(_('text size'),
+                app.conf, 'lrc-highlighted-text-size', use_margin=True)
+        lrc_box.pack_start(lrc_highlighted_text_size, False, True, 0)
+
+        lrc_highlighted_text_color = ColorBox(_('text color'),
+                app.conf, 'lrc-highlighted-text-color', use_margin=True)
+        lrc_highlighted_text_color.props.margin_bottom = 10
+        lrc_box.pack_start(lrc_highlighted_text_color, False, True, 0)
+
+        lrc_word_back_color = ColorBox(_('Lyrics Text Background color'),
+                app.conf, 'lrc-word-back-color')
+        lrc_box.pack_start(lrc_word_back_color, False, True, 0)
+
+        lrc_img_back_color = ColorBox(_('Lyrics image background color'),
+                app.conf, 'lrc-img-back-color')
+        lrc_box.pack_start(lrc_img_back_color, False, True, 0)
+
         
         # folders tab
         folder_box = NoteTab()
@@ -233,19 +278,3 @@ class Preferences(Gtk.Dialog):
     def on_video_toggled(self, radiobtn):
         # radio_group[0] is MKV
         self.app.conf['use-mkv'] = radiobtn.get_group()[0].get_active()
-
-    def on_lrc_word_back_color_set(self, colorbutton):
-        back_rgba = colorbutton.get_rgba()
-        # Fixed: if alpha == 1, to_string() will remove alpha value
-        #        and we got a RGB instead of RGBA.
-        if back_rgba.alpha == 1:
-            back_rgba.alpha = 0.999
-        back_rgba.to_string()
-        self.app.conf['lrc-word-back-color'] = back_rgba.to_string()
-
-    def on_lrc_img_back_color_set(self, colorbutton):
-        back_rgba = colorbutton.get_rgba()
-        if back_rgba.alpha == 1:
-            back_rgba.alpha = 0.999
-        back_rgba.to_string()
-        self.app.conf['lrc-img-back-color'] = back_rgba.to_string()

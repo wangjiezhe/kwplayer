@@ -19,7 +19,7 @@ locale.textdomain('kuwo')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '2.5'
+VERSION = '2.6'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>',]
 
@@ -57,6 +57,10 @@ _default_conf = {
         'use-ape': False,
         'use-mkv': False,
         'use-status-icon': True,
+        'lrc-text-color': 'rgba(0, 0, 0, 1)',
+        'lrc-text-size': '24',
+        'lrc-highlighted-text-color': 'rgba(0, 255, 0, 1)',
+        'lrc-highlighted-text-size': '28',
         'lrc-img-back-color': 'rgba(0, 0, 0, 1)',
         'lrc-word-back-color': 'rgba(237, 221, 221, 0.28)',
         }
@@ -85,13 +89,17 @@ def check_first():
 def load_conf():
     if os.path.exists(_conf_file):
         with open(_conf_file) as fh:
-            return json.loads(fh.read())
+            conf = json.loads(fh.read())
+        for key in _default_conf:
+            if key not in conf:
+                conf[key] = _default_conf[key]
+        return conf
     dump_conf(_default_conf)
     return _default_conf
 
 def dump_conf(conf):
     with open(_conf_file, 'w') as fh:
-        fh.write(json.dumps(conf))
+        fh.write(json.dumps(conf, indent=2))
 
 def load_theme():
     theme_file = os.path.join(THEME_DIR, 'images.json')

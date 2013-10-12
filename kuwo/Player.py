@@ -642,6 +642,8 @@ class Player(Gtk.Box):
         dialog = Preferences(self.app)
         dialog.run()
         dialog.destroy()
+        self.app.load_styles()
+        self.app.lrc.update_highlighted_tag()
 
     def on_main_menu_about_activate(self, menu_item):
         dialog = Gtk.AboutDialog()

@@ -55,7 +55,7 @@ class BoldLabel(Gtk.Label):
         self.set_use_markup(True)
         self.props.halign = Gtk.Align.START
         self.props.xalign = 0
-        self.props.margin_bottom = 10
+        #self.props.margin_bottom = 10
 
 class FolderChooser(Gtk.Box):
     def __init__(self, parent):

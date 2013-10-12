@@ -36,9 +36,6 @@ class App:
         self.app.connect('shutdown', self.on_app_shutdown)
 
         self.conf = Config.load_conf()
-        if 'use-status-icon' not in self.conf:
-            self.conf['use-status-icon'] = True
-
         self.theme = Config.load_theme()
 
     def on_app_startup(self, app):
@@ -150,12 +147,21 @@ class App:
         self.notebook.set_current_page(page)
 
     def load_styles(self):
-        if Gtk.MINOR_VERSION < 8:
-            style_file = Config.THEME_MAIN_STYLE_3_6
-        else:
-            style_file = Config.THEME_MAIN_STYLE
-        with open(style_file, 'rb') as fh:
-            css = fh.read()
+        font_size = str(self.conf['lrc-text-size'])
+        if Gtk.MINOR_VERSION > 6:
+            font_size += 'px;'
+        # CssProvider needs bytecode
+        css = '\n'.join([
+            'GtkTextView.lrc_tv {',
+                'font-size: ' + font_size,
+                'color: ' + self.conf['lrc-text-color'] + ';',
+                'background-color: rgba(0, 0, 0, 0);',
+            '}',
+            '.info-label {',
+              'color: rgb(136, 139, 132);',
+              'font-size: 9px;',
+            '}',
+            ]).encode()
 
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(css)
