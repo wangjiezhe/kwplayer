@@ -152,21 +152,33 @@ class App:
         self.notebook.set_current_page(page)
 
     def load_styles(self):
+        # CssProvider needs bytecode
         font_size = str(self.conf['lrc-text-size'])
         if Gtk.MINOR_VERSION > 6:
             font_size += 'px;'
-        # CssProvider needs bytecode
-        css = '\n'.join([
-            'GtkTextView.lrc_tv {',
-                'font-size: ' + font_size,
-                'color: ' + self.conf['lrc-text-color'] + ';',
-                'background-color: rgba(0, 0, 0, 0);',
-            '}',
-            '.info-label {',
-              'color: rgb(136, 139, 132);',
-              'font-size: 9px;',
-            '}',
-            ]).encode()
+            css = '\n'.join([
+                'GtkTextView.lrc_tv {',
+                    'font-size: ' + font_size,
+                    'color: ' + self.conf['lrc-text-color'] + ';',
+                    'background-color: rgba(0, 0, 0, 0);',
+                '}',
+                '.info-label {',
+                  'color: rgb(136, 139, 132);',
+                  'font-size: 9px;',
+                '}',
+                ]).encode()
+        else:
+            css = '\n'.join([
+                'GtkTextView.lrc_tv {',
+                    'font-size: ' + font_size,
+                    'color: ' + self.conf['lrc-text-color'] + ';',
+                    'background-color: rgba(0, 0, 0, 0);',
+                '}',
+                '.info-label {',
+                  'color: rgb(136, 139, 132);',
+                  'font-size: 9;',
+                '}',
+                ]).encode()
 
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(css)
