@@ -1,3 +1,9 @@
+v2.6 - 2013.10.12
+* Show a warning dialog when network error or filesystem error
+* Automatically cache next MV
+* Can export lyrics
+* Can custom lyrics text style
+
 v2.5 - 2013.10.10
 * Fixed: LRC_DIR failed to init in Config.check_first()
 * Increase max retry times in Net.get_lrc()
