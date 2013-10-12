@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+
+# Use of this source code is governed by GPLv3 license that can be found
+# in the LICENSE file.
+
 # Generate deb package from source.
 # v1.1 - 2013.10.3
 # move deb package to ../bin
