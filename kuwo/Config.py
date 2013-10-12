@@ -57,11 +57,11 @@ _default_conf = {
         'use-ape': False,
         'use-mkv': False,
         'use-status-icon': True,
-        'lrc-text-color': 'rgba(0, 0, 0, 1)',
-        'lrc-text-size': '24',
-        'lrc-highlighted-text-color': 'rgba(0, 255, 0, 1)',
-        'lrc-highlighted-text-size': '28',
-        'lrc-img-back-color': 'rgba(0, 0, 0, 1)',
+        'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
+        'lrc-text-size': 22,
+        'lrc-highlighted-text-color': 'rgba(52, 101, 164, 0.999)',
+        'lrc-highlighted-text-size': 26,
+        'lrc-img-back-color': 'rgba(0, 0, 0, 0.999)',
         'lrc-word-back-color': 'rgba(237, 221, 221, 0.28)',
         }
 
