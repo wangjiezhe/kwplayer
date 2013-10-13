@@ -1,3 +1,14 @@
+v2.7 - 2013.10.13
+* Add more software dependency.
+* Fixed: failed to display song item in Search Box.
+* Fixed: failed to display control box in Search Box.
+* Fixed: failed to display song item in some lists in TopCategories.
+* Fixed: Error: Junk at end, in Gtk<3.6, this is an old CSS Error.
+* Fixed: forgot to append MV item to playlist when playing.
+* Fixed: VolumeRange inited with too small value.
+* Added: two symbolic icons added, to support Debian wheezy.
+* Added: copyright comment added to all the source files.
+
 v2.6 - 2013.10.12
 * Show a warning dialog when network error or filesystem error
 * Automatically cache next MV
