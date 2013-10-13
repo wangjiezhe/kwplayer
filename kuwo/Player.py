@@ -205,7 +205,7 @@ class Player(Gtk.Box):
 
         self.volume = Gtk.VolumeButton()
         self.volume.props.use_symbolic = True
-        self.volume.set_value(app.conf['volume'])
+        self.volume.set_value(app.conf['volume'] ** 0.33)
         self.volume.connect('value-changed', self.on_volume_value_changed)
         scale_box.pack_start(self.volume, False, False, 0)
 
@@ -583,7 +583,6 @@ class Player(Gtk.Box):
 
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
-            print('_update mv link:', mv_args)
             mv_link, mv_path = mv_args
             print('mv_link, mv_path:', mv_link, mv_path)
             self.show_mv_btn.set_sensitive(mv_link is not False)
