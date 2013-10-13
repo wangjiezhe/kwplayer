@@ -105,6 +105,11 @@ class TopCategories(Gtk.Box):
         model = iconview.get_model()
         self.curr_sub1_name = model[path][1]
         self.curr_sub1_id = model[path][2]
+        if self.curr_sub1_id in (79, 17250):
+            # (79, 17250) will get songs with Net.get_alubum()
+            self.use_album = True
+        else:
+            self.use_album = False
         if self.curr_sub1_id in (79, 17250, 78067, 78312):
             self.use_sub2 = True
         else:
@@ -189,26 +194,23 @@ class TopCategories(Gtk.Box):
         self.curr_list_id = model[path][2]
         self.label.set_label(self.curr_list_name)
         self.button_sub2.set_label(self.curr_sub2_name)
-        print('sub2 item activated, will call show song()')
         self.append_songs(init=True)
 
     def append_songs(self, init=False):
-        print('append songs')
         def _append_songs(songs_args, error=None):
             songs, self.songs_total = songs_args
-            if songs is None or self.songs_total == 0:
-                return
-            if len(songs) == 0:
+            if len(songs) == 0 or self.songs_total == 0 or self.use_album:
                 songs = Net.get_album(self.curr_list_id)
                 self.songs_total = 1
                 if songs is None:
                     return
                 for song in songs:
                     self.liststore_songs.append([ True, song['name'], 
-                        song['artist'], songs_wrap['name'], 
+                        song['artist'], self.curr_list_name, 
                         int(song['id']), int(song['artistid']), 
                         int(self.curr_list_id), ])
                 return
+
             for song in songs:
                 self.liststore_songs.append([
                     True, song['name'], song['artist'], song['album'],
@@ -230,8 +232,6 @@ class TopCategories(Gtk.Box):
             self.scrolled_songs.show_all()
             self.liststore_songs.clear()
 
-        #songs, self.songs_total = Net.get_themes_songs(self.curr_list_id, 
-        #        self.songs_page)
         Net.async_call(Net.get_themes_songs, _append_songs,
                 self.curr_list_id, self.songs_page)
 
