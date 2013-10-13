@@ -32,15 +32,8 @@ debian系列的, 需要手动安装一些依赖包, 它们是:
 
 如果不想手动打包的话, 在bin/目录里面有我打包好的kwplayer.deb, 也可以直接使用.
 
-对于Debian Wheezy和Ubuntu 12.04, 因为软件源里面的包都比较旧, 需要对上述操作
-做一些修改, 比如gstreamer1.0-libav要改为gstreamer0.1-ffmpeg, 将gstreamer的
-1.0版都改为0.1版. 如果ubuntu 12.04中找不到gstreamer0.1-ffmpeg, 这说明你的软
-件源中没有启用multiverse源, 可以在software-center里面进行设置. 另外, 由于
-gstreamer0.1中不能直接把视频渲染到DrawingArea上, 在播放MV时视频窗口被被弹出,
-这个bug我暂时不打算修复; ubuntu 12.04的gnome-icon-theme-symbolic包里面少了一
-个video-x-generic-symbolic.svg这个图标, 所以工具栏上的MV按纽不能直接显示.
-解决方法是把kwplayer/share/kuwo/themes/default/video-x-generic-symbolic.svg
-复制到/usr/share/icons/gnome/scalable/mimetypes/目录里.
+对于Debian Wheezy, 由于gstreamer0.1(python)中不能直接把视频渲染到
+DrawingArea上, 在播放MV时视频窗口被被弹出, 这个bug我暂时不没时间修复;
 
 
 对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
@@ -94,11 +87,12 @@ Q&A
 TODO
 ====
 * 播放列表支持歌曲的拖放(已完成).
+* 在gnome3.10中, 屏幕锁定时, 仍然能控制播放器, 比如下一曲, 暂停等.
 * 加入dbus.
 * 支持键盘上的多媒体键.
 * 支持Debian stable (已支持)
 * 为Ubuntu创建PPA (已放弃, 因为它不能保证与debian等发行版的兼容性)
-* 优化歌词的显示效果
+* 优化歌词的显示效果(准备重写, 不再用textview来显示文本)
 * 将播放列表中的音乐导出到其它目录, 也可以导出到手机中(已完成)
 * 自动修复mp3的tag编码 (已完成)
 * 支持打开/管理本地的多媒体资源(已放弃)
