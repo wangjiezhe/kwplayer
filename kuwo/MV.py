@@ -1,5 +1,4 @@
 
-
 # Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
@@ -112,7 +111,7 @@ class MV(Gtk.Box):
         model = iconview.get_model()
         song = Widgets.song_row_to_dict(model[path])
         self.app.popup_page(self.app.lrc.app_page)
-        self.app.player.load_mv(song)
+        self.app.playlist.play_song(song, use_mv=True)
 
     def on_button_home_clicked(self, btn):
         self.scrolled_nodes.show_all()

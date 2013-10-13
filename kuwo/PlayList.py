@@ -1,9 +1,9 @@
 
-
 # Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
+
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gio
@@ -311,7 +311,7 @@ class PlayList(Gtk.Box):
             liststore.append(song)
 
     # Open API for others to call.
-    def play_song(self, song, list_name='Default'):
+    def play_song(self, song, list_name='Default', use_mv=False):
         print('PlayList.play_song:', song, list_name)
         if not song:
             return
@@ -328,7 +328,10 @@ class PlayList(Gtk.Box):
             return
         liststore.append(Widgets.song_dict_to_row(song))
         self.curr_playing = [list_name, len(liststore)-1, ]
-        self.app.player.load(song)
+        if use_mv:
+            self.app.player.load_mv(song)
+        else:
+            self.app.player.load(song)
 
     def play_songs(self, songs):
         if not songs or len(songs) == 0:

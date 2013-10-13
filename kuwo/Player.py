@@ -1,5 +1,4 @@
 
-
 # Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
@@ -260,6 +259,9 @@ class Player(Gtk.Box):
                 self.get_mv_link()
                 self.get_recommend_lists()
             elif self.play_type == PlayType.MV:
+                self.video_sink = Gst.ElementFactory.make(
+                        'xvimagesink', None)
+                self.playbin.set_property('video-sink', self.video_sink)
                 self.show_mv_btn.set_sensitive(True)
                 self.show_mv_btn.handler_block(self.show_mv_sid)
                 self.show_mv_btn.set_active(True)
