@@ -106,7 +106,7 @@ class TopCategories(Gtk.Box):
         model = iconview.get_model()
         self.curr_sub1_name = model[path][1]
         self.curr_sub1_id = model[path][2]
-        if self.curr_sub1_id in (79, 17250):
+        if self.curr_sub1_id in (79, 17250, 78067, 78312):
             self.use_sub2 = True
         else:
             self.use_sub2 = False
@@ -161,7 +161,7 @@ class TopCategories(Gtk.Box):
     def show_sub2(self, init=False):
         def _show_sub2(sub2_args, error=None):
             nodes, self.sub2_total = sub2_args
-            if node is None or self.sub2_total == 0:
+            if nodes is None or self.sub2_total == 0:
                 return
             i = len(self.liststore_sub2)
             for node in nodes:
