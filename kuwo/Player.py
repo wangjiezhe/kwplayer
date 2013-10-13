@@ -245,13 +245,14 @@ class Player(Gtk.Box):
             Widgets.network_error(self.app.window, msg)
 
     def on_chunk_received(self, widget, percent):
-        def _update_fill_level(value):
-            self.scale.set_fill_level(value)
-        GLib.idle_add(_update_fill_level, percent)
+        def _update_fill_level():
+            self.scale.set_fill_level(percent)
+        GLib.idle_add(_update_fill_level)
 
     def on_song_can_play(self, widget, song_path, status):
         def _on_song_can_play():
             uri = 'file://' + song_path
+            self.scale.set_fill_level(0)
             self.scale.set_show_fill_level(False)
             if self.play_type in (PlayType.SONG, PlayType.RADIO):
                 self.app.lrc.show_music()
