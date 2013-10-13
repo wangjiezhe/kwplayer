@@ -106,14 +106,16 @@ class Search(Gtk.Box):
         if not state:
             return
         self.notebook.set_current_page(page)
-        if page == 0 and not self.songs_tab_inited:
+        if page == 0:
             self.control_box.show_all()
+        else:
+            self.control_box.hide()
+
+        if page == 0 and not self.songs_tab_inited:
             self.on_search_entry_activate(None, False)
         elif page == 1 and not self.artists_tab_inited:
-            self.control_box.hide()
             self.on_search_entry_activate(None, False)
         elif page == 2 and not self.albums_tab_inited:
-            self.control_box.hide()
             self.on_search_entry_activate(None, False)
 
     def on_search_entry_activate(self, search_entry, reset_status=True):
@@ -121,6 +123,7 @@ class Search(Gtk.Box):
             self.reset_search_status()
         page = self.notebook.get_current_page()
         if page == 0:
+            self.control_box.show_all()
             self.songs_tab_inited = True
             self.show_songs(reset_status)
         elif page == 1:
