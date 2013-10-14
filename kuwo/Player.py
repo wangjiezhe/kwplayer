@@ -435,7 +435,25 @@ class Player(Gtk.Box):
             self.adj_timeout = 0
 
     def load_next(self):
-        self.on_eos(None, None)
+        self.pause_player(stop=True)
+        if self.repeat_type == RepeatType.ONE:
+            if self.play_type == PlayType.MV:
+                self.load_mv(self.curr_song)
+            else:
+                self.load(self.curr_song)
+            return
+
+        _repeat = self.repeat_btn.get_active()
+        _shuffle = self.shuffle_btn.get_active()
+        if self.next_song is None:
+            return
+        if self.play_type == PlayType.RADIO:
+            #self.load_radio(self.next_song, self.curr_radio_item)
+            self.curr_radio_item.play_next_song()
+        elif self.play_type == PlayType.SONG:
+            self.app.playlist.play_next_song(repeat=_repeat, use_mv=False)
+        elif self.play_type == PlayType.MV:
+            self.app.playlist.play_next_song(repeat=_repeat, use_mv=True)
 
     def on_scale_change_value(self, scale, scroll_type, value):
         '''
@@ -514,25 +532,7 @@ class Player(Gtk.Box):
         Net.async_call(Net.get_recommend_image, _update_background, url)
 
     def on_eos(self, bus, msg):
-        self.pause_player(stop=True)
-        if self.repeat_type == RepeatType.ONE:
-            if self.play_type == PlayType.MV:
-                self.load_mv(self.curr_song)
-            else:
-                self.load(self.curr_song)
-            return
-
-        _repeat = self.repeat_btn.get_active()
-        _shuffle = self.shuffle_btn.get_active()
-        if self.next_song is None:
-            return
-        if self.play_type == PlayType.RADIO:
-            #self.load_radio(self.next_song, self.curr_radio_item)
-            self.curr_radio_item.play_next_song()
-        elif self.play_type == PlayType.SONG:
-            self.app.playlist.play_next_song(repeat=_repeat, use_mv=False)
-        elif self.play_type == PlayType.MV:
-            self.app.playlist.play_next_song(repeat=_repeat, use_mv=True)
+        GLib.idle_add(self.load_next)
 
     def on_error(self, bus, msg):
         print('on_error():', msg.parse_error())
