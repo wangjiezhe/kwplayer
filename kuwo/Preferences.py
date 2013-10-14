@@ -132,7 +132,7 @@ class ChooseFolder(Gtk.Box):
         if not status:
             self.old_dir = new_dir
             return False
-        self.app.player.pause_player(stop=True)
+        self.app.player.pause_player()
         items = os.listdir(self.old_dir)
         self.progress_bar.set_fraction(0)
         length = len(items)

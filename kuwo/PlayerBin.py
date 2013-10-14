@@ -79,18 +79,18 @@ class PlayerBin(GObject.GObject):
 
     def get_position(self):
         if GST_LOWER_THAN_1:
-            status, _type, pos = self.playbin.query_position(
+            status, _type, offset = self.playbin.query_position(
                 Gst.Format.TIME)
         else:
-            status, pos = self.playbin.query_position(Gst.Format.TIME)
-        return (status, pos)
+            status, offset = self.playbin.query_position(Gst.Format.TIME)
+        return (status, offset)
 
-    def set_position(self, pos):
-        self.seek(pos)
+    def set_position(self, offset):
+        self.seek(offset)
 
-    def seek(self, pos):
+    def seek(self, offset):
         self.playbin.seek_simple(Gst.Format.TIME, 
-                Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT, pos)
+                Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT, offset)
 
     def get_duration(self):
         if GST_LOWER_THAN_1:
