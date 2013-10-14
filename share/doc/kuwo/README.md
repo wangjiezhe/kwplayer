@@ -5,49 +5,45 @@ kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音�
 
 安装
 ====
-debian系列的, 需要手动安装一些依赖包, 它们是:
+Debian系列, 如果不想手动打包的话, 在bin/目录里面有我打包好的kwplayer.deb.
+直接安装这个deb包就行了.
+
+关于为其它包管理系统打包的问题, 我一个人没能力完全维护, 比如rpm, gentoo的
+ebuild, arch的pkgbuild. 如果有哪位朋友对其中比较熟悉的, 并且乐意提供帮助的,
+请联系我: LiuLang<gsushzhsosgsu@gmail.com>
+
+以后尽可能提供rpm等安装包.
+
+手动安装的话, 需要手动安装一些依赖包, 它们是:
 
 * python3 - 推荐python3.3以上的版本, 不然mutagen模块无法使用(用于消除mp3/ape乱码的).
 * python3-gi  -  gkt3的python3绑定(Fedora中叫做python3-gobject);
 * python3-cairo -  cairo的python3绑定(用于实现显示特效);
 * python3-gi-cairo - 在GObject中用到的cairo的python3绑定;
-* gstreamer1.0-x - gtk的多媒体框架;
-* gstreamer1.0-libav  -  gstreamer的编码/解码库;
-* gstreamer1.0-plugins-base - gstreamer的基本核心包
-* gir1.2-gstreamer-1.0, gir1.2-gst-plugins-base-1.0 - 这两个是gst的gobject
-绑定, 这样就可以解决ImportError: cannot import name GstVideo 之类的错误.
+* gstreamer1.0-plugins-base, gstreamer1.0-plugins-good,
+gstreamer-plugins-ugly, gstreamer1.0-x, gir1.2-gstreamer-1.0,
+gir1.2-gst-plugins-base-1.0, gstreamer1.0-libav, gstreamer1.0-pulseaudio
+一堆的gst依赖, 数多发行版中已默认安装. 安装好gstreamer后, 可能需要重启一下
+系统, 至少在我这里测试时需要这样.
 * leveldb - 强大的NoSQL数据库(用于缓存数据);
 * python3-leveldb  -  leveldb的python3绑定(Fedora中是python3-plyvel);
-* 安装好gstreamer后, 可能需要重启一下系统, 至少在我这里测试时需要这样.
 
-也可以直接运行build/下面的脚本, 生成deb包, 它会自动处理依赖关系, 不需要手动
-安装上面列出的那些软件包, 需要以下的操作:
-
-* 更新系统
-* 下载本页面右侧的zip压缩包
-* 进入kwplayer/build目录
-* 运行build.sh, 用于创建fakeroot目录, 需要普通用户权限;
-* 运行generate_deb.sh 用于创建deb包, 由于使用了dpkg命令来打包, 这个脚本需要root权限
-* 一切无误的话, 会在kwplayer/bin/目录下生成kwplayer.deb, 生成的deb包可以用dpkg命令来安装: `# dpkg -i kwplayer.deb`.
-
-如果不想手动打包的话, 在bin/目录里面有我打包好的kwplayer.deb, 也可以直接使用.
+上面是gstreamer1.0的, 对于旧的gstreamer0.10版, 需要大致修改一下, 还有,
+gstreamer1.0-libav在0.10版中的名称是gstreamer0.10-ffmpeg.
 
 对于Debian Wheezy, 由于gstreamer0.1(python)中不能直接把视频渲染到
 DrawingArea上, 在播放MV时视频窗口被被弹出, 这个bug我暂时不没时间修复;
-
 
 对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
 
 * 更新系统. 我用的是mirrors.163.com这个更新源, 速度很好.
 * 安装python3-cairo.
 * 使用rpmfushion, 可以参考这篇文章:http://blog.csdn.net/sabalol/article/details/9286073
-* 安装gstreamer1-libav
-* 不需要安装python3-gobject或gstreamer的其它组件, 因为它们都在安装系统时自动被安装了.
-* 安装leveldb 和 python3-plyvel. 
+* 安装gstreamer的一堆依赖, 上面列出的.
+* 安装leveldb 和 python3-plyvel, python3-plyvel是leveldb的另一个python绑定.
 
-Gentoo/Arch Linux的话, 也没什么好说的, 看一下上面的依赖包, 缺少的都给装上, 
+Gentoo/Arch的话, 也没什么好说的, 看一下上面的依赖包, 缺少的都给装上, 
 应该就能运行了. 但gentoo中稍稍注意一下软件版本的问题.
-
 
 已经测试通过的发行版(版本):
 
@@ -65,12 +61,14 @@ Gentoo/Arch Linux的话, 也没什么好说的, 看一下上面的依赖包, 缺
 
 Tips & Tricks
 =============
+* 需要批量下载歌曲的话, 可以把它们加入到"正在缓存"(caching)这个播放列表里,
+在这个播放列表的上方有一个"开始缓存"的按纽, 你明白的~
+* 播放歌曲时把鼠标放到左上角的歌手头像上, 可以显示歌手的基本信息.
 * 播放歌曲时双击左上角的歌手的头像可以在播放列表中定位正在播放的这首歌.
 * 播放列表中的歌曲可以直接拖放到其它列表, 支持键盘操作, 比如Ctrl+A全选;
 选择歌曲时按下Ctrl键可多选. 按Del键可以删除选中的歌曲.
 * 对于小屏的笔记本来说, 全屏播放MV的效果更好.
 * 尽量不下载ape格式的歌曲, 因为这种格式的文件实在太大了.
-
 
 Q&A
 ===
@@ -129,3 +127,16 @@ THANKS
 这个模块被集成过来, 主要是为了方便朋友们安装, 因为debian/fedora中集成了
 python2 的版本(http://code.google.com/p/mutagen). 当然了, 也可以从github
 得到最新的mutagen(python3)代码, 安装也很方便.
+
+
+COPYRIGHT
+========
+软件本身使用GPLv3协议发布, 协议内容请参看LICENSE文件.
+
+本人不存储任何侵权的多媒体资源供网友下载, 软件中获取的网络资源, 包括但不限
+于图片, 音频文件, 视频文件, 都来自于kuwo.cn这个网站, 因使用本程序引起的一
+切侵权问题由使用者本人承担.
+
+软件名称kwplayer没有中文名, 不与"酷我音乐盒"等对应.
+
+有任何问题, 请联系我: LiuLang<gsushzhsosgsu@gmail.com>
