@@ -10,13 +10,14 @@ Debian系列, 如果不想手动打包的话, 在bin/目录里面有我打包好
 
 关于为其它包管理系统打包的问题, 我一个人没能力完全维护, 比如rpm, gentoo的
 ebuild, arch的pkgbuild. 如果有哪位朋友对其中比较熟悉的, 并且乐意提供帮助的,
-请联系我: LiuLang<gsushzhsosgsu@gmail.com>
+请联系我:
+<a href="mailto:gsushzhsosgsu@gmail.com" title="LiuLang">LiuLang</a>
 
 以后尽可能提供rpm等安装包.
 
 手动安装的话, 需要手动安装一些依赖包, 它们是:
 
-* python3 - 推荐python3.3以上的版本, 不然mutagen模块无法使用(用于消除mp3/ape乱码的).
+* python3 - 推荐python3.3以上的版本, 不然mutagenx模块无法使用(用于消除mp3/ape乱码的).
 * python3-gi  -  gkt3的python3绑定(Fedora中叫做python3-gobject);
 * python3-cairo -  cairo的python3绑定(用于实现显示特效);
 * python3-gi-cairo - 在GObject中用到的cairo的python3绑定;
@@ -38,7 +39,7 @@ DrawingArea上, 在播放MV时视频窗口被被弹出, 这个bug我暂时不没
 
 * 更新系统. 我用的是mirrors.163.com这个更新源, 速度很好.
 * 安装python3-cairo.
-* 使用rpmfushion, 可以参考这篇文章:http://blog.csdn.net/sabalol/article/details/9286073
+* 使用rpmfushion, 可以参考这篇文章:<http://blog.csdn.net/sabalol/article/details/9286073>
 * 安装gstreamer的一堆依赖, 上面列出的.
 * 安装leveldb 和 python3-plyvel, python3-plyvel是leveldb的另一个python绑定.
 
@@ -123,10 +124,10 @@ MV:
 
 THANKS
 ======
-`mutagenx(mutagen)` 模块来自https://github.com/LordSputnik/mutagen
+`mutagenx` 模块来自这个项目,  <https://github.com/LordSputnik/mutagen>
 这个模块被集成过来, 主要是为了方便朋友们安装, 因为debian/fedora中集成了
-python2 的版本(http://code.google.com/p/mutagen). 当然了, 也可以从github
-得到最新的mutagen(python3)代码, 安装也很方便.
+python2 的版本(http://code.google.com/p/mutagen), 容易引发误解, 比如:
+<http://forum.ubuntu.org.cn/viewtopic.php?f=162&t=448911&start=240>
 
 
 COPYRIGHT
@@ -139,4 +140,4 @@ COPYRIGHT
 
 软件名称kwplayer没有中文名, 不与"酷我音乐盒"等对应.
 
-有任何问题, 请联系我: LiuLang<gsushzhsosgsu@gmail.com>
+有任何问题, 请联系我: LiuLang <gsushzhsosgsu@gmail.com>
