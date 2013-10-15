@@ -32,9 +32,6 @@ gir1.2-gst-plugins-base-1.0, gstreamer1.0-libav, gstreamer1.0-pulseaudio
 上面是gstreamer1.0的, 对于旧的gstreamer0.10版, 需要大致修改一下, 还有,
 gstreamer1.0-libav在0.10版中的名称是gstreamer0.10-ffmpeg.
 
-对于Debian Wheezy, 由于gstreamer0.1(python)中不能直接把视频渲染到
-DrawingArea上, 在播放MV时视频窗口被被弹出, 这个bug我暂时不没时间修复;
-
 对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
 
 * 更新系统. 我用的是mirrors.163.com这个更新源, 速度很好.
@@ -81,6 +78,18 @@ Q&A
 问: 为什么不能用它来打开/管理本地的音乐?
 
 答: 没有必要. 因为Linux桌面已经有不少强大的音乐管理软件了, 像rhythmbox, audacity, amarok等, 干嘛要加入一些重复的功能?
+
+
+BUGS
+====
+* 对于Debian Wheezy, 由于gstreamer0.1中不能直接把视频渲染到DrawingArea上,
+在播放MV时视频窗口被被弹出, 这个bug我暂时不能修复; 这个bug在2011年就有人发
+现, 可一直没有得到修复, 再加上后来推出了gstreamer1.0, 看来就更难了.
+* Debian Wheezy中, gnome-icon-theme-symbolic这个主题包中缺少了几个图标, 用到
+的是video-x-generic-symbolic.svg, media-playlist-repeat-song-symbolic.svg,
+我把它们放在了kwplayer/share/icons/hicolor/scalable/目录里, 如果使用包管理
+器自动安装的话, 没有问题; 如果是不想安装kwplayer, 还要使用这两个图标, 需要
+把它们俩放到~/.local/share/icons/hicolor/目录里.
 
 
 TODO

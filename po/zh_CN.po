@@ -213,7 +213,7 @@ msgstr "喜爱"
 
 #: ../kuwo/PlayList.py:274 ../kuwo/PlayList.py:382
 msgid "Start Caching"
-msgstr "开始级存"
+msgstr "开始缓存"
 
 #: ../kuwo/PlayList.py:373
 msgid "Stop Caching"
