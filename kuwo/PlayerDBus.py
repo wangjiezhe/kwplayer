@@ -116,7 +116,7 @@ class PlayerDBus(dbus.service.Object):
     @dbus.service.signal(dbus.PROPERTIES_IFACE, signature='sa{sv}as')
     def PropertiesChanged(self, interface, changed_properties,
             invalidated_properties):
-        print('PropertiesChanged():', interface)
+        pass
 
     # root iface methods
     @dbus.service.method(ROOT_IFACE)
@@ -156,7 +156,7 @@ class PlayerDBus(dbus.service.Object):
     def Seek(self, offset):
         # Note: offset unit is microsecond, but player.seek() requires
         # nanoseconds as time unit
-        print('palyerDBus.Seek()')
+        #print('palyerDBus.Seek()')
         GLib.idle_add(self.player.seek, offset*1000)
 
     @dbus.service.method(PLAYER_IFACE, in_signature='s')
@@ -166,11 +166,12 @@ class PlayerDBus(dbus.service.Object):
     # player iface signals
     @dbus.service.signal(PLAYER_IFACE, signature='x')
     def Seeked(self, offset):
-        print('PlayerDBus.Seeked signal emited')
+        #print('PlayerDBus.Seeked signal emited')
+        pass
 
     @dbus.service.method(PLAYER_IFACE)
     def SetPosition(self, track_id, offset):
-        print('SetPosition:', track_id, offset)
+        #print('SetPosition:', track_id, offset)
         self.Seek()
 
     # does not have playlists or tracklist
