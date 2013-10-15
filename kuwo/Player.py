@@ -176,13 +176,16 @@ class Player(Gtk.Box):
             _('Unknown')))
         self.label.props.use_markup = True
         self.label.props.xalign = 0
+        self.label.props.margin_left = 10
         control_box.pack_start(self.label, False, False, 0)
 
-        scale_box = Gtk.Box()
+        scale_box = Gtk.Box(spacing=3)
+        scale_box.props.margin_left = 5
         control_box.pack_start(scale_box, True, False, 0)
 
         self.scale = Gtk.Scale()
         self.adjustment = Gtk.Adjustment(0, 0, 100, 1, 10, 0)
+        self.adjustment.connect('changed', self.on_adjustment_changed)
         self.scale.set_adjustment(self.adjustment)
         self.scale.set_restrict_to_fill_level(False)
         self.scale.props.draw_value = False
@@ -202,9 +205,10 @@ class Player(Gtk.Box):
         self.playbin = PlayerBin()
         self.playbin.connect('eos', self.on_playbin_eos)
         self.playbin.connect('eos', self.on_playbin_error)
+        self.dbus = PlayerDBus(self)
 
     def after_init(self):
-        pass
+        self.init_meta()
 
     def do_destroy(self):
         print('Player.do_destroy()')
@@ -247,6 +251,8 @@ class Player(Gtk.Box):
     def on_song_can_play(self, widget, song_path, status):
         def _on_song_can_play():
             uri = 'file://' + song_path
+            self.meta_url = uri
+
             self.scale.set_fill_level(0)
             self.scale.set_show_fill_level(False)
             if self.play_type in (PlayType.SONG, PlayType.RADIO):
@@ -276,7 +282,6 @@ class Player(Gtk.Box):
     def on_song_downloaded(self, widget, song_path):
         def _on_song_download():
             self.init_adjustment()
-            self.scale.set_sensitive(True)
             if self.play_type in (PlayType.SONG, PlayType.MV):
                 self.app.playlist.on_song_downloaded(play=True)
                 _repeat = self.repeat_btn.get_active()
@@ -287,7 +292,11 @@ class Player(Gtk.Box):
                 self.next_song = self.curr_radio_item.get_next_song()
             if self.next_song:
                 self.cache_next_song()
+            # update metadata in dbus
+            self.dbus.update_meta()
+            self.dbus.enable_seek()
 
+        self.scale.set_sensitive(True)
         if song_path:
             GLib.idle_add(_on_song_download)
         else:
@@ -319,6 +328,8 @@ class Player(Gtk.Box):
         status, offset = self.playbin.get_position()
         if not status:
             return True
+
+        self.dbus.update_pos(offset // 1000)
 
         status, duration = self.playbin.get_duration()
         self.adjustment.set_value(offset)
@@ -375,22 +386,7 @@ class Player(Gtk.Box):
             button.set_icon_name('media-playlist-repeat-symbolic')
 
     def on_scale_change_value(self, scale, scroll_type, value):
-        '''
-        When user move the scale, pause play and seek audio position.
-        Delay 500 miliseconds to increase responce spead
-        '''
-        def _delay_play(local_timestamp):
-            if self.player_timestamp == local_timestamp:
-                self.playbin.seek(self.adjustment.get_value())
-                self.playbin.play()
-            return False
-
-        if self.play_type == PlayType.NONE:
-            return
-        self.playbin.pause()
-        self.sync_label_by_adjustment()
-        self.player_timestamp = time.time()
-        GLib.timeout_add(500, _delay_play, self.player_timestamp)
+        self.seek(value)
 
     def on_volume_value_changed(self, volume, value):
         # reduce volume value because in 0~0.2 it is too sensitive
@@ -403,6 +399,8 @@ class Player(Gtk.Box):
             self.artist_pic.set_tooltip_text(
                     Widgets.short_tooltip(info['info'], length=500))
             if info['pic']:
+                self.meta_artUrl = info['pic']
+                self.dbus.update_meta()
                 pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
                         info['pic'], 100, 100)
                 self.artist_pic.set_from_pixbuf(pix)
@@ -572,13 +570,17 @@ class Player(Gtk.Box):
 
     # control player, UI and dbus
     def start_player(self, load=False):
+        self.dbus.set_Playing()
+
         self.play_button.set_icon_name('media-playback-pause-symbolic')
         self.playbin.play()
         self.adj_timeout = GLib.timeout_add(250, self.sync_adjustment)
         if load:
+            self.init_meta()
             GLib.timeout_add(1500, self.init_adjustment)
 
     def pause_player(self):
+        self.dbus.set_Pause()
         self.play_button.set_icon_name('media-playback-start-symbolic')
         self.playbin.pause()
         if self.adj_timeout > 0:
@@ -592,7 +594,7 @@ class Player(Gtk.Box):
             self.start_player()
 
     def stop_player(self):
-        self.play_button.set_icon_name('media-playback-stop-symbolic')
+        self.play_button.set_icon_name('media-playback-pause-symbolic')
         self.playbin.stop()
         self.scale.set_value(0)
         self.scale.set_sensitive(False)
@@ -606,8 +608,7 @@ class Player(Gtk.Box):
             self.adj_timeout = 0
 
     def load_prev(self):
-        if self.play_type == PlayType.RADIO or \
-                self.play_type == PlayType.NONE:
+        if not self.can_go_previous():
             return
         self.stop_player()
         _repeat = self.repeat_btn.get_active()
@@ -640,12 +641,28 @@ class Player(Gtk.Box):
             self.app.playlist.play_next_song(repeat=_repeat, use_mv=True)
 
     def set_volume(self, vol, source):
-        if source == CmdSource.UI:
-            mod_value = value ** 3
-            self.app.conf['volume'] = mod_value
-            self.playbin.set_volume(mod_value)
-        elif source == CmdSource.DBUS:
-            pass
+        mod_value = vol ** 3
+        self.app.conf['volume'] = mod_value
+        self.playbin.set_volume(mod_value)
 
     def seek(self, offset):
-        pass
+        if self.play_type == PlayType.NONE:
+            return
+        self.playbin.seek(offset)
+        self.sync_label_by_adjustment()
+
+    def can_go_previous(self):
+        if self.play_type in (PlayType.MV, PlayType.SONG):
+            return True
+        return False
+
+
+    # dbus parts
+    def init_meta(self):
+        self.adjustment_upper = 0
+        self.dbus.disable_seek()
+        self.meta_artUrl = ''
+
+    def on_adjustment_changed(self, adj):
+        self.dbus.update_meta()
+        self.adjustment_upper = adj.get_upper()
