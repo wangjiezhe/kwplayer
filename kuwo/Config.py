@@ -5,11 +5,10 @@
 # in the LICENSE file.
 
 import gettext
+from gi.repository import GdkPixbuf
 import json
 import locale
 import os
-
-from gi.repository import GdkPixbuf
 
 if __file__.startswith('/usr/'):
     PREF = '/usr/share'
@@ -24,12 +23,9 @@ locale.textdomain('kuwo')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '2.7'
+VERSION = '3.0'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>',]
-
-_UI_FILES = ('menus.ui', )
-UI_FILES = [os.path.join(PREF, 'kuwo', 'ui', ui) for ui in _UI_FILES]
 
 HOME_DIR = os.path.expanduser('~')
 CACHE_DIR = os.path.join(HOME_DIR, '.cache', 'kuwo')
@@ -49,8 +45,6 @@ PLS_JSON = os.path.join(CACHE_DIR, 'pls.json')
 RADIO_JSON = os.path.join(CACHE_DIR, 'radio.json')
 
 THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
-THEME_MAIN_STYLE = os.path.join(THEME_DIR, 'main.css')
-THEME_MAIN_STYLE_3_6 = os.path.join(THEME_DIR, 'main-3.6.css')
 
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')

@@ -8,8 +8,6 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
 from gi.repository import GObject
-from gi.repository import Gst
-from gi.repository import GstVideo
 from gi.repository import Gtk
 import sys
 import time
@@ -17,18 +15,15 @@ import time
 from kuwo import Config
 from kuwo import Net
 from kuwo.Preferences import Preferences
+from kuwo.PlayerBin import PlayerBin
+from kuwo.PlayerDBus import PlayerDBus
 from kuwo import Widgets
 
 _ = Config._
 # Gdk.EventType.2BUTTON_PRESS is an invalid variable
 GDK_2BUTTON_PRESS = 5
-
 # set toolbar icon size to Gtk.IconSize.DND
 ICON_SIZE = 5
-
-# init Gst so that play works ok.
-Gst.init(None)
-GST_LOWER_THAN_1 = (Gst.version()[0] < 1)
 
 class PlayType:
     NONE = -1
@@ -40,6 +35,10 @@ class RepeatType:
     NONE = 0
     ALL = 1
     ONE = 2
+
+class CmdSource:
+    UI = 0
+    DBUS = 1
 
 def delta(nanosec_float):
     _seconds = nanosec_float // 10**9
@@ -65,16 +64,6 @@ class Player(Gtk.Box):
         # use this to keep Net.AsyncSong and Net.AsyncMV object
         self.async_song = None
         self.async_next_song = None
-
-        self.playbin = Gst.ElementFactory.make('playbin', None)
-        if self.playbin is None:
-            print('Error: playbin failed to inited!')
-            sys.exit(1)
-        self.bus = self.playbin.get_bus()
-        self.bus.add_signal_watch()
-        self.bus.connect('message::eos', self.on_eos)
-        self.bus.connect('message::error', self.on_error)
-        self.playbin.set_property('volume', app.conf['volume'])
 
         event_pic = Gtk.EventBox()
         event_pic.connect('button-press-event', self.on_pic_pressed)
@@ -186,13 +175,16 @@ class Player(Gtk.Box):
             _('Unknown')))
         self.label.props.use_markup = True
         self.label.props.xalign = 0
+        self.label.props.margin_left = 10
         control_box.pack_start(self.label, False, False, 0)
 
-        scale_box = Gtk.Box()
+        scale_box = Gtk.Box(spacing=3)
+        scale_box.props.margin_left = 5
         control_box.pack_start(scale_box, True, False, 0)
 
         self.scale = Gtk.Scale()
         self.adjustment = Gtk.Adjustment(0, 0, 100, 1, 10, 0)
+        self.adjustment.connect('changed', self.on_adjustment_changed)
         self.scale.set_adjustment(self.adjustment)
         self.scale.set_restrict_to_fill_level(False)
         self.scale.props.draw_value = False
@@ -208,12 +200,18 @@ class Player(Gtk.Box):
         self.volume.connect('value-changed', self.on_volume_value_changed)
         scale_box.pack_start(self.volume, False, False, 0)
 
+        # init playbin and dbus
+        self.playbin = PlayerBin()
+        self.playbin.connect('eos', self.on_playbin_eos)
+        self.playbin.connect('eos', self.on_playbin_error)
+        self.dbus = PlayerDBus(self)
+
     def after_init(self):
-        pass
+        self.init_meta()
 
     def do_destroy(self):
         print('Player.do_destroy()')
-        self.playbin.set_state(Gst.State.NULL)
+        self.playbin.destroy()
         if self.async_song:
             self.async_song.destroy()
         if self.async_next_song:
@@ -222,7 +220,7 @@ class Player(Gtk.Box):
     def load(self, song):
         self.play_type = PlayType.SONG
         self.curr_song = song
-        self.pause_player(stop=True)
+        self.stop_player()
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
         self.async_song = Net.AsyncSong(self.app)
@@ -252,24 +250,23 @@ class Player(Gtk.Box):
     def on_song_can_play(self, widget, song_path, status):
         def _on_song_can_play():
             uri = 'file://' + song_path
+            self.meta_url = uri
+
             self.scale.set_fill_level(0)
             self.scale.set_show_fill_level(False)
             if self.play_type in (PlayType.SONG, PlayType.RADIO):
                 self.app.lrc.show_music()
+                self.playbin.load_audio(uri)
                 self.get_lrc()
                 self.get_mv_link()
                 self.get_recommend_lists()
             elif self.play_type == PlayType.MV:
-                self.video_sink = Gst.ElementFactory.make(
-                        'xvimagesink', None)
-                self.playbin.set_property('video-sink', self.video_sink)
                 self.show_mv_btn.set_sensitive(True)
                 self.show_mv_btn.handler_block(self.show_mv_sid)
                 self.show_mv_btn.set_active(True)
                 self.show_mv_btn.handler_unblock(self.show_mv_sid)
                 self.app.lrc.show_mv()
-                self.enable_bus_sync()
-            self.playbin.set_property('uri', uri)
+                self.playbin.load_video(uri, self.app.lrc.xid)
             self.start_player(load=True)
             self.update_player_info()
         def _load_next():
@@ -284,7 +281,6 @@ class Player(Gtk.Box):
     def on_song_downloaded(self, widget, song_path):
         def _on_song_download():
             self.init_adjustment()
-            self.scale.set_sensitive(True)
             if self.play_type in (PlayType.SONG, PlayType.MV):
                 self.app.playlist.on_song_downloaded(play=True)
                 _repeat = self.repeat_btn.get_active()
@@ -295,7 +291,11 @@ class Player(Gtk.Box):
                 self.next_song = self.curr_radio_item.get_next_song()
             if self.next_song:
                 self.cache_next_song()
+            # update metadata in dbus
+            self.dbus.update_meta()
+            self.dbus.enable_seek()
 
+        self.scale.set_sensitive(True)
         if song_path:
             GLib.idle_add(_on_song_download)
         else:
@@ -312,50 +312,37 @@ class Player(Gtk.Box):
             self.async_next_song = Net.AsyncSong(self.app)
             self.async_next_song.get_song(self.next_song)
 
-    def is_playing(self):
-        state = self.playbin.get_state(5)
-        return state[1] == Gst.State.PLAYING
-
     def init_adjustment(self):
         self.adjustment.set_value(0.0)
         self.adjustment.set_lower(0.0)
         # when song is not totally downloaded but can play, query_duration
         # might give incorrect/inaccurate result.
-        if GST_LOWER_THAN_1:
-            status, _type, upper = self.playbin.query_duration(
-                Gst.Format.TIME)
-        else:
-            status, upper = self.playbin.query_duration(Gst.Format.TIME)
-        if status and upper > 0:
-            self.adjustment.set_upper(upper)
+        status, duration = self.playbin.get_duration()
+        if status and duration > 0:
+            self.adjustment.set_upper(duration)
             return False
         return True
 
     def sync_adjustment(self):
-        if GST_LOWER_THAN_1:
-            status, _type, curr = self.playbin.query_position(
-                Gst.Format.TIME)
-        else:
-            status, curr = self.playbin.query_position(Gst.Format.TIME)
+        status, offset = self.playbin.get_position()
         if not status:
             return True
-        if GST_LOWER_THAN_1:
-            status, _type, total = self.playbin.query_duration(
-                Gst.Format.TIME)
-        else:
-            status, total = self.playbin.query_duration(Gst.Format.TIME)
-        self.adjustment.set_value(curr)
-        self.adjustment.set_upper(total)
+
+        self.dbus.update_pos(offset // 1000)
+
+        status, duration = self.playbin.get_duration()
+        self.adjustment.set_value(offset)
+        self.adjustment.set_upper(duration)
         self.sync_label_by_adjustment()
-        if curr >= total - 800000000:
+        if offset >= duration - 800000000:
             self.load_next()
             return False
         if self.play_type == PlayType.MV:
             return True
-        self.app.lrc.sync_lrc(curr)
+        self.app.lrc.sync_lrc(offset)
         if self.recommend_imgs and len(self.recommend_imgs) > 0:
             # change lyrics background image every 20 seconds
-            div, mod = divmod(int(curr / 10**9), 20)
+            div, mod = divmod(int(offset / 10**9), 20)
             if mod == 0:
                 div2, mod2 = divmod(div, len(self.recommend_imgs))
                 self.update_lrc_background(self.recommend_imgs[mod2])
@@ -373,27 +360,14 @@ class Player(Gtk.Box):
             self.app.playlist.locate_curr_song()
 
     def on_prev_button_clicked(self, button):
-        if self.play_type == PlayType.RADIO or \
-                self.play_type == PlayType.NONE:
-            return
-        self.pause_player(stop=True)
-        _repeat = self.repeat_btn.get_active()
-        if self.play_type == PlayType.SONG:
-            self.app.playlist.play_prev_song(repeat=_repeat, use_mv=False)
-        elif self.play_type == PlayType.MV:
-            self.app.playlist.play_prev_song(repeat=_repeat, use_mv=True)
+        self.load_prev()
 
     def on_play_button_clicked(self, button):
         if self.play_type == PlayType.NONE:
             return
-        if self.is_playing(): 
-            self.pause_player()
-        else:
-            self.start_player()
+        self.play_pause()
 
     def on_next_button_clicked(self, button):
-        if self.play_type == PlayType.NONE:
-            return
         self.load_next()
 
     def on_repeat_button_clicked(self, button):
@@ -410,77 +384,12 @@ class Player(Gtk.Box):
             button.set_active(False)
             button.set_icon_name('media-playlist-repeat-symbolic')
 
-    def start_player(self, load=False):
-        self.play_button.set_icon_name('media-playback-pause-symbolic')
-        self.playbin.set_state(Gst.State.PLAYING)
-        self.adj_timeout = GLib.timeout_add(250, self.sync_adjustment)
-        if load:
-            GLib.timeout_add(1500, self.init_adjustment)
-
-    def pause_player(self, stop=False):
-        self.play_button.set_icon_name('media-playback-start-symbolic')
-        if stop:
-            self.playbin.set_state(Gst.State.NULL)
-            self.scale.set_value(0)
-            self.scale.set_sensitive(False)
-            self.show_mv_btn.set_sensitive(False)
-            self.show_mv_btn.handler_block(self.show_mv_sid)
-            self.show_mv_btn.set_active(False)
-            self.show_mv_btn.handler_unblock(self.show_mv_sid)
-            self.time_label.set_label('0:00/0:00')
-        else:
-            self.playbin.set_state(Gst.State.PAUSED)
-        if self.adj_timeout > 0:
-            GLib.source_remove(self.adj_timeout)
-            self.adj_timeout = 0
-
-    def load_next(self):
-        self.pause_player(stop=True)
-        if self.repeat_type == RepeatType.ONE:
-            if self.play_type == PlayType.MV:
-                self.load_mv(self.curr_song)
-            else:
-                self.load(self.curr_song)
-            return
-
-        _repeat = self.repeat_btn.get_active()
-        _shuffle = self.shuffle_btn.get_active()
-        if self.next_song is None:
-            return
-        if self.play_type == PlayType.RADIO:
-            #self.load_radio(self.next_song, self.curr_radio_item)
-            self.curr_radio_item.play_next_song()
-        elif self.play_type == PlayType.SONG:
-            self.app.playlist.play_next_song(repeat=_repeat, use_mv=False)
-        elif self.play_type == PlayType.MV:
-            self.app.playlist.play_next_song(repeat=_repeat, use_mv=True)
-
     def on_scale_change_value(self, scale, scroll_type, value):
-        '''
-        When user move the scale, pause play and seek audio position.
-        Delay 500 miliseconds to increase responce spead
-        '''
-        if self.play_type == PlayType.NONE:
-            return
-
-        self.pause_player()
-        self.playbin.seek_simple(Gst.Format.TIME, 
-                Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT,
-                self.adjustment.get_value())
-        self.sync_label_by_adjustment()
-        self.player_timestamp = time.time()
-        GLib.timeout_add(500, self._delay_play, self.player_timestamp)
-
-    def _delay_play(self, local_timestamp):
-        if self.player_timestamp == local_timestamp:
-            self.start_player()
-        return False
+        self.seek(value)
 
     def on_volume_value_changed(self, volume, value):
         # reduce volume value because in 0~0.2 it is too sensitive
-        mod_value = value ** 3
-        self.app.conf['volume'] = mod_value
-        self.playbin.set_property('volume', mod_value)
+        self.set_volume(value, CmdSource.UI)
 
     def update_player_info(self):
         def _update_pic(info, error=None):
@@ -489,6 +398,8 @@ class Player(Gtk.Box):
             self.artist_pic.set_tooltip_text(
                     Widgets.short_tooltip(info['info'], length=500))
             if info['pic']:
+                self.meta_artUrl = info['pic']
+                self.dbus.update_meta()
                 pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
                         info['pic'], 100, 100)
                 self.artist_pic.set_from_pixbuf(pix)
@@ -531,12 +442,6 @@ class Player(Gtk.Box):
                 self.app.lrc.update_background(filepath)
         Net.async_call(Net.get_recommend_image, _update_background, url)
 
-    def on_eos(self, bus, msg):
-        GLib.idle_add(self.load_next)
-
-    def on_error(self, bus, msg):
-        print('on_error():', msg.parse_error())
-
     # Radio part
     def load_radio(self, song, radio_item):
         '''
@@ -544,7 +449,7 @@ class Player(Gtk.Box):
         Remember to update its information.
         '''
         self.play_type = PlayType.RADIO
-        self.pause_player(stop=True)
+        self.stop_player()
         self.curr_radio_item = radio_item
         self.curr_song = song
         self.scale.set_sensitive(False)
@@ -563,19 +468,16 @@ class Player(Gtk.Box):
         state = toggle_button.get_active()
         if state:
             self.app.lrc.show_mv()
-            self.enable_bus_sync()
             self.load_mv(self.curr_song)
             self.app.popup_page(self.app.lrc.app_page)
         else:
             self.app.lrc.show_music()
             self.load(self.curr_song)
-            # TODO, FIXME
-            #self.disable_bus_sync()
 
     def load_mv(self, song):
         self.play_type = PlayType.MV
         self.curr_song = song
-        self.pause_player(stop=True)
+        self.stop_player()
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
         self.async_song = Net.AsyncMV(self.app)
@@ -591,19 +493,6 @@ class Player(Gtk.Box):
             self.show_mv_btn.set_sensitive(mv_link is not False)
         Net.async_call(Net.get_song_link, _update_mv_link,
                 self.curr_song, self.app.conf, True)
-
-    def enable_bus_sync(self):
-        self.bus.enable_sync_message_emission()
-        self.bus_sync_sid = self.bus.connect('sync-message::element', 
-                self.on_sync_message)
-
-    def disable_bus_sync(self):
-        self.bus.disconnect(self.bus_sync_sid)
-        self.bus.disable_sync_message_emission()
-
-    def on_sync_message(self, bus, msg):
-        if msg.get_structure().get_name() == 'prepare-window-handle':
-            msg.src.set_window_handle(self.app.lrc.xid)
 
     # Fullscreen
     def on_fullscreen_button_clicked(self, button):
@@ -669,3 +558,110 @@ class Player(Gtk.Box):
 
     def on_main_menu_quit_activate(self, menu_item):
         self.app.quit()
+
+
+    # playbin signal handlers
+    def on_playbin_eos(self, *args):
+        pass
+
+    def on_playbin_error(self, widget, error_msg):
+        pass
+
+    # control player, UI and dbus
+    def start_player(self, load=False):
+        self.dbus.set_Playing()
+
+        self.play_button.set_icon_name('media-playback-pause-symbolic')
+        self.playbin.play()
+        self.adj_timeout = GLib.timeout_add(250, self.sync_adjustment)
+        if load:
+            self.init_meta()
+            GLib.timeout_add(1500, self.init_adjustment)
+
+    def pause_player(self):
+        self.dbus.set_Pause()
+        self.play_button.set_icon_name('media-playback-start-symbolic')
+        self.playbin.pause()
+        if self.adj_timeout > 0:
+            GLib.source_remove(self.adj_timeout)
+            self.adj_timeout = 0
+
+    def play_pause(self):
+        if self.playbin.is_playing():
+            self.pause_player()
+        else:
+            self.start_player()
+
+    def stop_player(self):
+        self.play_button.set_icon_name('media-playback-pause-symbolic')
+        self.playbin.stop()
+        self.scale.set_value(0)
+        self.scale.set_sensitive(False)
+        self.show_mv_btn.set_sensitive(False)
+        self.show_mv_btn.handler_block(self.show_mv_sid)
+        self.show_mv_btn.set_active(False)
+        self.show_mv_btn.handler_unblock(self.show_mv_sid)
+        self.time_label.set_label('0:00/0:00')
+        if self.adj_timeout > 0:
+            GLib.source_remove(self.adj_timeout)
+            self.adj_timeout = 0
+
+    def load_prev(self):
+        if not self.can_go_previous():
+            return
+        self.stop_player()
+        _repeat = self.repeat_btn.get_active()
+        if self.play_type == PlayType.SONG:
+            self.app.playlist.play_prev_song(repeat=_repeat, use_mv=False)
+        elif self.play_type == PlayType.MV:
+            self.app.playlist.play_prev_song(repeat=_repeat, use_mv=True)
+
+    def load_next(self):
+        if self.play_type == PlayType.NONE:
+            return
+        self.stop_player()
+        if self.repeat_type == RepeatType.ONE:
+            if self.play_type == PlayType.MV:
+                self.load_mv(self.curr_song)
+            else:
+                self.load(self.curr_song)
+            return
+
+        _repeat = self.repeat_btn.get_active()
+        _shuffle = self.shuffle_btn.get_active()
+        if self.next_song is None:
+            return
+        if self.play_type == PlayType.RADIO:
+            #self.load_radio(self.next_song, self.curr_radio_item)
+            self.curr_radio_item.play_next_song()
+        elif self.play_type == PlayType.SONG:
+            self.app.playlist.play_next_song(repeat=_repeat, use_mv=False)
+        elif self.play_type == PlayType.MV:
+            self.app.playlist.play_next_song(repeat=_repeat, use_mv=True)
+
+    def set_volume(self, vol, source):
+        mod_value = vol ** 3
+        self.app.conf['volume'] = mod_value
+        self.playbin.set_volume(mod_value)
+
+    def seek(self, offset):
+        if self.play_type == PlayType.NONE:
+            return
+        self.playbin.seek(offset)
+        self.sync_label_by_adjustment()
+
+    def can_go_previous(self):
+        if self.play_type in (PlayType.MV, PlayType.SONG):
+            return True
+        return False
+
+
+    # dbus parts
+    def init_meta(self):
+        self.adjustment_upper = 0
+        self.dbus.disable_seek()
+        self.meta_artUrl = ''
+
+    def on_adjustment_changed(self, adj):
+        self.dbus.update_meta()
+        self.adjustment_upper = adj.get_upper()

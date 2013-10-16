@@ -17,8 +17,6 @@ import urllib.error
 from urllib import parse
 from urllib import request
 
-from kuwo import Config
-from kuwo import Utils
 try:
     # Debian: http://code.google.com/p/py-leveldb/
     from leveldb import LevelDB
@@ -31,6 +29,9 @@ except ImportError as e:
     except ImportError as e:
         leveldb_imported = False
         print('Warning: No leveldb/plyvel module was found, http requests will not be cached!')
+
+from kuwo import Config
+from kuwo import Utils
 
 IMG_CDN = 'http://img4.kwcdn.kuwo.cn/'
 ARTIST = 'http://artistlistinfo.kuwo.cn/mb.slist?'
@@ -110,8 +111,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
         except Exception as e:
             print('Error: Net.urlopen', e, 'url:', url)
             retried += 1
-    if retried == MAXTIMES:
-        return None
+    return None
 
 def get_nodes(nid, page):
     # node list contains very few items
