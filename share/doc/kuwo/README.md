@@ -1,10 +1,25 @@
 关于
 ====
 kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音乐资源.
-注意: 程序尚在开发当中, 可能会出现各种问题, 欢迎提交bug.
+程序尚在完善当中, 可能会出现各种问题, 欢迎提交bug.
 
-安装
-====
+已经测试, kwplayer支持在以下系统中能运行:
+
+* Debian sid
+* Debian testing
+* Debian whezy
+* Ubuntu 13.10 Beta
+* Ubuntu 13.04
+* Ubuntu 12.10
+* Ubuntu 12.04
+* Gentoo
+* Fedora 20 Alpha
+* Fedora 19
+* Arch Linux
+
+
+自动安装
+=======
 Debian系列, 如果不想手动打包的话, 在bin/目录里面有我打包好的kwplayer.deb.
 直接安装这个deb包就行了.
 
@@ -15,46 +30,68 @@ ebuild, arch的pkgbuild. 如果有哪位朋友对其中比较熟悉的, 并且�
 
 以后尽可能提供rpm等安装包.
 
-手动安装的话, 需要手动安装一些依赖包, 它们是:
+
+Debian 手动安装
+==============
+手动安装的话, 需要手动安装一些依赖包, 以Debian sid中安装为例, 它们是:
 
 * python3 - 推荐python3.3以上的版本, 不然mutagenx模块无法使用(用于消除mp3/ape乱码的).
 * python3-gi  -  gkt3的python3绑定(Fedora中叫做python3-gobject);
 * python3-cairo -  cairo的python3绑定(用于实现显示特效);
 * python3-gi-cairo - 在GObject中用到的cairo的python3绑定;
-* gstreamer1.0-plugins-base, gstreamer1.0-plugins-good,
-gstreamer-plugins-ugly, gstreamer1.0-x, gir1.2-gstreamer-1.0,
-gir1.2-gst-plugins-base-1.0, gstreamer1.0-libav, gstreamer1.0-pulseaudio
-一堆的gst依赖, 数多发行版中已默认安装. 安装好gstreamer后, 可能需要重启一下
-系统, 至少在我这里测试时需要这样.
+* gstreamer1.0-plugins-base
+* gstreamer1.0-plugins-good
+* gstreamer-plugins-ugly
+* gstreamer1.0-x
+* gir1.2-gstreamer-1.0,
+* gir1.2-gst-plugins-base-1.0
+* gstreamer1.0-libav 视频/音频解码器
+* gstreamer1.0-pulseaudio
 * leveldb - 强大的NoSQL数据库(用于缓存数据);
 * python3-leveldb  -  leveldb的python3绑定(Fedora中是python3-plyvel);
+* python3-mutagenx - 这个需要手动安装. 可以在这里下载:
+<https://github.com/LordSputnik/mutagen>, 如果你没有python3.3, 就不需要安装
+这个模块了, 因为它不支持python3.2以下的版本.
 
 上面是gstreamer1.0的, 对于旧的gstreamer0.10版, 需要大致修改一下, 还有,
 gstreamer1.0-libav在0.10版中的名称是gstreamer0.10-ffmpeg.
 
+Fedora 中手动安装
+================
 对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
 
 * 更新系统. 我用的是mirrors.163.com这个更新源, 速度很好.
 * 安装python3-cairo.
 * 使用rpmfushion, 可以参考这篇文章:<http://blog.csdn.net/sabalol/article/details/9286073>
-* 安装gstreamer的一堆依赖, 上面列出的.
+* 安装gstreamer的一堆依赖, 上面列出的, 名称都大致一样.
 * 安装leveldb 和 python3-plyvel, python3-plyvel是leveldb的另一个python绑定.
+* 安装python3-mutagenx, <https://github.com/LordSputnik/mutagen>
 
-Gentoo/Arch的话, 也没什么好说的, 看一下上面的依赖包, 缺少的都给装上, 
-应该就能运行了. 但gentoo中稍稍注意一下软件版本的问题.
+在Arch 中手动安装
+================
+感谢mindcat为arch写的pkgbuild:
+<https://aur.archlinux.org/packages/kwplayer-git/?setlang=en>
+尽管我测试过程中出了一些小的问题; 同时也感谢他对kwplayer在开发过程中提出的
+宝贵建议.
 
-已经测试通过的发行版(版本):
+[注:] arch中, 默认的python版本是python3.
 
-* Debian sid
-* Debian testing
-* Debian whezy
-* Ubuntu 13.10 Beta
-* Ubuntu 13.04
-* Ubuntu 12.10
-* Ubuntu 12.04
-* Gentoo
-* Fedora 19
-* Arch Linux
+* python-cairo
+* gst-plugins-good | gstreamer.01.0-good-plugins
+* gst-plugins-ugly | gstremaer0.10-ugly-plugins
+* gstreamer | gstreamer0.10
+* python-gobject
+* leveldb
+* py-leveldb | plyvel 这两个任选一个, 它们分别由不同的团队在维护:
+<http://code.google.com/p/py-leveldb/> 和
+<https://github.com/wbolster/plyvel>
+* python3-mutagenx <https://github.com/LordSputnik/mutagen>
+
+
+Gentoo 中手动安装
+================
+没条件测试, 如果有哪位gentoo的朋友写了ebuild, 请一定分享出来, 以方便其他同类
+用户;
 
 
 Tips & Tricks
@@ -68,6 +105,7 @@ Tips & Tricks
 * 对于小屏的笔记本来说, 全屏播放MV的效果更好.
 * 尽量不下载ape格式的歌曲, 因为这种格式的文件实在太大了.
 
+
 Q&A
 ===
 问: 为什么只使用mp3(192K)和ape两种格式的音乐?
@@ -78,6 +116,13 @@ Q&A
 问: 为什么不能用它来打开/管理本地的音乐?
 
 答: 没有必要. 因为Linux桌面已经有不少强大的音乐管理软件了, 像rhythmbox, audacity, amarok等, 干嘛要加入一些重复的功能?
+
+问: kwplayer 中怎样代理上网?
+答: 它使用系统默认的http代理. 比如在gnome桌面里,
+打开"系统设置"面板 -> "网络" -> "代理", 选择"手动", 然后为http设置代理.
+也可以在在终端中使用代理, 比如:
+`$ export http_proxy="http://127.0.0.1:8080"; kwplayer`
+就可以了.
 
 
 BUGS
@@ -96,7 +141,7 @@ TODO
 ====
 * 播放列表支持歌曲的拖放(已完成).
 * 在gnome3.10中, 屏幕锁定时, 仍然能控制播放器, 比如下一曲, 暂停等.
-* 加入dbus.
+* 加入dbus(已完成).
 * 支持键盘上的多媒体键.
 * 支持Debian stable (已支持)
 * 为Ubuntu创建PPA (已放弃, 因为它不能保证与debian等发行版的兼容性)
@@ -131,17 +176,10 @@ MV:
 其它的:
 <img src="screenshot/others.png?raw=true" title="其他的" />
 
-THANKS
-======
-`mutagenx` 模块来自这个项目,  <https://github.com/LordSputnik/mutagen>
-这个模块被集成过来, 主要是为了方便朋友们安装, 因为debian/fedora中集成了
-python2 的版本(http://code.google.com/p/mutagen), 容易引发误解, 比如:
-<http://forum.ubuntu.org.cn/viewtopic.php?f=162&t=448911&start=240>
-
 
 COPYRIGHT
 ========
-软件本身使用GPLv3协议发布, 协议内容请参看LICENSE文件.
+软件本身使用GNU General Public License v3协议发布, 协议内容请参看LICENSE文件.
 
 本人不存储任何侵权的多媒体资源供网友下载, 软件中获取的网络资源, 包括但不限
 于图片, 音频文件, 视频文件, 都来自于kuwo.cn这个网站, 因使用本程序引起的一
