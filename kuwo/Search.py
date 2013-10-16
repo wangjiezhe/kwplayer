@@ -144,7 +144,7 @@ class Search(Gtk.Box):
             self.songs_button.set_label(
                     '{0} ({1})'.format(_('Songs'), hit))
             for song in songs:
-                self.liststore_songs.append([self.app.theme['anonymous'],
+                self.liststore_songs.append([True,
                     song['SONGNAME'], song['ARTIST'], song['ALBUM'],
                     int(song['MUSICRID'][6:]), int(song['ARTISTID']),
                     int(song['ALBUMID']), ])
