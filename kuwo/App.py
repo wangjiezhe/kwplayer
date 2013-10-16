@@ -6,7 +6,6 @@
 
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
-from gi.repository import Gio
 from gi.repository import GObject
 from gi.repository import Gtk
 import os
@@ -15,27 +14,24 @@ import sys
 from kuwo import Config
 # ~/.config/kuwo and ~/.cache/kuwo need to be created at first time
 Config.check_first()
+_ = Config._
 
 from kuwo.Artists import Artists
 from kuwo.Lrc import Lrc
 from kuwo.MV import MV
 from kuwo.Player import Player
 from kuwo.PlayList import PlayList
-from kuwo.Preferences import Preferences
 from kuwo.Radio import Radio
 from kuwo.Search import Search
 from kuwo.Themes import Themes
 from kuwo.TopCategories import TopCategories
 from kuwo.TopList import TopList
 
-
-_ = Config._
-
 GObject.threads_init()
 
 class App:
     def __init__(self):
-        self.app = Gtk.Application.new('org.gtk.kuwo', 0)
+        self.app = Gtk.Application.new('org.liulang.kwplayer', 0)
         self.app.connect('startup', self.on_app_startup)
         self.app.connect('activate', self.on_app_activate)
         self.app.connect('shutdown', self.on_app_shutdown)
@@ -240,10 +236,7 @@ class App:
         self.window.present()
 
     def on_status_icon_pause_activate(self, menuitem):
-        if self.player.is_playing():
-            self.player.pause_player()
-        else:
-            self.player.start_player()
+        self.player.play_pause()
 
     def on_status_icon_next_activate(self, menuitem):
         self.player.load_next()
