@@ -10,7 +10,9 @@ import json
 import locale
 import os
 
-if __file__.startswith('/usr/'):
+if __file__.startswith('/usr/local/'):
+    PREF = '/usr/local/share'
+elif __file__.startswith('/usr/'):
     PREF = '/usr/share'
 else:
     PREF = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'share')
@@ -26,6 +28,7 @@ APPNAME = _('KW Player')
 VERSION = '3.0'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>',]
+DESCRIPTION = _('A simple music player which can get songs from kuwo.cn')
 
 HOME_DIR = os.path.expanduser('~')
 CACHE_DIR = os.path.join(HOME_DIR, '.cache', 'kuwo')

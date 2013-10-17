@@ -20,8 +20,9 @@ kwplayer是linux桌面下的网络音乐播放工具, 它使用了kuwo.cn的音�
 
 自动安装
 =======
-Debian系列, 如果不想手动打包的话, 在bin/目录里面有我打包好的kwplayer.deb.
-直接安装这个deb包就行了.
+推荐自动安装, 除非你愿意手动维护下面那么多的软件包依赖关系.
+
+Debian系列, 直接安装kwplayer.deb包就行了, 它会处理好安装问题.
 
 关于为其它包管理系统打包的问题, 我一个人没能力完全维护, 比如rpm, gentoo的
 ebuild, arch的pkgbuild. 如果有哪位朋友对其中比较熟悉的, 并且乐意提供帮助的,
@@ -30,12 +31,22 @@ ebuild, arch的pkgbuild. 如果有哪位朋友对其中比较熟悉的, 并且�
 
 以后尽可能提供rpm等安装包.
 
+所有打好的包都转移到了
+[kwplayer-packages](https://github.com/LiuLang/kwplayer-packages "kwplayer-packages")
+这个项目中, 请转到那里去下载.
 
-Debian 手动安装
-==============
+手动安装
+========
+手动安装分两部分, 一是安装kwplayer的依赖包, 二是安装kwplayer. 有太多linux
+发行版, 这里只以四个主要的发行版为例来说明.
+
+
+Debian 手动安装依赖包
+---------------------
 手动安装的话, 需要手动安装一些依赖包, 以Debian sid中安装为例, 它们是:
 
 * python3 - 推荐python3.3以上的版本, 不然mutagenx模块无法使用(用于消除mp3/ape乱码的).
+* python3-dbus
 * python3-gi  -  gkt3的python3绑定(Fedora中叫做python3-gobject);
 * python3-cairo -  cairo的python3绑定(用于实现显示特效);
 * python3-gi-cairo - 在GObject中用到的cairo的python3绑定;
@@ -56,8 +67,8 @@ Debian 手动安装
 上面是gstreamer1.0的, 对于旧的gstreamer0.10版, 需要大致修改一下, 还有,
 gstreamer1.0-libav在0.10版中的名称是gstreamer0.10-ffmpeg.
 
-Fedora 中手动安装
-================
+Fedora 中手动安装依赖包
+-----------------------
 对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
 
 * 更新系统. 我用的是mirrors.163.com这个更新源, 速度很好.
@@ -67,8 +78,8 @@ Fedora 中手动安装
 * 安装leveldb 和 python3-plyvel, python3-plyvel是leveldb的另一个python绑定.
 * 安装python3-mutagenx, <https://github.com/LordSputnik/mutagen>
 
-在Arch 中手动安装
-================
+在Arch 中手动安装依赖包
+-----------------------
 感谢mindcat为arch写的pkgbuild:
 <https://aur.archlinux.org/packages/kwplayer-git/?setlang=en>
 尽管我测试过程中出了一些小的问题; 同时也感谢他对kwplayer在开发过程中提出的
@@ -77,6 +88,7 @@ Fedora 中手动安装
 [注:] arch中, 默认的python版本是python3.
 
 * python-cairo
+* python-dbus
 * gst-plugins-good | gstreamer.01.0-good-plugins
 * gst-plugins-ugly | gstremaer0.10-ugly-plugins
 * gstreamer | gstreamer0.10
@@ -88,10 +100,18 @@ Fedora 中手动安装
 * python3-mutagenx <https://github.com/LordSputnik/mutagen>
 
 
-Gentoo 中手动安装
-================
-没条件测试, 如果有哪位gentoo的朋友写了ebuild, 请一定分享出来, 以方便其他同类
-用户;
+Gentoo 中手动安装依赖包
+-----------------------
+没条件测试, 如果有哪位gentoo的朋友写了ebuild, 请一定分享出来, 以方便其他朋友使用;
+
+安装kwplayer
+------------
+根据你的发行版, 按照上面的方法安装好依赖包之后, 就可以开始安装kwplayer本身了.
+
+* 将kwplayer 放到PATH变量定义的目录里, 比如/usr/bin/, /usr/local/bin等.
+* 将share 目录完整的合并到/usr/share, /usr/local/share, ~/.local/share中的一个. 合并目录的方法有很多, 比如可以`# rsync -r kwplayer/share/ /usr/share/`
+* 将Kuwo/目录完整复制到python3的PATH里, 比如/usr/lib/python3/dist-packages/,
+/usr/local/lib/python3/dist-packages, ~/.local/lib/python3/dist-packages.
 
 
 Tips & Tricks
@@ -125,16 +145,11 @@ Q&A
 就可以了.
 
 
-BUGS
-====
+KNOWN BUGS
+============
 * 对于Debian Wheezy, 由于gstreamer0.1中不能直接把视频渲染到DrawingArea上,
 在播放MV时视频窗口被被弹出, 这个bug我暂时不能修复; 这个bug在2011年就有人发
 现, 可一直没有得到修复, 再加上后来推出了gstreamer1.0, 看来就更难了.
-* Debian Wheezy中, gnome-icon-theme-symbolic这个主题包中缺少了几个图标, 用到
-的是video-x-generic-symbolic.svg, media-playlist-repeat-song-symbolic.svg,
-我把它们放在了kwplayer/share/icons/hicolor/scalable/目录里, 如果使用包管理
-器自动安装的话, 没有问题; 如果是不想安装kwplayer, 还要使用这两个图标, 需要
-把它们俩放到~/.local/share/icons/hicolor/目录里.
 
 
 TODO

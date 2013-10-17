@@ -548,7 +548,7 @@ class Player(Gtk.Box):
         dialog.set_program_name(Config.APPNAME)
         dialog.set_logo(self.app.theme['app-logo'])
         dialog.set_version(Config.VERSION)
-        dialog.set_comments(_('A simple music player for Linux Desktop'))
+        dialog.set_comments(Config.DESCRIPTION)
         dialog.set_copyright('Copyright (c) 2013 LiuLang')
         dialog.set_website(Config.HOMEPAGE)
         dialog.set_license_type(Gtk.License.GPL_3_0)
