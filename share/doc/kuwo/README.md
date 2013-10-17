@@ -112,10 +112,8 @@ Gentoo 中手动安装依赖包
 ------------
 根据你的发行版, 按照上面的方法安装好依赖包之后, 就可以开始安装kwplayer本身了.
 
-* 将kwplayer 放到PATH变量定义的目录里, 比如/usr/bin/, /usr/local/bin等.
-* 将share 目录完整的合并到/usr/share, /usr/local/share, ~/.local/share中的一个. 合并目录的方法有很多, 比如可以`# rsync -r kwplayer/share/ /usr/share/`
-* 将Kuwo/目录完整复制到python3的PATH里, 比如/usr/lib/python3/dist-packages/,
-/usr/local/lib/python3/dist-packages, ~/.local/lib/python3/dist-packages.
+* 安装: `# pip3 install kwplayer`
+* 更新: `# pip3 install upgrade kwplayer`
 
 
 Tips & Tricks
