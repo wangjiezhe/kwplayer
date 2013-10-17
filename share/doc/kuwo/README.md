@@ -118,6 +118,9 @@ Gentoo 中手动安装依赖包
 
 Tips & Tricks
 =============
+* 在gnome-shell中, 可以安装mediaplayer这个扩展, 与kwplayer结合使用, 很方便.
+可以在这里进行安装:
+<https://extensions.gnome.org/extension/55/media-player-indicator/>
 * 需要批量下载歌曲的话, 可以把它们加入到"正在缓存"(caching)这个播放列表里,
 在这个播放列表的上方有一个"开始缓存"的按纽, 你明白的~
 * 播放歌曲时把鼠标放到左上角的歌手头像上, 可以显示歌手的基本信息.
