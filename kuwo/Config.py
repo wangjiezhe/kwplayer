@@ -70,12 +70,12 @@ _default_conf = {
 def check_first():
     if not os.path.exists(CONF_DIR):
         try:
-            os.mkdir(CONF_DIR)
+            os.makedirs(CONF_DIR)
         except Exception as e:
             print(e)
     if not os.path.exists(CACHE_DIR):
         try:
-            os.mkdir(CACHE_DIR)
+            os.makedirs(CACHE_DIR)
             os.mkdir(IMG_DIR)
             os.mkdir(IMG_LARGE_DIR)
             os.mkdir(_default_conf['song-dir'])
