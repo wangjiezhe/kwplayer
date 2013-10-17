@@ -365,7 +365,7 @@ msgstr "歌词的图片背景色"
 
 #: ../kuwo/Preferences.py:249
 msgid "Folders"
-msgstr "级存目录"
+msgstr "缓存目录"
 
 #: ../kuwo/Preferences.py:251
 msgid "Place to store sogns"
