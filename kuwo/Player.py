@@ -660,6 +660,7 @@ class Player(Gtk.Box):
     def init_meta(self):
         self.adjustment_upper = 0
         self.dbus.disable_seek()
+        self.meta_url = ''
         self.meta_artUrl = ''
 
     def on_adjustment_changed(self, adj):
