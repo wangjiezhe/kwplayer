@@ -93,6 +93,7 @@ Fedora 中手动安装依赖包
 
 * python-cairo
 * python-dbus
+* gst-plugins-base 根据@mindcat的测试补充进来的
 * gst-plugins-good | gstreamer.01.0-good-plugins
 * gst-plugins-ugly | gstremaer0.10-ugly-plugins
 * gstreamer | gstreamer0.10
