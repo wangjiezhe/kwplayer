@@ -54,11 +54,10 @@ except ImportError as e:
         print('Warning: No leveldb/plyvel module was found')
         ldb_imported = False
 
+ldb = None
 if ldb_imported:
     try:
         ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
-        ldb_get = ldb.Get
-        ldb_put = ldb.Put
     except Exception as e:
         print('Warning: Only one process can run at a time, quit!')
         sys.exit(1)
@@ -102,7 +101,9 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
     key = hash_byte(url)
     if use_cache and ldb_imported:
         try:
-            return ldb_get(key)
+            content = ldb_get(key)
+            if content is not None:
+                return content
         except KeyError:
             pass
     retried = 0

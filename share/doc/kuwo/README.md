@@ -60,7 +60,8 @@ Debian 手动安装依赖包
 * gstreamer1.0-pulseaudio
 * leveldb - 强大的NoSQL数据库(用于缓存数据);
 * python3-leveldb  -  leveldb的python3绑定(Fedora中是python3-plyvel);
-Ubuntu 12.04中缺少了这个包, 请使用`# pip3 install plyvel` 来安装.
+Ubuntu 12.04中缺少了这个包, 请使用`# pip3 install plyvel` 来安装, 安装时需要
+优先安装python3-dev, libleveldb-dev这两个头文件.
 * python3-mutagenx - 这个需要手动安装. 可以在这里下载:
 <https://github.com/LordSputnik/mutagen>, 如果你没有python3.3 比如Debian
 Wheezy, Ubuntu 12.04, 就不需要安装这个模块了, 因为它不支持python3.2以下的版本.
