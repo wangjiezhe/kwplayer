@@ -57,13 +57,18 @@ except ImportError as e:
 if ldb_imported:
     try:
         ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
+        ldb_get = ldb.Get
+        ldb_put = ldb.Put
     except Exception as e:
         print('Warning: Only one process can run at a time, quit!')
         sys.exit(1)
     # support plyvel 0.6
     if hasattr(ldb, 'put'):
-        ldb.Put = ldb.put
-        ldb.Get = ldb.get
+        ldb_get = ldb.get
+        ldb_put = ldb.put
+    else:
+        ldb_get = ldb.Get
+        ldb_put = ldb.Put
 
 def empty_func(*args, **kwds):
     pass
@@ -97,7 +102,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
     key = hash_byte(url)
     if use_cache and ldb_imported:
         try:
-            return ldb.Get(key)
+            return ldb_get(key)
         except KeyError:
             pass
     retried = 0
@@ -106,7 +111,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
             req = request.urlopen(url, timeout=TIMEOUT)
             req_content = req.read()
             if use_cache and ldb_imported:
-                ldb.Put(key, req_content)
+                ldb_put(key, req_content)
             return req_content
         except Exception as e:
             print('Error: Net.urlopen', e, 'url:', url)
