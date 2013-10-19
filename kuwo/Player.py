@@ -414,6 +414,7 @@ class Player(Gtk.Box):
         label = '<b>{0}</b> <i><small>by {1} from {2}</small></i>'.format(
                 name, artist, album)
         self.label.set_label(label)
+        self.app.window.set_title(name)
         self.artist_pic.set_from_pixbuf(self.app.theme['anonymous'])
         Net.async_call(Net.get_artist_info, _update_pic, 
                 song['artistid'], song['artist'])
