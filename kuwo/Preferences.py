@@ -241,14 +241,9 @@ class Preferences(Gtk.Dialog):
         lrc_box.pack_start(lrc_highlighted_text_color, False, True, 0)
 
         lrc_word_back_color = ColorBox(_('Lyrics Text Background color'),
-                app.conf, 'lrc-word-back-color')
+                app.conf, 'lrc-back-color')
         lrc_box.pack_start(lrc_word_back_color, False, True, 0)
 
-        lrc_img_back_color = ColorBox(_('Lyrics image background color'),
-                app.conf, 'lrc-img-back-color')
-        lrc_box.pack_start(lrc_img_back_color, False, True, 0)
-
-        
         # folders tab
         folder_box = NoteTab()
         notebook.append_page(folder_box, Gtk.Label(_('Folders')))
