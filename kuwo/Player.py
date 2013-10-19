@@ -36,10 +36,6 @@ class RepeatType:
     ALL = 1
     ONE = 2
 
-class CmdSource:
-    UI = 0
-    DBUS = 1
-
 def delta(nanosec_float):
     _seconds = nanosec_float // 10**9
     mm, ss = divmod(_seconds, 60)
@@ -211,7 +207,6 @@ class Player(Gtk.Box):
         self.init_meta()
 
     def do_destroy(self):
-        print('Player.do_destroy()')
         self.playbin.destroy()
         if self.async_song:
             self.async_song.destroy()
@@ -231,7 +226,6 @@ class Player(Gtk.Box):
         self.async_song.get_song(song)
 
     def failed_to_download(self, song_path, status):
-        print('Player.failed_to_download()')
         self.pause_player()
         
         if status == 'FileNotFoundError':
@@ -304,7 +298,6 @@ class Player(Gtk.Box):
             pass
 
     def cache_next_song(self):
-        print('Player.cache_next_song():', self.next_song)
         if self.play_type == PlayType.MV:
             # NOTE:if next song has no MV, cache will be failed
             self.async_next_song= Net.AsyncMV(self.app)
@@ -390,7 +383,7 @@ class Player(Gtk.Box):
 
     def on_volume_value_changed(self, volume, value):
         # reduce volume value because in 0~0.2 it is too sensitive
-        self.set_volume(value, CmdSource.UI)
+        self.set_volume(value)
 
     def update_player_info(self):
         def _update_pic(info, error=None):
@@ -490,7 +483,6 @@ class Player(Gtk.Box):
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
             mv_link, mv_path = mv_args
-            print('mv_link, mv_path:', mv_link, mv_path)
             self.show_mv_btn.set_sensitive(mv_link is not False)
         Net.async_call(Net.get_song_link, _update_mv_link,
                 self.curr_song, self.app.conf, True)
@@ -640,7 +632,7 @@ class Player(Gtk.Box):
         elif self.play_type == PlayType.MV:
             self.app.playlist.play_next_song(repeat=_repeat, use_mv=True)
 
-    def set_volume(self, vol, source):
+    def set_volume(self, vol):
         mod_value = vol ** 3
         self.app.conf['volume'] = mod_value
         self.playbin.set_volume(mod_value)

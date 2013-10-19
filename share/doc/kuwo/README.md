@@ -62,14 +62,15 @@ Debian 手动安装依赖包
 * python3-leveldb  -  leveldb的python3绑定(Fedora中是python3-plyvel);
 Ubuntu 12.04中缺少了这个包, 请使用`# pip3 install plyvel` 来安装.
 * python3-mutagenx - 这个需要手动安装. 可以在这里下载:
-<https://github.com/LordSputnik/mutagen>, 如果你没有python3.3, 就不需要安装
-这个模块了, 因为它不支持python3.2以下的版本.
+<https://github.com/LordSputnik/mutagen>, 如果你没有python3.3 比如Debian
+Wheezy, Ubuntu 12.04, 就不需要安装这个模块了, 因为它不支持python3.2以下的版本.
 
 上面是gstreamer1.0的, 对于旧的gstreamer0.10版, 需要大致修改一下, 还有,
 gstreamer1.0-libav在0.10版中的名称是gstreamer0.10-ffmpeg.
 
 [注]: pip3是python3-pip包提供的命令, 它是python3的一个包管理器, 可以自动安装
-更新, 卸载python3的模块包, 相录于debian中的dpkg.
+更新, 卸载python3的模块包, 相录于debian中的dpkg. 有些系统(比如Arch Linux),
+已经将python3作为了默认的python环境, 所以只需要用pip命令就可以了.
 
 Fedora 中手动安装依赖包
 -----------------------

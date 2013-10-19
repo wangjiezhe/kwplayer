@@ -106,7 +106,6 @@ class PlayerDBus(dbus.service.Object):
     @dbus.service.method(dbus.PROPERTIES_IFACE,
             in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
-        print('DBus.Set()')
         _, setter = self.properties[interface][prop]
         if setter is not None:
             setter(value)
@@ -156,7 +155,6 @@ class PlayerDBus(dbus.service.Object):
     def Seek(self, offset):
         # Note: offset unit is microsecond, but player.seek() requires
         # nanoseconds as time unit
-        #print('palyerDBus.Seek()')
         GLib.idle_add(self.player.seek, offset*1000)
 
     @dbus.service.method(PLAYER_IFACE, in_signature='s')
@@ -166,12 +164,10 @@ class PlayerDBus(dbus.service.Object):
     # player iface signals
     @dbus.service.signal(PLAYER_IFACE, signature='x')
     def Seeked(self, offset):
-        #print('PlayerDBus.Seeked signal emited')
         pass
 
     @dbus.service.method(PLAYER_IFACE)
     def SetPosition(self, track_id, offset):
-        #print('SetPosition:', track_id, offset)
         self.Seek()
 
     # does not have playlists or tracklist
@@ -252,7 +248,6 @@ class PlayerDBus(dbus.service.Object):
         self.Seeked(pos)
 
     def set_Playing(self):
-        print('DBUS.set_Playing()')
         self.PropertiesChanged(PLAYER_IFACE,
                 {'PlaybackStatus': 'Playing'}, [])
         self.update_meta()
@@ -262,13 +257,11 @@ class PlayerDBus(dbus.service.Object):
                 {'PlaybackStatus': 'Paused'}, [])
 
     def get_Length(self):
-        # FIXME:
         length = self.player.adjustment.get_upper()
         mod_len = int(divmod(length, 10**9)[0])
         return mod_len*10**6
 
     def update_meta(self):
-        print('update meta()')
         meta = self.get_Metadata()
         self.PropertiesChanged(PLAYER_IFACE,
                 {'Metadata': meta}, [])
