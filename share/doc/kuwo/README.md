@@ -101,6 +101,7 @@ Fedora 中手动安装依赖包
 * gstreamer | gstreamer0.10
 * python-gobject
 * leveldb
+* gnome-icon-theme-symbolic-git
 * py-leveldb | plyvel 这两个任选一个, 它们分别由不同的团队在维护:
 <http://code.google.com/p/py-leveldb/> 和
 <https://github.com/wbolster/plyvel>
