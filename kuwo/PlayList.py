@@ -452,6 +452,7 @@ class PlayList(Gtk.Box):
         path = self.curr_playing[1]
         song_nums = len(liststore)
         if song_nums == 0:
+            self.prev_playing = None
             return None
         if path == 0:
             if repeat:
@@ -470,11 +471,11 @@ class PlayList(Gtk.Box):
         song_nums = len(liststore)
         if song_nums == 0:
             return None
-
         if shuffle:
             path = random.randint(0, song_nums-1)
         elif path == song_nums - 1:
             if repeat is False:
+                self.next_playing = None
                 return None
             path = 0
         else:
@@ -485,6 +486,8 @@ class PlayList(Gtk.Box):
 
     def play_prev_song(self, repeat, use_mv=False):
         prev_song = self.get_prev_song(repeat=repeat)
+        if self.prev_playing is None:
+            return
         self.curr_playing[1] = self.prev_playing
         if use_mv:
             self.app.player.load_mv(prev_song)

@@ -148,6 +148,9 @@ class Player(Gtk.Box):
                 self.on_main_menu_about_activate)
         main_menu.append(about_item)
         quit_item = Gtk.MenuItem(label=_('Quit'))
+        key, mod = Gtk.accelerator_parse('<Ctrl>Q')
+        quit_item.add_accelerator('activate', 
+                app.accel_group, key, mod, Gtk.AccelFlags.VISIBLE)
         quit_item.connect('activate', 
                 self.on_main_menu_quit_activate)
         main_menu.append(quit_item)
