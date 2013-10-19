@@ -41,31 +41,29 @@ class Dict(dict):
     pass
 req_cache = Dict()
 
-ldb = None
 try:
     # Debian: http://code.google.com/p/py-leveldb/
     from leveldb import LevelDB
+    ldb_imported = True
+except ImportError as e:
+    try:
+        # Fedora: https://github.com/wbolster/plyvel
+        from plyvel import DB as LevelDB
+        ldb_imported = True
+    except ImportError as e:
+        print('Warning: No leveldb/plyvel module was found')
+        ldb_imported = False
+
+if ldb_imported:
     try:
         ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
     except Exception as e:
         print('Warning: Only one process can run at a time, quit!')
         sys.exit(1)
-except ImportError as e:
-    try:
-        # Fedora: https://github.com/wbolster/plyvel
-        from plyvel import DB as LevelDB
-        try:
-            ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
-        except Exception as e:
-            print('Warning: Only one process can run at a time, quit!')
-            sys.exit(1)
-        # support plyvel 0.6
-        if hasattr(ldb, 'put'):
-            ldb.Put = ldb.put
-            ldb.Get = ldb.get
-    except ImportError as e:
-        print('Warning: No leveldb/plyvel module was found')
-
+    # support plyvel 0.6
+    if hasattr(ldb, 'put'):
+        ldb.Put = ldb.put
+        ldb.Get = ldb.get
 
 def empty_func(*args, **kwds):
     pass
@@ -97,7 +95,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
     url = _url.replace(':81', '')
     # hash the url to accelerate string compare speed in db.
     key = hash_byte(url)
-    if use_cache and ldb:
+    if use_cache and ldb_imported:
         try:
             return ldb.Get(key)
         except KeyError:
@@ -107,7 +105,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
         try:
             req = request.urlopen(url, timeout=TIMEOUT)
             req_content = req.read()
-            if use_cache and ldb:
+            if use_cache and ldb_imported:
                 ldb.Put(key, req_content)
             return req_content
         except Exception as e:
