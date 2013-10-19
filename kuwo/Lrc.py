@@ -4,7 +4,6 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
-import cairo
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GdkX11
@@ -53,6 +52,7 @@ class Lrc(Gtk.Box):
         self.lrc_obj = None
         self.lrc_default_background = os.path.join(Config.THEME_DIR,
                 'lrc-background.jpg')
+        print('default back:', self.lrc_default_background)
         self.lrc_background = None
 
         # lyrics window
@@ -71,27 +71,26 @@ class Lrc(Gtk.Box):
         self.lrc_tv = Gtk.TextView(buffer=self.lrc_buf)
         self.lrc_tv.get_style_context().add_class('lrc_tv')
         self.lrc_tv.props.editable = False
+        self.lrc_tv.props.margin_top = 15
+        self.lrc_tv.props.margin_right = 35
+        self.lrc_tv.props.margin_bottom = 15
+        self.lrc_tv.props.margin_left = 35
         self.lrc_tv.props.cursor_visible = False
         self.lrc_tv.props.justification = Gtk.Justification.CENTER
         self.lrc_tv.props.pixels_above_lines = 10
-        self.lrc_tv.connect('draw', self.on_lrc_tv_draw)
         self.lrc_window.add(self.lrc_tv)
 
         # mv window
         self.mv_window = Gtk.DrawingArea()
         self.pack_start(self.mv_window, True, True, 0)
 
+        self.update_background(self.lrc_default_background)
+
     def after_init(self):
         self.mv_window.hide()
 
     def first(self):
         pass
-
-    def update_highlighted_tag(self):
-        fore_rgba = Gdk.RGBA()
-        fore_rgba.parse(self.app.conf['lrc-highlighted-text-color'])
-        self.highlighted_tag.props.size_points = self.app.conf['lrc-highlighted-text-size']
-        self.highlighted_tag.props.foreground_rgba = fore_rgba
 
     def set_lrc(self, lrc_txt):
         self.lrc_background = None
@@ -134,57 +133,6 @@ class Lrc(Gtk.Box):
         self.old_line_iter = (iter_start, iter_end)
         self.old_line = line_num
 
-    def update_background(self, filepath, error=None):
-        if filepath and os.path.exists(filepath):
-            self.lrc_background = filepath
-        else:
-            self.lrc_background = None
-
-    def on_lrc_tv_draw(self, textview, cr):
-        # TODO: use Gtk.Image to display background image
-        tv_width = self.lrc_tv.get_allocated_width()
-        tv_height = self.lrc_tv.get_allocated_height()
-
-#        lg3 = cairo.LinearGradient(0, 0, 0, tv_height/2)
-#        lg3.add_color_stop_rgba(0.9, 0.9, 0.9, 0.9, 0.9) 
-#        lg3.add_color_stop_rgba(0.7, 0.7, 0.7, 0.7, 0.7) 
-#        lg3.add_color_stop_rgba(0.5, 0.5, 0.5, 0.5, 0.5) 
-#        lg3.add_color_stop_rgba(0.3, 0.3, 0.3, 0.3, 0.3) 
-#
-#        cr.rectangle(0, 0, tv_width, tv_height)
-#        cr.set_source(lg3)
-#        cr.fill()
-        back_rgba = Gdk.RGBA()
-        back_rgba.parse(self.app.conf['lrc-img-back-color'])
-        cr.set_source_rgba(back_rgba.red, back_rgba.green, 
-                back_rgba.blue, back_rgba.alpha)
-        cr.set_line_width(14)
-        cr.rectangle(0, 0, tv_width, tv_height)
-        cr.fill()
-
-        if self.lrc_background:
-            pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                    self.lrc_background, tv_width, tv_height)
-        else:
-            pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                    self.lrc_default_background, tv_width, tv_height)
-        Gdk.Window.process_all_updates()
-        pix_width = pix.get_width()
-        pix_height = pix.get_height()
-        d_width = (tv_width - pix_width) / 2
-        d_height = (tv_height - pix_height) / 2
-        Gdk.cairo_set_source_pixbuf(cr, pix, d_width, d_height)
-        cr.paint()
-
-        back_rgba = Gdk.RGBA()
-        back_rgba.parse(self.app.conf['lrc-word-back-color'])
-        cr.set_source_rgba(back_rgba.red, back_rgba.green, 
-                back_rgba.blue, back_rgba.alpha)
-        cr.set_line_width(14)
-        cr.rectangle(d_width + 30, d_height+30, pix_width-65, 
-                pix_height-65)
-        cr.fill()
-
     def show_mv(self):
         self.lrc_window.hide()
         self.mv_window.show_all()
@@ -195,3 +143,27 @@ class Lrc(Gtk.Box):
     def show_music(self):
         self.mv_window.hide()
         self.lrc_window.show_all()
+
+    # styles
+    def update_background(self, filepath, error=None):
+        if filepath == self.lrc_background:
+            return
+        if filepath and os.path.exists(filepath):
+            self.lrc_background = filepath
+        else:
+            self.lrc_background = self.lrc_default_background
+        css = '\n'.join([
+            'GtkScrolledWindow {',
+                "background-image: url('{0}');".format(
+                    self.lrc_background),
+            '}',
+            ])
+        print(css)
+        self.app.apply_css(self.lrc_window, css)
+
+    def update_highlighted_tag(self):
+        fore_rgba = Gdk.RGBA()
+        fore_rgba.parse(self.app.conf['lrc-highlighted-text-color'])
+        self.highlighted_tag.props.size_points = self.app.conf['lrc-highlighted-text-size']
+        self.highlighted_tag.props.foreground_rgba = fore_rgba
+
