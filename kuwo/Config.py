@@ -52,7 +52,7 @@ THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')
 _default_conf = {
-        'window-size': (840, 580),
+        'window-size': (960, 680),
         'song-dir': os.path.join(CACHE_DIR, 'song'),
         'mv-dir': os.path.join(CACHE_DIR, 'mv'),
         'volume': 0.08,
@@ -60,11 +60,10 @@ _default_conf = {
         'use-mkv': False,
         'use-status-icon': True,
         'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
+        'lrc-back-color': 'rgba(237, 221, 221, 0.28)',
         'lrc-text-size': 22,
         'lrc-highlighted-text-color': 'rgba(52, 101, 164, 0.999)',
         'lrc-highlighted-text-size': 26,
-        'lrc-img-back-color': 'rgba(0, 0, 0, 0.999)',
-        'lrc-word-back-color': 'rgba(237, 221, 221, 0.28)',
         }
 
 def check_first():
