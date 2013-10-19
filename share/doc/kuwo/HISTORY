@@ -1,3 +1,15 @@
+v3.1 - 2013.10.19
+* <Ctrl>Q to quit program.
+* Add dbus support, Support MPRIS Dbus Interface v2.2.
+* Move playbin to a new Class.
+* Support plyvel-0.6.
+* Installation method was rewritten.
+* zh_CN.po supported.
+* Add setup.py, now can use `pip` command to install kwpalyer
+* mutagenx removed from source tree
+* pkgbuild for Arch Linux added.
+* Fixed: goes wrong when ~/.config does not exist.
+
 v2.7 - 2013.10.13
 * Add more software dependency.
 * Fixed: failed to display song item in Search Box.
