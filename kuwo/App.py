@@ -147,39 +147,43 @@ class App:
     def popup_page(self, page):
         self.notebook.set_current_page(page)
 
-    def load_styles(self):
+    def apply_css(self, widget, css, overall=False):
         # CssProvider needs bytecode
-        font_size = str(self.conf['lrc-text-size'])
-        if Gtk.MINOR_VERSION > 6:
-            css = '\n'.join([
-                'GtkTextView.lrc_tv {',
-                    'font-size: {0}px;'.format(font_size),
-                    'color: {0};'.format(self.conf['lrc-text-color']),
-                    'background-color: rgba(0, 0, 0, 0);',
-                '}',
-                '.info-label {',
-                  'color: rgb(136, 139, 132);',
-                  'font-size: 9px;',
-                '}',
-                ]).encode()
-        else:
-            css = '\n'.join([
-                'GtkTextView.lrc_tv {',
-                    'font-size: {0};'.format(font_size),
-                    'color: {0};'.format(self.conf['lrc-text-color']),
-                    'background-color: rgba(0, 0, 0, 0);',
-                '}',
-                '.info-label {',
-                  'color: rgb(136, 139, 132);',
-                  'font-size: 9;',
-                '}',
-                ]).encode()
-
         style_provider = Gtk.CssProvider()
-        style_provider.load_from_data(css)
-        Gtk.StyleContext.add_provider_for_screen(
+        _css = css.encode()
+        style_provider.load_from_data(_css)
+        if overall:
+            Gtk.StyleContext.add_provider_for_screen(
                 Gdk.Screen.get_default(), style_provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        else:
+            widget.get_style_context().add_provider(style_provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+    def load_styles(self):
+        font_size = str(int(self.conf['lrc-text-size']))
+        px = ''
+        if Gtk.MINOR_VERSION > 6:
+            px = 'px'
+        css = '\n'.join([
+            '* {',
+                'transition-property: background-image;',
+                'transition-duration: 1s;',
+                '}',
+            'GtkTextView.lrc_tv {',
+                'font-size: {0}{1};'.format(font_size, px),
+                'color: {0};'.format(self.conf['lrc-text-color']),
+                'border-radius: 0 25px 0 50px;',
+                'border-width: 5px;',
+                'background-color: {0};'.format(
+                    self.conf['lrc-back-color']),
+                '}',
+            '.info-label {',
+                'color: rgb(136, 139, 132);',
+                'font-size: 9{0};'.format(px),
+                '}',
+            ])
+        self.apply_css(self.window, css, overall=True)
 
     def init_status_icon(self):
         # set status_icon as class property, to keep its life
