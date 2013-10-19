@@ -17,19 +17,6 @@ import urllib.error
 from urllib import parse
 from urllib import request
 
-try:
-    # Debian: http://code.google.com/p/py-leveldb/
-    from leveldb import LevelDB
-    leveldb_imported = True
-except ImportError as e:
-    try:
-        # Fedora: https://github.com/wbolster/plyvel
-        from plyvel import DB as LevelDB
-        leveldb_imported = True
-    except ImportError as e:
-        leveldb_imported = False
-        print('Warning: No leveldb/plyvel module was found, http requests will not be cached!')
-
 from kuwo import Config
 from kuwo import Utils
 
@@ -54,16 +41,32 @@ class Dict(dict):
     pass
 req_cache = Dict()
 
-# Using leveldb to cache urlrequest
-ldb = None
-if leveldb_imported:
-    #ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
+try:
+    # Debian: http://code.google.com/p/py-leveldb/
+    from leveldb import LevelDB
     try:
         ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
     except Exception as e:
-        print(e, type(e))
         print('Warning: Only one process can run at a time, quit!')
         sys.exit(1)
+
+except ImportError:
+    try:
+        # Fedora: https://github.com/wbolster/plyvel
+        from plyvel import DB as LevelDB
+        try:
+            ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
+        except Exception as e:
+            print('Warning: Only one process can run at a time, quit!')
+            sys.exit(1)
+        # support plyvel 0.6
+        if hasattrib(ldb, 'put'):
+            ldb.Put = ldb.put
+            ldb.Get = ldb.get
+    except ImportError:
+        print('Warning: No leveldb/plyvel module was found')
+        ldb = None
+
 
 def empty_func(*args, **kwds):
     pass
@@ -95,7 +98,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
     url = _url.replace(':81', '')
     # hash the url to accelerate string compare speed in db.
     key = hash_byte(url)
-    if use_cache and leveldb_imported:
+    if use_cache and ldb:
         try:
             return ldb.Get(key)
         except KeyError:
@@ -105,7 +108,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
         try:
             req = request.urlopen(url, timeout=TIMEOUT)
             req_content = req.read()
-            if use_cache and leveldb_imported:
+            if use_cache and ldb:
                 ldb.Put(key, req_content)
             return req_content
         except Exception as e:

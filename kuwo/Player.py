@@ -202,6 +202,7 @@ class Player(Gtk.Box):
 
         # init playbin and dbus
         self.playbin = PlayerBin()
+        self.playbin.set_volume(self.app.conf['volume'])
         self.playbin.connect('eos', self.on_playbin_eos)
         self.playbin.connect('eos', self.on_playbin_error)
         self.dbus = PlayerDBus(self)
@@ -562,7 +563,7 @@ class Player(Gtk.Box):
 
     # playbin signal handlers
     def on_playbin_eos(self, *args):
-        pass
+        self.load_next()
 
     def on_playbin_error(self, widget, error_msg):
         pass
