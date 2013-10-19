@@ -60,7 +60,7 @@ except ImportError as e:
             print('Warning: Only one process can run at a time, quit!')
             sys.exit(1)
         # support plyvel 0.6
-        if hasattrib(ldb, 'put'):
+        if hasattr(ldb, 'put'):
             ldb.Put = ldb.put
             ldb.Get = ldb.get
     except ImportError as e:
