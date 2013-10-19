@@ -11,13 +11,17 @@ import sys
 from urllib import parse
 import zlib
 
-is_py33 = False
+
+mutagenx_imported = False
 if sys.version_info.major >= 3 and sys.version_info.minor >= 3:
-    is_y33 = True
-    from mutagenx.easyid3 import EasyID3
-    from mutagenx.apev2 import APEv2File
+    try:
+        from mutagenx.easyid3 import EasyID3
+        from mutagenx.apev2 import APEv2File
+        mutagenx_imported = True
+    except ImportError as e:
+        print('Warning: mutagenx was not found')
 else:
-    print('Warning: Python3 version is lower than 3.3, mutagenx is not supported')
+    print('Warning: Python3 < 3.3, mutagenx is not supported')
 
 
 def decode_lrc_content(lrc, is_lrcx=False):
@@ -107,7 +111,7 @@ def parse_radio_songs(txt):
 
 def iconvtag(song_path, song):
     # Do nothing if python3 version is lower than 3.3
-    if is_py33 is False:
+    if not mutagenx_imported:
         return
     print('Net.iconvtag()', song_path, song)
     def use_id3():

@@ -41,6 +41,7 @@ class Dict(dict):
     pass
 req_cache = Dict()
 
+ldb = None
 try:
     # Debian: http://code.google.com/p/py-leveldb/
     from leveldb import LevelDB
@@ -49,8 +50,7 @@ try:
     except Exception as e:
         print('Warning: Only one process can run at a time, quit!')
         sys.exit(1)
-
-except ImportError:
+except ImportError as e:
     try:
         # Fedora: https://github.com/wbolster/plyvel
         from plyvel import DB as LevelDB
@@ -63,9 +63,8 @@ except ImportError:
         if hasattrib(ldb, 'put'):
             ldb.Put = ldb.put
             ldb.Get = ldb.get
-    except ImportError:
+    except ImportError as e:
         print('Warning: No leveldb/plyvel module was found')
-        ldb = None
 
 
 def empty_func(*args, **kwds):
