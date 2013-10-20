@@ -53,9 +53,11 @@ class Lrc(Gtk.Box):
         self.lrc_default_background = os.path.join(Config.THEME_DIR,
                 'lrc-background.jpg')
         self.lrc_background = None
+        self.old_provider = None
 
         # lyrics window
         self.lrc_window = Gtk.ScrolledWindow()
+        self.lrc_window.get_style_context().add_class('lrc_window')
         self.pack_start(self.lrc_window, True, True, 0)
 
         self.lrc_buf = Gtk.TextBuffer()
@@ -174,11 +176,12 @@ class Lrc(Gtk.Box):
                     self.lrc_background),
             '}',
             ])
-        self.app.apply_css(self.lrc_window, css)
+        new_provider = self.app.apply_css(self.lrc_window, css,
+                old_provider=self.old_provider)
+        self.old_provider = new_provider
 
     def update_highlighted_tag(self):
         fore_rgba = Gdk.RGBA()
         fore_rgba.parse(self.app.conf['lrc-highlighted-text-color'])
         self.highlighted_tag.props.size_points = self.app.conf['lrc-highlighted-text-size']
         self.highlighted_tag.props.foreground_rgba = fore_rgba
-
