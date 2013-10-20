@@ -431,7 +431,6 @@ class Artists(Gtk.Box):
 
     def append_artist_albums(self, init=False):
         def _append_artist_albums(albums_args, error=None):
-            print('_append artist_albums:', albums_args)
             albums, self.artist_albums_total = albums_args
             if self.artist_albums_total == 0:
                 return
@@ -511,7 +510,6 @@ class Artists(Gtk.Box):
 
     def append_artist_similar(self, init=False):
         def _append_artist_similar(similar_args, error=None):
-            print('_append_artist_similar:', similar_args, error)
             artists, self.artist_similar_total = similar_args
             if self.artist_similar_total == 0:
                 return
@@ -602,9 +600,7 @@ class Artists(Gtk.Box):
         self.append_album_songs()
     
     def append_album_songs(self):
-        print('Artists.append_album_songs()')
         def _append_album_songs(songs, error=None):
-            print('_append_album_songs()')
             if songs is None:
                 return
             for song in songs:
