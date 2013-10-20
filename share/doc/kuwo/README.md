@@ -48,8 +48,6 @@ Debian 手动安装依赖包
 * python3 - 推荐python3.3以上的版本, 不然mutagenx模块无法使用(用于消除mp3/ape乱码的).
 * python3-dbus
 * python3-gi  -  gkt3的python3绑定(Fedora中叫做python3-gobject);
-* python3-cairo -  cairo的python3绑定(用于实现显示特效);
-* python3-gi-cairo - 在GObject中用到的cairo的python3绑定;
 * gstreamer1.0-plugins-base
 * gstreamer1.0-plugins-good
 * gstreamer-plugins-ugly
@@ -78,7 +76,6 @@ Fedora 中手动安装依赖包
 对于Fedora, 我专门安装并测试了Fedora 19 amd64, 也很简单, 需要这些操作:
 
 * 更新系统. 我用的是mirrors.163.com这个更新源, 速度很好.
-* 安装python3-cairo.
 * 使用rpmfushion, 可以参考这篇文章:<http://blog.csdn.net/sabalol/article/details/9286073>
 * 安装gstreamer的一堆依赖, 上面列出的, 名称都大致一样.
 * 安装leveldb 和 python3-plyvel, python3-plyvel是leveldb的另一个python绑定.
@@ -93,7 +90,6 @@ Fedora 中手动安装依赖包
 
 [注:] arch中, 默认的python版本是python3.
 
-* python-cairo
 * python-dbus
 * gst-plugins-base 根据@mindcat的测试补充进来的
 * gst-plugins-good | gstreamer.01.0-good-plugins
