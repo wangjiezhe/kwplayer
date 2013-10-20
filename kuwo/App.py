@@ -147,7 +147,7 @@ class App:
     def popup_page(self, page):
         self.notebook.set_current_page(page)
 
-    def apply_css(self, widget, css, overall=False):
+    def apply_css(self, widget, css, old_provider=None, overall=False):
         # CssProvider needs bytecode
         style_provider = Gtk.CssProvider()
         _css = css.encode()
@@ -156,9 +156,15 @@ class App:
             Gtk.StyleContext.add_provider_for_screen(
                 Gdk.Screen.get_default(), style_provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            if old_provider is not None:
+                Gtk.StyleContext.remove_provider_for_screen(
+                    Gdk.Screen.get_default(), style_provider)
         else:
             widget.get_style_context().add_provider(style_provider,
                     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            if old_provider is not None:
+                widget.get_style_context().remove_provider(old_provider)
+        return style_provider
 
     def load_styles(self):
         font_size = str(int(self.conf['lrc-text-size']))
@@ -166,7 +172,7 @@ class App:
         if Gtk.MINOR_VERSION > 6:
             px = 'px'
         css = '\n'.join([
-            '* {',
+            'GtkScrolledWindow.lrc_window {',
                 'transition-property: background-image;',
                 'transition-duration: 1s;',
                 '}',
