@@ -27,10 +27,6 @@ PLAYER_IFACE = 'org.mpris.MediaPlayer2.Player'
 URI_SCHEMES = ['file', 'http', 'smb']
 MIME_TYPES = ['application/ogg', ]
 
-class CmdSource:
-    UI = 0
-    DBUS = 1
-
 
 class PlayerDBus(dbus.service.Object):
     '''Implements MPRIS DBus Interface v2.2'''
@@ -55,7 +51,7 @@ class PlayerDBus(dbus.service.Object):
             'CanQuit': (True, None),
             'Fullscreen': (False, None),
             'CanSetFullscreen': (False, None),
-            'CanRaise': (False, None),
+            'CanRaise': (True, None),
             'HasTrackList': (False, None),
             'Identity': ('KW Player', None),
             'DesktopEntry': ('kwplayer', None),
@@ -223,7 +219,7 @@ class PlayerDBus(dbus.service.Object):
         return self.player.playbin.get_volume()
 
     def set_Volume(self, vol):
-        self.player.set_volume(vol, CmdSource.DBUS)
+        self.player.set_volume(vol)
 
     def get_Position(self):
         pos = self.player.playbin.get_position()[1] // 1000
