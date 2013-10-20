@@ -339,7 +339,8 @@ class Artists(Gtk.Box):
         i = len(self.artists_liststore)
         for artist in artists:
             self.artists_liststore.append([self.app.theme['anonymous'],
-                artist['name'], int(artist['id']), 
+                Widgets.unescape_html(artist['name']),
+                int(artist['id']), 
                 artist['music_num'] + _(' songs'), ])
             Net.update_artist_logo(self.artists_liststore, i, 0, 
                     artist['pic'])
@@ -401,9 +402,12 @@ class Artists(Gtk.Box):
             if self.artist_songs_total == 0:
                 return
             for song in songs:
-                self.artist_songs_liststore.append([True, song['name'], 
-                    song['artist'], song['album'], 
-                    int(song['musicrid']), int(song['artistid']), 
+                self.artist_songs_liststore.append([True,
+                    song['name'], 
+                    song['artist'],
+                    song['album'], 
+                    int(song['musicrid']),
+                    int(song['artistid']), 
                     int(song['albumid']), ]) 
             # automatically load more songs
             self.artist_songs_page += 1
@@ -440,9 +444,12 @@ class Artists(Gtk.Box):
                             Widgets.tooltip(album['name']),
                             Widgets.tooltip(album['info']))
                 self.artist_albums_liststore.append([
-                    self.app.theme['anonymous'], album['name'],
-                    int(album['albumid']), album['artist'],
-                    int(album['artistid']), tooltip, ])
+                    self.app.theme['anonymous'],
+                    album['name'],
+                    int(album['albumid']),
+                    album['artist'],
+                    int(album['artistid']),
+                    tooltip, ])
                 Net.update_album_covers(self.artist_albums_liststore, i,
                         0, album['pic'])
                 i += 1
@@ -473,8 +480,13 @@ class Artists(Gtk.Box):
             i = len(self.artist_mv_liststore)
             for mv in mvs:
                 self.artist_mv_liststore.append([
-                    self.app.theme['anonymous'], mv['name'], mv['artist'],
-                    '', int(mv['musicid']), int(mv['artistid']), 0, ])
+                    self.app.theme['anonymous'],
+                    mv['name'],
+                    mv['artist'],
+                    '',
+                    int(mv['musicid']),
+                    int(mv['artistid']),
+                    0, ])
                 Net.update_mv_image(self.artist_mv_liststore, i, 0,
                         mv['pic'])
                 i += 1
@@ -506,8 +518,10 @@ class Artists(Gtk.Box):
             i = len(self.artist_similar_liststore)
             for artist in artists:
                 self.artist_similar_liststore.append([
-                    self.app.theme['anonymous'], artist['name'],
-                    int(artist['id']), artist['songnum'] + _(' songs'), ])
+                    self.app.theme['anonymous'],
+                    artist['name'],
+                    int(artist['id']),
+                    artist['songnum'] + _(' songs'), ])
                 Net.update_artist_logo(self.artist_similar_liststore, i,
                         0, artist['pic'])
                 i += 1
@@ -594,9 +608,12 @@ class Artists(Gtk.Box):
             if songs is None:
                 return
             for song in songs:
-                self.album_songs_liststore.append([True, song['name'],
-                    song['artist'], self.curr_album_name,
-                    int(song['id']), int(song['artistid']),
+                self.album_songs_liststore.append([True,
+                    song['name'],
+                    song['artist'],
+                    self.curr_album_name,
+                    int(song['id']),
+                    int(song['artistid']),
                     int(self.curr_album_id), ])
         self.album_songs_liststore.clear()
         Net.async_call(Net.get_album, _append_album_songs,

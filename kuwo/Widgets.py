@@ -8,11 +8,15 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 import html
+from html.parser import HTMLParser
 import os
 
 from kuwo import Config
 
 _ = Config._
+_html_parser = HTMLParser()
+# Need to unescape twice
+unescape_html = lambda entity: _html_parser.unescape(_html_parser.unescape(entity))
 
 def short_str(_str, length=10):
     if len(_str) > length:

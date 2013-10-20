@@ -96,7 +96,9 @@ class TopCategories(Gtk.Box):
         i = 0
         for node in nodes:
             self.liststore_main.append([self.app.theme['anonymous'],
-                node['disname'], int(node['id']), node['info'], ])
+                Widgets.unescape_html(node['disname']),
+                int(node['id']),
+                Widgets.unescape_html(node['info']), ])
             Net.update_liststore_image(self.liststore_main, i, 0, 
                     node['pic'])
             i += 1
@@ -126,7 +128,9 @@ class TopCategories(Gtk.Box):
             for node in nodes:
                 _id = 'id' if self.use_sub2 else 'sourceid'
                 self.liststore_sub1.append([self.app.theme['anonymous'],
-                    node['name'], int(node[_id]), node['info'], ])
+                    Widgets.unescape_html(node['name']),
+                    int(node[_id]),
+                    Widgets.unescape_html(node['info']), ])
                 Net.update_liststore_image(self.liststore_sub1, i, 0, 
                         node['pic'])
                 i += 1
@@ -170,7 +174,9 @@ class TopCategories(Gtk.Box):
             i = len(self.liststore_sub2)
             for node in nodes:
                 self.liststore_sub2.append([self.app.theme['anonymous'],
-                    node['name'], int(node['sourceid']), node['info'], ])
+                    Widgets.unescape_html(node['name']),
+                    int(node['sourceid']),
+                    Widgets.unescape_html(node['info']), ])
                 Net.update_liststore_image(self.liststore_sub2, i, 0, 
                         node['pic'])
                 i += 1
@@ -205,16 +211,22 @@ class TopCategories(Gtk.Box):
                 if songs is None:
                     return
                 for song in songs:
-                    self.liststore_songs.append([ True, song['name'], 
-                        song['artist'], self.curr_list_name, 
-                        int(song['id']), int(song['artistid']), 
+                    self.liststore_songs.append([True,
+                        song['name'], 
+                        song['artist'],
+                        self.curr_list_name, 
+                        int(song['id']),
+                        int(song['artistid']), 
                         int(self.curr_list_id), ])
                 return
 
             for song in songs:
-                self.liststore_songs.append([
-                    True, song['name'], song['artist'], song['album'],
-                    int(song['id']), int(song['artistid']), 
+                self.liststore_songs.append([True,
+                    song['name'],
+                    song['artist'],
+                    song['album'],
+                    int(song['id']),
+                    int(song['artistid']), 
                     int(song['albumid']), ])
             self.songs_page += 1
             if self.songs_page < self.songs_total - 1:

@@ -145,8 +145,10 @@ class Search(Gtk.Box):
                     '{0} ({1})'.format(_('Songs'), hit))
             for song in songs:
                 self.liststore_songs.append([True,
-                    song['SONGNAME'], song['ARTIST'], song['ALBUM'],
-                    int(song['MUSICRID'][6:]), int(song['ARTISTID']),
+                    song['SONGNAME'],
+                    song['ARTIST'], song['ALBUM'],
+                    int(song['MUSICRID'][6:]),
+                    int(song['ARTISTID']),
                     int(song['ALBUMID']), ])
 
         keyword = self.search_entry.get_text()
@@ -170,7 +172,8 @@ class Search(Gtk.Box):
             i = len(self.liststore_artists)
             for artist in artists:
                 self.liststore_artists.append([self.app.theme['anonymous'],
-                    artist['ARTIST'], int(artist['ARTISTID']), 
+                    artist['ARTIST'],
+                    int(artist['ARTISTID']), 
                     artist['COUNTRY'], ])
                 Net.update_artist_logo(self.liststore_artists, i, 0,
                         artist['PICPATH'])
@@ -203,8 +206,10 @@ class Search(Gtk.Box):
                             Widgets.tooltip(album['name']),
                             Widgets.tooltip(album['info']))
                 self.liststore_albums.append([self.app.theme['anonymous'],
-                    album['name'], int(album['albumid']), 
-                    album['artist'], int(album['artistid']),
+                    album['name'],
+                    int(album['albumid']), 
+                    album['artist'],
+                    int(album['artistid']),
                     tooltip, ])
                 Net.update_album_covers(self.liststore_albums,
                         i, 0, album['pic'])

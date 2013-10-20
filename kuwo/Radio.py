@@ -243,9 +243,10 @@ class Radio(Gtk.Box):
         i = 0
         for radio in radios:
             self.liststore_radios.append([self.app.theme['anonymous'],
-                Widgets.short_str(radio['disname']), 
+                Widgets.short_str(Widgets.unescape_html(radio['disname'])), 
                 int(radio['sourceid'].split(',')[0]),
-                radio['info'], radio['pic']])
+                Widgets.unescape_html(radio['info']),
+                radio['pic'], ])
             Net.update_liststore_image(self.liststore_radios, i, 0,
                     radio['pic']),
             i += 1

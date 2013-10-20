@@ -67,7 +67,9 @@ class TopList(Gtk.Box):
         i = 0
         for node in nodes:
             self.liststore_nodes.append([self.app.theme['anonymous'],
-                node['name'], int(node['sourceid']), node['info'], ])
+                Widgets.unescape_html(node['name']),
+                int(node['sourceid']),
+                Widgets.unescape_html(node['info']), ])
             Net.update_toplist_node_logo(self.liststore_nodes, i, 0, 
                     node['pic'])
             i += 1
@@ -93,6 +95,10 @@ class TopList(Gtk.Box):
             return
         self.liststore_songs.clear()
         for song in songs:
-            self.liststore_songs.append([True, song['name'], 
-                song['artist'], song['album'], int(song['id']), 
-                int(song['artistid']), int(song['albumid']), ])
+            self.liststore_songs.append([True,
+                song['name'], 
+                song['artist'],
+                song['album'],
+                int(song['id']), 
+                int(song['artistid']),
+                int(song['albumid']), ])

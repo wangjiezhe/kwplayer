@@ -69,7 +69,9 @@ class MV(Gtk.Box):
         i = 0
         for node in nodes:
             self.liststore_nodes.append([self.app.theme['anonymous'],
-                node['disname'], int(node['sourceid']), node['info'], ])
+                Widgets.unescape_html(node['disname']),
+                int(node['sourceid']),
+                Widgets.unescape_html(node['info']), ])
             Net.update_liststore_image(self.liststore_nodes, i, 0,
                     node['pic'])
             i += 1
@@ -91,8 +93,11 @@ class MV(Gtk.Box):
             i = len(self.liststore_songs)
             for song in songs:
                 self.liststore_songs.append([self.app.theme['anonymous'],
-                    song['name'], song['artist'], song['album'],
-                    int(song['id']), int(song['artistid']), 
+                    song['name'],
+                    song['artist'],
+                    song['album'],
+                    int(song['id']),
+                    int(song['artistid']), 
                     int(song['albumid']), ])
                 Net.update_mv_image(self.liststore_songs, i, 0,
                         song['mvpic'])

@@ -84,7 +84,9 @@ class Themes(Gtk.Box):
         i = 0
         for node in nodes:
             self.liststore_main.append([self.app.theme['anonymous'],
-                    node['name'], int(node['nid']), node['info'], ])
+                    Widgets.unescape_html(node['name']),
+                    int(node['nid']),
+                    Widgets.unescape_html(node['info']), ])
             Net.update_liststore_image(self.liststore_main, i, 0, 
                     node['pic'])
             i += 1
@@ -114,7 +116,9 @@ class Themes(Gtk.Box):
         i = len(self.liststore_sub)
         for node in nodes:
             self.liststore_sub.append([self.app.theme['anonymous'],
-                node['name'], int(node['sourceid']), node['info'], ])
+                Widgets.unescape_html(node['name']),
+                int(node['sourceid']),
+                Widgets.unescape_html(node['info']), ])
             Net.update_liststore_image(self.liststore_sub, i, 0, 
                     node['pic'])
             i += 1
@@ -142,9 +146,12 @@ class Themes(Gtk.Box):
         if songs is None:
             return
         for song in songs:
-            self.liststore_songs.append([
-                True, song['name'], song['artist'], song['album'],
-                int(song['id']), int(song['artistid']), 
+            self.liststore_songs.append([True,
+                song['name'],
+                song['artist'],
+                song['album'],
+                int(song['id']),
+                int(song['artistid']), 
                 int(song['albumid']), ])
     
     # buttonbox buttons
