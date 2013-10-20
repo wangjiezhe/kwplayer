@@ -1,3 +1,19 @@
+v3.1.3 - 2013.10.20
+* Fixed: memory leak caused by CssProvider.
+* Automatically load next song when error occurs.
+* Debug infor removed from kuwo/Artists.py.
+* Enable `raise` in MPRIS Interface.
+* Transition animation only applies to lrc_window now.
+
+v3.1.2 - 2013.10.20
+* Add micro version.
+* unescape html entity; reported by @gdgglhy.
+* show song name in window title
+* python3-cairo removed from package dependencies
+* lrc redesigned.
+* use reset.css to initialize GtkWidget styles.
+* gnome-icon-theme-symbolic-git added to Arch Linux package dependencies
+
 v3.1 - 2013.10.19
 * <Ctrl>Q to quit program.
 * Add dbus support, Support MPRIS Dbus Interface v2.2.
