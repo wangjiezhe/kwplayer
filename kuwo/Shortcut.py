@@ -29,21 +29,21 @@ class Shortcut:
         self.keybinder.start()
             
     def volume_up(self, *args):
-        vol = self.player.get_volume() + 0.1
-        print('Shortcut.volume up(), ', vol)
+        vol = self.player.get_volume() ** 0.33 + 0.1
         if vol > 1:
             vol = 1
         self.player.set_volume_cb(vol)
 
     def volume_down(self, *args):
-        print('Shortcut.voluem_down()')
-        vol = self.player.get_volume() - 0.1
+        vol = self.player.get_volume() ** 0.33 - 0.1
         if vol < 0:
             vol = 0
         self.player.set_volume_cb(vol)
 
     def bind_keys(self):
         curr_mode = self.player.app.conf['shortcut-mode']
+        if curr_mode == ShortcutMode.NONE:
+            return
         if curr_mode == ShortcutMode.DEFAULT:
             shortcut_keys = self.player.app.conf['default-shortcut']
         elif curr_mode == ShortcutMode.CUSTOM:

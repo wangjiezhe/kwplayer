@@ -673,7 +673,6 @@ class Player(Gtk.Box):
         mod_value = vol ** 3
         self.app.conf['volume'] = mod_value
         self.playbin.set_volume(mod_value)
-        print('set volume:', mod_value)
         if refresh:
             self.volume.handler_block(self.volume_sid)
             self.volume.set_value(vol)
