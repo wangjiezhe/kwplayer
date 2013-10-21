@@ -26,6 +26,7 @@ from kuwo.Search import Search
 from kuwo.Themes import Themes
 from kuwo.TopCategories import TopCategories
 from kuwo.TopList import TopList
+from kuwo.Shortcut import Shortcut
 
 GObject.threads_init()
 
@@ -83,12 +84,14 @@ class App:
         self.lrc.after_init()
         self.player.after_init()
         self.search.after_init()
+        self.shortcut = Shortcut(self.player)
 
     def run(self, argv):
         self.app.run(argv)
 
     def quit(self):
         self.window.destroy()
+        self.shortcut.quit()
         self.app.quit()
 
     def on_app_shutdown(self, app):

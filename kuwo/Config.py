@@ -49,6 +49,11 @@ RADIO_JSON = os.path.join(CACHE_DIR, 'radio.json')
 
 THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
 
+class ShortcutMode:
+    NONE = 0
+    DEFAULT = 1
+    CUSTOM = 2
+
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')
 _default_conf = {
@@ -64,6 +69,27 @@ _default_conf = {
         'lrc-text-size': 22,
         'lrc-highlighted-text-color': 'rgba(52, 101, 164, 0.999)',
         'lrc-highlighted-text-size': 26,
+        'shortcut-mode': ShortcutMode.DEFAULT,
+        'custom-shortcut': {
+            'VolumeUp': '<Ctrl><Shift>plus',
+            'VolumeDown': '<Ctrl><Shift>minus',
+            'Mute': '<Ctrl><Shift>0',
+            'Previous': '<Ctrl><Shift>Left',
+            'Next': '<Ctrl><Shift>Right',
+            'Pause': '<Ctrl><Shift>Down',
+            'Play': '<Ctrl><Shift>Down',
+            'Stop': '<Ctrl><Shift>Up',
+            },
+        'default-shortcut': {
+            'VolumeUp': 'XF86AudioRaiseVolume',
+            'VolumeDown': 'XF86AudioLowerVolume',
+            'Mute': 'XF86AudioMute',
+            'Previous': 'XF86AudioPrev',
+            'Next': 'XF86AudioNext',
+            'Pause': 'XF86AudioPause',
+            'Play': 'XF86AudioPlay',
+            'Stop': 'XF86AudioStop',
+            },
         }
 
 def check_first():

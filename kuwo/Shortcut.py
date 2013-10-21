@@ -1,0 +1,59 @@
+
+# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+
+# Use of this source code is governed by GPLv3 license that can be found
+# in http://www.gnu.org/licenses/gpl-3.0.html
+
+from keybinder.keybinder_gtk import KeybinderGtk
+
+from kuwo import Config
+ShortcutMode = Config.ShortcutMode
+
+class Shortcut:
+    def __init__(self, player):
+        self.player = player
+
+        self.callbacks = {
+                'VolumeUp': self.volume_up,
+                'VolumeDown': self.volume_down,
+                'Mute': lambda *args: player.set_volume_cb(0),
+                'Previous': lambda *args: player.load_prev_cb(),
+                'Next': lambda *args: player.load_next_cb(),
+                'Pause': lambda *args: player.play_pause_cb(),
+                'Play': lambda *args: player.play_pause_cb(),
+                'Stop': lambda *args: player.stop_player_cb(),
+                }
+
+        self.keybinder = KeybinderGtk()
+        self.bind_keys()
+        self.keybinder.start()
+            
+    def volume_up(self, *args):
+        vol = self.player.get_volume() + 0.1
+        print('Shortcut.volume up(), ', vol)
+        if vol > 1:
+            vol = 1
+        self.player.set_volume_cb(vol)
+
+    def volume_down(self, *args):
+        print('Shortcut.voluem_down()')
+        vol = self.player.get_volume() - 0.1
+        if vol < 0:
+            vol = 0
+        self.player.set_volume_cb(vol)
+
+    def bind_keys(self):
+        curr_mode = self.player.app.conf['shortcut-mode']
+        if curr_mode == ShortcutMode.DEFAULT:
+            shortcut_keys = self.player.app.conf['default-shortcut']
+        elif curr_mode == ShortcutMode.CUSTOM:
+            shortcut_keys = self.player.app.conf['custom-shortcut']
+        for name, key in shortcut_keys.items():
+            self.keybinder.register(key, self.callbacks[name])
+
+    def rebind_keys(self):
+        self.bind_keys()
+
+    def quit(self):
+        print('Shortcut.quit')
+        self.keybinder.stop()

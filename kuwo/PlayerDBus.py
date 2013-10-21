@@ -124,34 +124,34 @@ class PlayerDBus(dbus.service.Object):
 
     # player iface methods
     @dbus.service.method(PLAYER_IFACE)
-    def Next(self):
-        GLib.idle_add(self.player.load_next)
+    def Previous(self):
+        self.player.load_prev_cb()
 
     @dbus.service.method(PLAYER_IFACE)
-    def Previous(self):
-        GLib.idle_add(self.player.load_prev)
+    def Next(self):
+        self.player.load_next_cb()
 
     @dbus.service.method(PLAYER_IFACE)
     def Pause(self):
-        GLib.idle_add(self.player.pause_player)
+        self.player.pause_player_cb()
 
     @dbus.service.method(PLAYER_IFACE)
     def PlayPause(self):
-        GLib.idle_add(self.player.play_pause)
+        self.player.play_pause_cb()
 
     @dbus.service.method(PLAYER_IFACE)
     def Stop(self):
-        GLib.idle_add(self.player.stop_player)
+        self.player.stop_player_cb()
 
     @dbus.service.method(PLAYER_IFACE)
     def Play(self):
-        GLib.idle_add(self.player.start_player)
+        self.player.start_player_cb()
 
     @dbus.service.method(PLAYER_IFACE, in_signature='x')
     def Seek(self, offset):
         # Note: offset unit is microsecond, but player.seek() requires
         # nanoseconds as time unit
-        GLib.idle_add(self.player.seek, offset*1000)
+        self.player.seek_cb(offset*1000)
 
     @dbus.service.method(PLAYER_IFACE, in_signature='s')
     def OpenUri(self, uri):

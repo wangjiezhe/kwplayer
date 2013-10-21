@@ -18,6 +18,8 @@ _ = Config._
 
 MARGIN_LEFT = 15
 MARGIN_TOP = 20
+ShortcutMode = Config.ShortcutMode
+
 
 class NoteTab(Gtk.Box):
     def __init__(self):
@@ -261,6 +263,63 @@ class Preferences(Gtk.Dialog):
                 _('Moving cached MVs to new folder'))
         folder_box.pack_start(mv_folder, False, False, 0)
 
+        self.notebook = notebook
+
+        # shortcut tab
+        self.init_shortcut_tab()
+
+    def init_shortcut_tab(self):
+        curr_mode = self.app.conf['shortcut-mode']
+
+        box = NoteTab()
+        self.notebook.append_page(box, Gtk.Label(_('Shortcut')))
+
+        self.shortcut_win = Gtk.ScrolledWindow()
+
+        disable_btn = Gtk.RadioButton(_('Disable Keyboard Shortcut'))
+        disable_btn.connect('toggled', self.on_shortcut_btn_toggled,
+                ShortcutMode.NONE)
+        disable_btn.set_active(curr_mode == ShortcutMode.NONE)
+        box.pack_start(disable_btn, False, False, 0)
+
+        default_btn = Gtk.RadioButton(_('Use Default MultiMedia Key'))
+        default_btn.connect('toggled', self.on_shortcut_btn_toggled,
+                ShortcutMode.DEFAULT)
+        default_btn.join_group(disable_btn)
+        default_btn.set_active(curr_mode == ShortcutMode.DEFAULT)
+        box.pack_start(default_btn, False, False, 0)
+
+        custom_btn = Gtk.RadioButton(_('Use Custom Keyboard Shortcut'))
+        custom_btn.connect('toggled', self.on_shortcut_btn_toggled,
+                ShortcutMode.CUSTOM)
+        custom_btn.join_group(default_btn)
+        custom_btn.set_active(curr_mode == ShortcutMode.CUSTOM)
+        box.pack_start(custom_btn, False, False, 0)
+
+        self.shortcut_win.props.margin_left = 10
+        self.shortcut_win.set_sensitive(curr_mode == ShortcutMode.CUSTOM)
+        box.pack_start(self.shortcut_win, True, True, 0)
+
+        # name, shortct key, shortcut modifiers
+        self.shortcut_liststore = Gtk.ListStore(str, int, int)
+        tv = Gtk.TreeView(model=self.shortcut_liststore)
+        self.shortcut_win.add(tv)
+
+        name_cell = Gtk.CellRendererText()
+        name_col = Gtk.TreeViewColumn('Action', name_cell, text=0)
+        tv.append_column(name_col)
+
+        key_cell = Gtk.CellRendererAccel(editable=True)
+        key_cell.connect('accel-edited', self.on_shortcut_key_cell_edited)
+        key_col = Gtk.TreeViewColumn('Shortcut Key', key_cell,
+                accel_key=1, accel_mods=2)
+        tv.append_column(key_col)
+        
+        for name in self.app.conf['custom-shortcut']:
+            key = self.app.conf['custom-shortcut'][name]
+            k, m = Gtk.accelerator_parse(key)
+            self.shortcut_liststore.append([name, k, m, ])
+
     def run(self):
         self.get_content_area().show_all()
         super().run()
@@ -278,3 +337,17 @@ class Preferences(Gtk.Dialog):
     def on_video_toggled(self, radiobtn):
         # radio_group[0] is MKV
         self.app.conf['use-mkv'] = radiobtn.get_group()[0].get_active()
+
+    def on_shortcut_btn_toggled(self, button, mode):
+        if button.get_active() is False:
+            return
+        self.app.conf['shortcut-mode'] = mode
+        self.shortcut_win.set_sensitive(mode == ShortcutMode.CUSTOM)
+
+    def on_shortcut_key_cell_edited(self, accel, path, key, mod,
+            hardware_keycode):
+        accel_key = Gtk.accelerator_name(key, mod)
+        name = self.shortcut_liststore[path][0]
+        self.shortcut_liststore[path][1] = key
+        self.shortcut_liststore[path][2] = int(mod)
+        self.app.conf['custom-shortcut'][name] = accel_key

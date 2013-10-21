@@ -196,7 +196,8 @@ class Player(Gtk.Box):
         self.volume = Gtk.VolumeButton()
         self.volume.props.use_symbolic = True
         self.volume.set_value(app.conf['volume'] ** 0.33)
-        self.volume.connect('value-changed', self.on_volume_value_changed)
+        self.volume_sid = self.volume.connect('value-changed',
+                self.on_volume_value_changed)
         scale_box.pack_start(self.volume, False, False, 0)
 
         # init playbin and dbus
@@ -386,7 +387,7 @@ class Player(Gtk.Box):
 
     def on_volume_value_changed(self, volume, value):
         # reduce volume value because in 0~0.2 it is too sensitive
-        self.set_volume(value)
+        self.set_volume(value, refresh=False)
 
     def update_player_info(self):
         def _update_pic(info, error=None):
@@ -537,6 +538,7 @@ class Player(Gtk.Box):
         dialog.destroy()
         self.app.load_styles()
         self.app.lrc.update_highlighted_tag()
+        self.app.shortcut.rebind_keys()
 
     def on_main_menu_about_activate(self, menu_item):
         dialog = Gtk.AboutDialog()
@@ -567,6 +569,9 @@ class Player(Gtk.Box):
 
     # control player, UI and dbus
     def start_player(self, load=False):
+        if self.play_type == PlayType.NONE:
+            return
+
         self.dbus.set_Playing()
 
         self.play_button.set_icon_name('media-playback-pause-symbolic')
@@ -576,7 +581,12 @@ class Player(Gtk.Box):
             self.init_meta()
             GLib.timeout_add(1500, self.init_adjustment)
 
+    def start_player_cb(self, load=False):
+        GLib.idle_add(self.start_player, load)
+
     def pause_player(self):
+        if self.play_type == PlayType.NONE:
+            return
         self.dbus.set_Pause()
         self.play_button.set_icon_name('media-playback-start-symbolic')
         self.playbin.pause()
@@ -584,17 +594,27 @@ class Player(Gtk.Box):
             GLib.source_remove(self.adj_timeout)
             self.adj_timeout = 0
 
+    def pause_player_cb(self):
+        GLib.idle_add(self.pause_player)
+
     def play_pause(self):
+        if self.play_type == PlayType.NONE:
+            return
         if self.playbin.is_playing():
             self.pause_player()
         else:
             self.start_player()
 
+    def play_pause_cb(self):
+        GLib.idle_add(self.play_pause)
+
     def stop_player(self):
-        self.play_button.set_icon_name('media-playback-pause-symbolic')
+        if self.play_type == PlayType.NONE:
+            return
+        self.play_button.set_icon_name('media-playback-stop-symbolic')
         self.playbin.stop()
         self.scale.set_value(0)
-        self.scale.set_sensitive(False)
+        #self.scale.set_sensitive(False)
         self.show_mv_btn.set_sensitive(False)
         self.show_mv_btn.handler_block(self.show_mv_sid)
         self.show_mv_btn.set_active(False)
@@ -604,8 +624,11 @@ class Player(Gtk.Box):
             GLib.source_remove(self.adj_timeout)
             self.adj_timeout = 0
 
+    def stop_player_cb(self):
+        GLib.idle_add(self.stop_player)
+
     def load_prev(self):
-        if not self.can_go_previous():
+        if self.play_type == PlayType.NONE or not self.can_go_previous():
             return
         self.stop_player()
         _repeat = self.repeat_btn.get_active()
@@ -613,6 +636,9 @@ class Player(Gtk.Box):
             self.app.playlist.play_prev_song(repeat=_repeat, use_mv=False)
         elif self.play_type == PlayType.MV:
             self.app.playlist.play_prev_song(repeat=_repeat, use_mv=True)
+
+    def load_prev_cb(self):
+        GLib.idle_add(self.load_prev)
 
     def load_next(self):
         if self.play_type == PlayType.NONE:
@@ -637,16 +663,33 @@ class Player(Gtk.Box):
         elif self.play_type == PlayType.MV:
             self.app.playlist.play_next_song(repeat=_repeat, use_mv=True)
 
-    def set_volume(self, vol):
+    def load_next_cb(self):
+        GLib.idle_add(self.load_next)
+
+    def get_volume(self):
+        return self.playbin.get_volume()
+
+    def set_volume(self, vol, refresh=True):
         mod_value = vol ** 3
         self.app.conf['volume'] = mod_value
         self.playbin.set_volume(mod_value)
+        print('set volume:', mod_value)
+        if refresh:
+            self.volume.handler_block(self.volume_sid)
+            self.volume.set_value(vol)
+            self.volume.handler_unblock(self.volume_sid)
+
+    def set_volume_cb(self, vol):
+        GLib.idle_add(self.set_volume, vol)
 
     def seek(self, offset):
         if self.play_type == PlayType.NONE:
             return
         self.playbin.seek(offset)
         self.sync_label_by_adjustment()
+
+    def seek_cb(self, offset):
+        GLib.idle_add(self.seek, offset)
 
     def can_go_previous(self):
         if self.play_type in (PlayType.MV, PlayType.SONG):
