@@ -558,8 +558,7 @@ class PlayList(Gtk.Box):
         return result.fetchone()
 
     def remove_song_from_cached_db(self, rid):
-        sql = 'DELETE FROM `songs` WHERE rid=? LIMIT 1'
-        print(sql, rid)
+        sql = 'DELETE FROM `songs` WHERE rid=?'
         self.cursor.execute(sql, (rid, ))
 
     def get_song_path_in_liststore(self, liststore, rid, pos=3):
