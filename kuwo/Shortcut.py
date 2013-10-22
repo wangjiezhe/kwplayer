@@ -4,7 +4,12 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in http://www.gnu.org/licenses/gpl-3.0.html
 
-from keybinder.keybinder_gtk import KeybinderGtk
+try:
+    from keybinder.keybinder_gtk import KeybinderGtk
+    keybinder_imported = True
+except ImportError as e:
+    keybinder_imported = False
+    print('Warning: no python3-keybinder module found, global keyboard shortcut will be disabled!')
 
 from kuwo import Config
 ShortcutMode = Config.ShortcutMode
@@ -24,9 +29,10 @@ class Shortcut:
                 'Stop': lambda *args: player.stop_player_cb(),
                 }
 
-        self.keybinder = KeybinderGtk()
-        self.bind_keys()
-        self.keybinder.start()
+        if keybinder_imported:
+            self.keybinder = KeybinderGtk()
+            self.bind_keys()
+            self.keybinder.start()
             
     def volume_up(self, *args):
         vol = self.player.get_volume() ** 0.33 + 0.1
@@ -41,6 +47,8 @@ class Shortcut:
         self.player.set_volume_cb(vol)
 
     def bind_keys(self):
+        if not keybinder_imported:
+            return
         curr_mode = self.player.app.conf['shortcut-mode']
         if curr_mode == ShortcutMode.NONE:
             return
@@ -56,4 +64,5 @@ class Shortcut:
 
     def quit(self):
         print('Shortcut.quit')
-        self.keybinder.stop()
+        if keybinder_imported:
+            self.keybinder.stop()

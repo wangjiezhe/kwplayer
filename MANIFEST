@@ -14,6 +14,7 @@ kuwo/PlayerDBus.py
 kuwo/Preferences.py
 kuwo/Radio.py
 kuwo/Search.py
+kuwo/Shortcut.py
 kuwo/Themes.py
 kuwo/TopCategories.py
 kuwo/TopList.py
