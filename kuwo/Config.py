@@ -25,7 +25,7 @@ locale.textdomain('kuwo')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '3.1.3'
+VERSION = '3.1.4'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>',]
 DESCRIPTION = _('A simple music player which can get songs from kuwo.cn')
@@ -71,9 +71,9 @@ _default_conf = {
         'lrc-highlighted-text-size': 26,
         'shortcut-mode': ShortcutMode.DEFAULT,
         'custom-shortcut': {
-            'VolumeUp': '<Ctrl><Shift>plus',
-            'VolumeDown': '<Ctrl><Shift>minus',
-            'Mute': '<Ctrl><Shift>0',
+            'VolumeUp': '<Ctrl><Shift>U',
+            'VolumeDown': '<Ctrl><Shift>D',
+            'Mute': '<Ctrl><Shift>M',
             'Previous': '<Ctrl><Shift>Left',
             'Next': '<Ctrl><Shift>Right',
             'Pause': '<Ctrl><Shift>Down',

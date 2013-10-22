@@ -30,19 +30,20 @@ scripts = ['kwplayer', ]
 
 if __name__ == '__main__':
     setup(
-        name='kwplayer',
-        version=Config.VERSION,
-        packages=['kuwo'],
-        author='LiuLang',
-        author_email='gsushzhsosgsu@gmail.com',
-        url=Config.HOMEPAGE,
-        platforms='All',
-        scripts=scripts,
-        data_files=build_data_files(),
-        license='http://www.gnu.org/licenses/gpl-3.0.html',
-        description='An elegant music player which can get songs from kuwo.cn',
-        long_description='''\
+        name = 'kwplayer',
+        description = 'An elegant music player which can get songs from kuwo.cn',
+        version = Config.VERSION,
+        license = 'GPLv3',
+        url = Config.HOMEPAGE,
+
+        author = 'LiuLang',
+        author_email = 'gsushzhsosgsu@gmail.com',
+
+        packages = ['kuwo', ],
+        scripts = scripts,
+        data_files = build_data_files(),
+        long_description = '''\
 KW music player is used to get music resources from Internet.
 It can also play MV, show lyrics and show photo albums of artists.
-'''
-            )
+''',
+        )
