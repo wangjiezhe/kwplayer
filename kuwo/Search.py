@@ -55,7 +55,8 @@ class Search(Gtk.Box):
         # checked, name, artist, album, rid, artistid, albumid
         self.liststore_songs = Gtk.ListStore(bool, str, str, str, int, int,
                 int)
-        self.control_box = Widgets.ControlBox(self.liststore_songs, app)
+        self.control_box = Widgets.ControlBox(self.liststore_songs,
+                app, select_all=False)
         box_top.pack_end(self.control_box, False, False, 0)
 
         self.notebook = Gtk.Notebook()
@@ -106,19 +107,19 @@ class Search(Gtk.Box):
         if not state:
             return
         self.notebook.set_current_page(page)
-        if page == 0:
+        if page == 0 and self.songs_tab_inited:
             self.control_box.show_all()
         else:
             self.control_box.hide()
 
-        if page == 0 and not self.songs_tab_inited:
-            self.on_search_entry_activate(None, False)
-        elif page == 1 and not self.artists_tab_inited:
-            self.on_search_entry_activate(None, False)
-        elif page == 2 and not self.albums_tab_inited:
+        if (page == 0 and not self.songs_tab_inited) or \
+           (page == 1 and not self.artists_tab_inited) or \
+           (page == 2 and not self.artists_tab_inited):
             self.on_search_entry_activate(None, False)
 
     def on_search_entry_activate(self, search_entry, reset_status=True):
+        if len(self.search_entry.get_text()) == 0:
+            return
         if reset_status:
             self.reset_search_status()
         page = self.notebook.get_current_page()
@@ -152,6 +153,7 @@ class Search(Gtk.Box):
                     int(song['ALBUMID']), ])
 
         keyword = self.search_entry.get_text()
+        self.app.playlist.advise_new_playlist_name(keyword)
         if len(keyword) == 0:
             return
         if reset_status:

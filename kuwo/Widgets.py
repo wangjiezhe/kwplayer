@@ -127,13 +127,13 @@ class TreeViewColumnIcon(Gtk.TreeViewColumn):
 
 
 class ControlBox(Gtk.Box):
-    def __init__(self, liststore, app):
+    def __init__(self, liststore, app, select_all=True):
         super().__init__(spacing=5)
         self.liststore = liststore
         self.app = app
 
         button_selectall = Gtk.ToggleButton(_('Select All'))
-        button_selectall.set_active(True)
+        button_selectall.set_active(select_all)
         button_selectall.connect('toggled', 
                 self.on_button_selectall_toggled)
         self.pack_start(button_selectall, False, False, 0)

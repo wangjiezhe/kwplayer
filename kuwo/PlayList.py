@@ -128,6 +128,7 @@ class PlayList(Gtk.Box):
         self.cache_timeout = 0
 
         self.playlist_menu = Gtk.Menu()
+        self.playlist_advice_disname = ''
 
         self.conn = sqlite3.connect(Config.SONG_DB)
         self.cursor = self.conn.cursor()
@@ -144,6 +145,9 @@ class PlayList(Gtk.Box):
         col_name = Gtk.TreeViewColumn('List Name', list_disname, 
                 text=0, editable=2)
         self.treeview_left.append_column(col_name)
+        #col_name.props.max_width = 30
+        #col_name.props.fixed_width = 30
+        #col_name.props.min_width = 15
         tree_sel = self.treeview_left.get_selection()
         tree_sel.connect('changed', self.on_tree_selection_left_changed)
         self.treeview_left.enable_model_drag_dest(
@@ -268,8 +272,6 @@ class PlayList(Gtk.Box):
                 songs = self.get_all_cached_songs_from_db()
             else:
                 songs = playlists[list_name]
-            if list_name not in ('Cached', 'Caching'):
-                self.append_menu_item_to_playlist_menu(disname, list_name)
             self.init_tab(list_name, songs)
 
     def init_tab(self, list_name, songs):
@@ -576,7 +578,6 @@ class PlayList(Gtk.Box):
             return
         old_name = self.liststore_left[path][0]
         self.liststore_left[path][0] = new_name
-        self.update_item_name_in_playlist_menu(old_name, new_name)
 
     def on_add_playlist_button_clicked(self, button):
         list_name = str(time.time())
@@ -586,7 +587,6 @@ class PlayList(Gtk.Box):
         selection = self.treeview_left.get_selection()
         selection.select_iter(_iter)
         self.init_tab(list_name, [])
-        self.append_menu_item_to_playlist_menu(disname, list_name)
 
     def on_remove_playlist_button_clicked(self, button):
         selection = self.treeview_left.get_selection()
@@ -600,7 +600,6 @@ class PlayList(Gtk.Box):
             return
         self.notebook.remove_page(index)
         model.remove(_iter)
-        self.remove_menu_item_from_playlist_menu(disname)
 
     def on_export_playlist_button_clicked(self, button):
         def do_export(button):
@@ -676,47 +675,46 @@ class PlayList(Gtk.Box):
         dialog.run()
         dialog.destroy()
 
-    # other button can activate this function
-    def append_menu_item_to_playlist_menu(self, disname, list_name):
-        menu_item = Gtk.MenuItem(disname)
-        menu_item.connect('activate', self.on_menu_item_active)
-        menu_item.list_name = list_name
-        self.playlist_menu.append(menu_item)
+    def advise_new_playlist_name(self, disname):
+        self.playlist_advice_disname = disname
 
-    def remove_menu_item_from_playlist_menu(self, disname):
-        item = self.get_item_from_playlist_menu(disname)
-        self.playlist_menu.remove(item)
+    def on_advice_menu_item_activated(self, advice_item):
+        list_name = str(time.time())
+        self.liststore_left.append([self.playlist_advice_disname,
+                                    list_name,
+                                    True])
+        self.init_tab(list_name, [])
+        advice_item.list_name = list_name
+        self.on_menu_item_activated(advice_item)
 
-    def advice_new_playlist_name(self, disname):
-        pass
-        # remove old advice
-        # check exists
-        # create and connect signal
-        # append to self.playlist_menu
-
-    def update_item_name_in_playlist_menu(self, old_name, new_name):
-        item = self.get_item_from_playlist_menu(old_name)
-        item.set_label(new_name)
-
-    def get_item_from_playlist_menu(self, disname):
-        menu = self.playlist_menu
-        items = menu.get_children()
-        for item in items:
-            if item.get_label() == disname:
-                return item
-
-    def on_menu_item_active(self, menu_item):
+    def on_menu_item_activated(self, menu_item):
         list_name = menu_item.list_name
-        songs = self.playlist_menu.songs
+        songs = menu_item.get_parent().songs
         self.add_songs_to_playlist(songs, list_name)
 
     def popup_playlist_menu(self, button, songs):
-        def set_pos(menu, user_data=None):
-            event = Gtk.get_current_event().button
-            alloc = button.get_allocation()
-            return (event.x, event.y + alloc.height, True)
-
         menu = self.playlist_menu
+        while len(menu.get_children()) > 0:
+            menu.remove(menu.get_children()[0])
+
+        for item in self.liststore_left:
+            if item[1] in ('Cached', 'Caching'):
+                continue
+            menu_item = Gtk.MenuItem(item[0])
+            menu_item.list_name = item[1]
+            menu_item.connect('activate', self.on_menu_item_activated)
+            menu.append(menu_item)
+
+        if self.playlist_advice_disname:
+            sep_item = Gtk.SeparatorMenuItem()
+            menu.append(sep_item)
+            advice_item = Gtk.MenuItem('+ ' + self.playlist_advice_disname)
+            advice_item.connect('activate',
+                    self.on_advice_menu_item_activated)
+            advice_item.set_tooltip_text(
+                    _('Create this playlist and add songs into it'))
+            menu.append(advice_item)
+
         menu.songs = songs
         menu.show_all()
         menu.popup(None, None, None, None, 1, 

@@ -381,6 +381,7 @@ class Artists(Gtk.Box):
         self.artist_mv_control_box.hide()
         self.album_control_box.hide()
         self.label.set_label(artist)
+        self.app.playlist.advise_new_playlist_name(artist)
         # switch to `songs` tab
         if self.artist_songs_button.get_active():
             self.show_artist_songs()
@@ -593,6 +594,7 @@ class Artists(Gtk.Box):
         self.curr_artist_id = artistid
         self.artist_button.set_label(artist)
         self.label.set_label(album)
+        self.app.playlist.advise_new_playlist_name(album)
         self.buttonbox.show_all()
         self.artist_control_box.hide()
         self.artist_mv_control_box.hide()

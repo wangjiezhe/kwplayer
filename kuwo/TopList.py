@@ -83,6 +83,7 @@ class TopList(Gtk.Box):
         model = iconview.get_model()
         self.buttonbox.show_all()
         self.label.set_label(model[path][1])
+        self.app.playlist.advise_new_playlist_name(model[path][1])
         self.show_toplist_songs(model[path][2])
 
     def show_toplist_songs(self, nid):

@@ -133,6 +133,8 @@ class Themes(Gtk.Box):
     
     def show_songs(self, init=False):
         if init:
+            self.app.playlist.advise_new_playlist_name(
+                    self.label.get_text())
             self.liststore_songs.clear()
             self.songs_page = 0
             self.scrolled_sub.hide()

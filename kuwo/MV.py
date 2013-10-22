@@ -107,6 +107,8 @@ class MV(Gtk.Box):
                 self.append_songs()
 
         if init:
+            self.app.playlist.advise_new_playlist_name(
+                    self.label.get_text())
             self.songs_page = 0
             self.liststore_songs.clear()
         Net.async_call(Net.get_mv_songs, _append_songs, 

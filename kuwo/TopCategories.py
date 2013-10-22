@@ -163,6 +163,7 @@ class TopCategories(Gtk.Box):
             self.curr_list_name = model[path][1]
             self.curr_list_id = model[path][2]
             self.label.set_label(self.curr_list_name)
+            self.app.playlist.advise_new_playlist_name(self.curr_list_name)
             self.button_sub1.set_label(self.curr_sub1_name)
             self.append_songs(init=True)
 
@@ -233,6 +234,8 @@ class TopCategories(Gtk.Box):
                 self.append_songs()
 
         if init:
+            self.app.playlist.advise_new_playlist_name(
+                    self.label.get_text())
             self.songs_page = 0
             self.scrolled_sub1.hide()
             self.button_sub1.show_all()
@@ -261,7 +264,6 @@ class TopCategories(Gtk.Box):
         self.button_sub1.hide()
         self.button_sub2.hide()
         self.control_box.hide()
-        self.label.set_label(self.button_sub1.get_label())
         self.scrolled_sub1.show_all()
 
     def on_button_sub2_clicked(self, btn):
