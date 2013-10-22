@@ -78,6 +78,9 @@ class NormalSongTab(Gtk.ScrolledWindow):
             model, paths = selection.get_selected_rows()
             # paths needs to be reversed, or else an IndexError throwed.
             for path in reversed(paths):
+                if self.list_name == 'Cached':
+                    self.app.playlist.remove_song_from_cached_db(
+                            model[path][3])
                 model.remove(model[path].iter)
 
     def on_treeview_row_activated(self, treeview, path, column):
@@ -556,7 +559,8 @@ class PlayList(Gtk.Box):
 
     def remove_song_from_cached_db(self, rid):
         sql = 'DELETE FROM `songs` WHERE rid=? LIMIT 1'
-        result = self.cursor.execute(sql, (rid, ))
+        print(sql, rid)
+        self.cursor.execute(sql, (rid, ))
 
     def get_song_path_in_liststore(self, liststore, rid, pos=3):
         i = 0
@@ -683,6 +687,13 @@ class PlayList(Gtk.Box):
     def remove_menu_item_from_playlist_menu(self, disname):
         item = self.get_item_from_playlist_menu(disname)
         self.playlist_menu.remove(item)
+
+    def advice_new_playlist_name(self, disname):
+        pass
+        # remove old advice
+        # check exists
+        # create and connect signal
+        # append to self.playlist_menu
 
     def update_item_name_in_playlist_menu(self, old_name, new_name):
         item = self.get_item_from_playlist_menu(old_name)
