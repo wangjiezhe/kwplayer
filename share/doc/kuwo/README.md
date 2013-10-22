@@ -48,10 +48,6 @@ Debian 手动安装依赖包
 * python3 - 推荐python3.3以上的版本, 不然mutagenx模块无法使用(用于消除mp3/ape乱码的).
 * python3-dbus
 * python3-gi  -  gkt3的python3绑定(Fedora中叫做python3-gobject);
-* python3-xlib - X的底层接口, 这个是从python-xlib迁移过来的, 刚刚完成.
-可以在这里找到<https://github.com/LiuLang/python3-xlib>
-* python3-keybinder 这个是用于绑定全局快捷键.
-<https://github.com/LiuLang/python3-keybinder>
 * gstreamer1.0-plugins-base
 * gstreamer1.0-plugins-good
 * gstreamer-plugins-ugly
@@ -66,7 +62,14 @@ Ubuntu 12.04中缺少了这个包, 请使用`# pip3 install plyvel` 来安装, �
 优先安装python3-dev, libleveldb-dev这两个头文件.
 * python3-mutagenx - 这个需要手动安装. 可以在这里下载:
 <https://github.com/LordSputnik/mutagen>, 如果你没有python3.3 比如Debian
-Wheezy, Ubuntu 12.04, 就不需要安装这个模块了, 因为它不支持python3.2以下的版本.
+Wheezy, Ubuntu 12.04, 就不需要安装这个模块了, 因为它不支持python3.2以下的
+版本. `# pip3 install mutagenx`
+* python3-xlib - X的底层接口, 这个是从python-xlib迁移过来的, 刚刚完成.
+可以在这里找到<https://github.com/LiuLang/python3-xlib>,
+`# pip3 install python3-xlib`
+* python3-keybinder 这个是用于绑定全局快捷键.
+<https://github.com/LiuLang/python3-keybinder>
+`# pip3 install python3-keybinder`
 
 上面是gstreamer1.0的, 对于旧的gstreamer0.10版, 需要大致修改一下, 还有,
 gstreamer1.0-libav在0.10版中的名称是gstreamer0.10-ffmpeg.
@@ -83,8 +86,8 @@ Fedora 中手动安装依赖包
 * 使用rpmfushion, 可以参考这篇文章:<http://blog.csdn.net/sabalol/article/details/9286073>
 * 安装gstreamer的一堆依赖, 上面列出的, 名称都大致一样.
 * 安装leveldb 和 python3-plyvel, python3-plyvel是leveldb的另一个python绑定.
-* 安装python3-mutagenx, <https://github.com/LordSputnik/mutagen>
-* 安装python3-xlib, python3-keybinder
+* 安装python3-mutagenx,
+* 安装python3-xlib 和 python3-keybinder
 
 在Arch 中手动安装依赖包
 -----------------------
@@ -96,8 +99,6 @@ Fedora 中手动安装依赖包
 [注:] arch中, 默认的python版本是python3.
 
 * python-dbus
-* python-xlib
-* python-keybinder
 * gst-plugins-base 根据@mindcat的测试补充进来的
 * gst-plugins-good | gstreamer.01.0-good-plugins
 * gst-plugins-ugly | gstremaer0.10-ugly-plugins
@@ -107,8 +108,11 @@ Fedora 中手动安装依赖包
 * py-leveldb | plyvel 这两个任选一个, 它们分别由不同的团队在维护:
 <http://code.google.com/p/py-leveldb/> 和
 <https://github.com/wbolster/plyvel>
+比如, 可以: `# pip install plyvel`
 * gnome-icon-theme-symbolic-git
-* python3-mutagenx <https://github.com/LordSputnik/mutagen>
+* python3-mutagenx - ` # pip install mutagenx`
+* python3-xlib - `# pip install python3-xlib`
+* python3-keybinder - `# pip install python3-keybinder`
 
 
 Gentoo 中手动安装依赖包
