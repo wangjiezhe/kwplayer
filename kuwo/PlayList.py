@@ -67,11 +67,10 @@ class NormalSongTab(Gtk.ScrolledWindow):
         col_album = Widgets.TreeViewColumnText('Album', album, text=2)
         self.treeview.append_column(col_album)
 
-        if list_name != 'Cached':
-            delete = Gtk.CellRendererPixbuf(icon_name='user-trash-symbolic')
-            col_delete = Widgets.TreeViewColumnIcon('Delete', delete)
-            self.treeview.append_column(col_delete)
-            self.connect('key-press-event', self.on_key_pressed)
+        delete = Gtk.CellRendererPixbuf(icon_name='user-trash-symbolic')
+        col_delete = Widgets.TreeViewColumnIcon('Delete', delete)
+        self.treeview.append_column(col_delete)
+        self.connect('key-press-event', self.on_key_pressed)
         
     def on_key_pressed(self, widget, event):
         if event.keyval == Gdk.KEY_Delete:
@@ -92,6 +91,8 @@ class NormalSongTab(Gtk.ScrolledWindow):
         elif index == 2:
             self.app.search.search_album(song['album'])
         elif index == 3:
+            if self.list_name == 'Cached':
+                self.app.playlist.remove_song_from_cached_db(song['rid'])
             model.remove(model[path].iter)
 
     def on_drag_data_get(self, treeview, drag_context, sel_data, info, 
@@ -328,6 +329,7 @@ class PlayList(Gtk.Box):
             return
         liststore.append(Widgets.song_dict_to_row(song))
         self.curr_playing = [list_name, len(liststore)-1, ]
+        self.locate_curr_song()
         if use_mv:
             self.app.player.load_mv(song)
         else:
@@ -489,6 +491,7 @@ class PlayList(Gtk.Box):
         if self.prev_playing is None:
             return
         self.curr_playing[1] = self.prev_playing
+        self.locate_curr_song()
         if use_mv:
             self.app.player.load_mv(prev_song)
         else:
@@ -497,6 +500,7 @@ class PlayList(Gtk.Box):
     def play_next_song(self, repeat, use_mv=False):
         next_song = self.get_next_song(repeat=repeat)
         self.curr_playing[1] = self.next_playing
+        self.locate_curr_song()
         if use_mv:
             self.app.player.load_mv(next_song)
         else:
@@ -521,6 +525,7 @@ class PlayList(Gtk.Box):
             left_path += 1
         selection_left = self.treeview_left.get_selection()
         selection_left.select_path(left_path)
+        print('left path:', left_path)
         self.app.popup_page(self.app_page)
 
     # DB operations
@@ -548,6 +553,10 @@ class PlayList(Gtk.Box):
         sql = 'SELECT * FROM `songs` WHERE rid=? LIMIT 1'
         result = self.cursor.execute(sql, (rid, ))
         return result.fetchone()
+
+    def remove_song_from_cached_db(self, rid):
+        sql = 'DELETE FROM `songs` WHERE rid=? LIMIT 1'
+        result = self.cursor.execute(sql, (rid, ))
 
     def get_song_path_in_liststore(self, liststore, rid, pos=3):
         i = 0
