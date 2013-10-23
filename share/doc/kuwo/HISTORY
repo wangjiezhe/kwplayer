@@ -1,3 +1,16 @@
+v3.1.5 - 2013.10.23
+* Songs in Cached playlist can be deleted
+* Can automatically create a new playlist and add songs into it.
+* python3-keybinder is optional now
+* Select None by default in Search tab
+* Fixed: sqlite3 does not support LIMIT command in Arch Linux
+* i18n updated
+* dir_entry in Preferences dialog cannot be foucused
+
+v3.1.4 - 2013.10.22
+* Can control player with keyboard (global keyboard shortcut)
+* Fixed: set_volume() with incorrect value.
+
 v3.1.3 - 2013.10.20
 * Fixed: memory leak caused by CssProvider.
 * Automatically load next song when error occurs.
