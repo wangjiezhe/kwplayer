@@ -126,6 +126,7 @@ def iconvtag(song_path, song):
         audio = APEv2File(song_path)
         if audio.tags is None:
             audio.add_tags()
+        # TODO: FIXME:
         audio.tags.clear()
         audio.tags['title'] = song['name']
         audio.tags['artist'] = song['artist']

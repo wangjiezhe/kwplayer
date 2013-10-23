@@ -92,6 +92,7 @@ class ChooseFolder(Gtk.Box):
         self.dir_entry = Gtk.Entry()
         self.dir_entry.set_text(self.old_dir)
         self.dir_entry.props.editable = False
+        self.dir_entry.props.can_focus = False
         self.dir_entry.props.width_chars = 20
         hbox.pack_start(self.dir_entry, True, True, 0)
 
@@ -113,8 +114,9 @@ class ChooseFolder(Gtk.Box):
             new_dir = dialog.get_filename()
             dialog.destroy()
             self.dir_entry.set_text(new_dir)
-            self.app.conf[self.conf_name] = new_dir
-            GLib.timeout_add(500, self.move_items, new_dir)
+            if new_dir != self.app.conf[self.conf_name]:
+                self.app.conf[self.conf_name] = new_dir
+                GLib.timeout_add(500, self.move_items, new_dir)
             return
 
         dialog = Gtk.FileChooserDialog(_('Choose a Folder'), self.parent,
@@ -159,12 +161,11 @@ class ChooseFolder(Gtk.Box):
 
 class Preferences(Gtk.Dialog):
     def __init__(self, app):
+        self.app = app
         super().__init__(_('Preferences'), app.window, 0,
                 (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE,))
         self.set_modal(True)
         self.set_transient_for(app.window)
-
-        self.app = app
         self.set_default_size(600, 320)
         self.set_border_width(5)
         box = self.get_content_area()
