@@ -79,6 +79,7 @@ _default_conf = {
             'Pause': '<Ctrl><Shift>Down',
             'Play': '<Ctrl><Shift>Down',
             'Stop': '<Ctrl><Shift>Up',
+            'Launch': '<Ctrl><Shift>L',
             },
         'default-shortcut': {
             'VolumeUp': 'XF86AudioRaiseVolume',
@@ -89,6 +90,7 @@ _default_conf = {
             'Pause': 'XF86AudioPause',
             'Play': 'XF86AudioPlay',
             'Stop': 'XF86AudioStop',
+            'Launch': 'XF86AudioMedia',
             },
         }
 
@@ -120,6 +122,11 @@ def load_conf():
         for key in _default_conf:
             if key not in conf:
                 conf[key] = _default_conf[key]
+        # 3.1.5 -> 3.1.6
+        if 'Launch' not in conf['custom-shortcut']:
+            conf['custom-shortcut']['Launch'] = _default_conf['custom-shortcut']['Launch']
+        if 'Launch' not in conf['default-shortcut']:
+            conf['default-shortcut']['Launch'] = _default_conf['default-shortcut']['Launch']
         return conf
     dump_conf(_default_conf)
     return _default_conf

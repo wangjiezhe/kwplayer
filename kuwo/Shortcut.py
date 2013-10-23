@@ -4,6 +4,8 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in http://www.gnu.org/licenses/gpl-3.0.html
 
+from gi.repository import GLib
+
 try:
     from keybinder.keybinder_gtk import KeybinderGtk
     keybinder_imported = True
@@ -27,6 +29,7 @@ class Shortcut:
                 'Pause': lambda *args: player.play_pause_cb(),
                 'Play': lambda *args: player.play_pause_cb(),
                 'Stop': lambda *args: player.stop_player_cb(),
+                'Launch': self.present_window,
                 }
 
         if keybinder_imported:
@@ -45,6 +48,9 @@ class Shortcut:
         if vol < 0:
             vol = 0
         self.player.set_volume_cb(vol)
+
+    def present_window(self, *args):
+        GLib.idle_add(self.player.app.window.present)
 
     def bind_keys(self):
         if not keybinder_imported:
