@@ -50,11 +50,10 @@ Debian 手动安装依赖包
 * python3-gi  -  gkt3的python3绑定(Fedora中叫做python3-gobject);
 * gstreamer1.0-plugins-base
 * gstreamer1.0-plugins-good
-* gstreamer-plugins-ugly
+* gstreamer1.0-plugins-ugly
 * gstreamer1.0-x
 * gir1.2-gstreamer-1.0,
 * gir1.2-gst-plugins-base-1.0
-* gstreamer1.0-libav 视频/音频解码器
 * gstreamer1.0-pulseaudio
 * leveldb - 强大的NoSQL数据库(用于缓存数据);
 * python3-leveldb  -  leveldb的python3绑定(Fedora中是python3-plyvel);
@@ -71,8 +70,7 @@ Wheezy, Ubuntu 12.04, 就不需要安装这个模块了, 因为它不支持pytho
 <https://github.com/LiuLang/python3-keybinder>
 `# pip3 install python3-keybinder`
 
-上面是gstreamer1.0的, 对于旧的gstreamer0.10版, 需要大致修改一下, 还有,
-gstreamer1.0-libav在0.10版中的名称是gstreamer0.10-ffmpeg.
+上面是gstreamer1.0的, 对于旧的gstreamer0.10版, 需要大致修改一下.
 
 [注]: pip3是python3-pip包提供的命令, 它是python3的一个包管理器, 可以自动安装
 更新, 卸载python3的模块包, 相录于debian中的dpkg. 有些系统(比如Arch Linux),
