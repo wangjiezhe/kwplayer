@@ -29,10 +29,11 @@ from kuwo.TopList import TopList
 from kuwo.Shortcut import Shortcut
 
 GObject.threads_init()
+DBUS_APP_NAME = 'org.liulang.kwplayer'
 
 class App:
     def __init__(self):
-        self.app = Gtk.Application.new('org.liulang.kwplayer', 0)
+        self.app = Gtk.Application.new(DBUS_APP_NAME, 0)
         self.app.connect('startup', self.on_app_startup)
         self.app.connect('activate', self.on_app_activate)
         self.app.connect('shutdown', self.on_app_shutdown)

@@ -5,12 +5,36 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
-
+import dbus
 from gi.repository import Gtk
 import sys
 
-from kuwo.App import App
 
-if __name__ == '__main__':
+BUS_NAME = 'org.mpris.MediaPlayer2.kwplayer'
+MPRIS_PATH = '/org/mpris/MediaPlayer2'
+ROOT_IFACE = 'org.mpris.MediaPlayer2'
+
+def check_loaded():
+    sb = dbus.SessionBus()
+    try:
+        kw_proxy = sb.get_object(BUS_NAME, MPRIS_PATH)
+        print('kwplayer is already loaded, and will be presented.')
+        prop = dbus.Interface(kw_proxy, ROOT_IFACE)
+        prop.Raise()
+        return True
+    except dbus.exceptions.DBusException:
+        return False
+
+def load_app():
+    from kuwo.App import App
     app = App()
     sys.exit(app.run(sys.argv))
+
+def main():
+    is_loaded = check_loaded()
+    if not is_loaded:
+        load_app()
+
+
+if __name__ == '__main__':
+    main()
