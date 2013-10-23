@@ -611,7 +611,7 @@ class Player(Gtk.Box):
     def stop_player(self):
         if self.play_type == PlayType.NONE:
             return
-        self.play_button.set_icon_name('media-playback-stop-symbolic')
+        self.play_button.set_icon_name('media-playback-pause-symbolic')
         self.playbin.stop()
         self.scale.set_value(0)
         #self.scale.set_sensitive(False)
