@@ -15,7 +15,6 @@ import json
 
 GObject.threads_init()
 dbus.mainloop.glib.threads_init()
-DBusGMainLoop(set_as_default=True)
 
 
 BUS_NAME = 'org.mpris.MediaPlayer2.kwplayer'
@@ -36,7 +35,8 @@ class PlayerDBus(dbus.service.Object):
     def __init__(self, player):
         self.player = player
         self.app = player.app
-        session_bus = dbus.SessionBus()
+        loop = DBusGMainLoop(set_as_default=True)
+        session_bus = dbus.SessionBus(loop)
         bus_name = dbus.service.BusName(BUS_NAME, bus=session_bus)
         mpris_path = dbus.service.ObjectPath(MPRIS_PATH)
         super().__init__(bus_name=bus_name, object_path=mpris_path)
