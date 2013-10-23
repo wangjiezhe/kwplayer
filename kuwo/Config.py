@@ -28,7 +28,7 @@ APPNAME = _('KW Player')
 VERSION = '3.1.4'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>',]
-DESCRIPTION = _('A simple music player which can get songs from kuwo.cn')
+DESCRIPTION = _('A simple music player on Linux desktop.')
 
 HOME_DIR = os.path.expanduser('~')
 CACHE_DIR = os.path.join(HOME_DIR, '.cache', 'kuwo')
