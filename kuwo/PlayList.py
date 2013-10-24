@@ -368,7 +368,7 @@ class PlayList(Gtk.Box):
             return
         liststore.append(Widgets.song_dict_to_row(song))
         self.curr_playing = [list_name, len(liststore)-1, ]
-        self.locate_curr_song()
+        self.locate_curr_song(popup_page=False)
         if use_mv:
             self.app.player.load_mv(song)
         else:
@@ -530,7 +530,7 @@ class PlayList(Gtk.Box):
         if self.prev_playing is None:
             return
         self.curr_playing[1] = self.prev_playing
-        self.locate_curr_song()
+        self.locate_curr_song(popup_page=False)
         if use_mv:
             self.app.player.load_mv(prev_song)
         else:
@@ -539,13 +539,13 @@ class PlayList(Gtk.Box):
     def play_next_song(self, repeat, use_mv=False):
         next_song = self.get_next_song(repeat=repeat)
         self.curr_playing[1] = self.next_playing
-        self.locate_curr_song()
+        self.locate_curr_song(popup_page=False)
         if use_mv:
             self.app.player.load_mv(next_song)
         else:
             self.app.player.load(next_song)
 
-    def locate_curr_song(self):
+    def locate_curr_song(self, popup_page=True):
         '''
         switch current playlist and select curr_song
         '''
@@ -564,7 +564,8 @@ class PlayList(Gtk.Box):
             left_path += 1
         selection_left = self.treeview_left.get_selection()
         selection_left.select_path(left_path)
-        self.app.popup_page(self.app_page)
+        if popup_page:
+            self.app.popup_page(self.app_page)
 
     # DB operations
     def append_cached_song(self, song):
