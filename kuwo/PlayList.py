@@ -32,6 +32,14 @@ DRAG_TARGETS = [
         ]
 DRAG_ACTION = Gdk.DragAction.DEFAULT | Gdk.DragAction.COPY
 
+class TreeViewColumnText(Widgets.TreeViewColumnText):
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
+        self.props.clickable = True
+        self.props.reorderable = True
+        self.props.sort_indicator = True
+        self.props.sort_column_id = kwds['text']
+
 class NormalSongTab(Gtk.ScrolledWindow):
     def __init__(self, app, list_name):
         super().__init__()
@@ -42,34 +50,42 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.liststore = Gtk.ListStore(str, str, str, int, int, int)
 
         self.treeview = Gtk.TreeView(model=self.liststore)
-        self.treeview.set_headers_visible(False)
+        #self.treeview.set_headers_visible(False)
         self.treeview.set_search_column(0)
+        self.treeview.props.headers_clickable = True
+        self.treeview.props.headers_visible = True
         self.treeview.props.reorderable = True
+        self.treeview.props.rules_hint = True
         self.treeview.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
         self.treeview.enable_model_drag_source(
                 Gdk.ModifierType.BUTTON1_MASK,
                 DRAG_TARGETS,
                 DRAG_ACTION)
         self.treeview.connect('drag-data-get', self.on_drag_data_get)
+        self.treeview.enable_model_drag_dest(
+                DRAG_TARGETS, DRAG_ACTION)
+        self.treeview.connect('drag-data-received',
+                self.on_drag_data_received)
         self.treeview.connect('row_activated', 
                 self.on_treeview_row_activated)
         self.add(self.treeview)
 
-        song_name = Gtk.CellRendererText()
-        col_song = Widgets.TreeViewColumnText('Name', song_name, text=0)
-        self.treeview.append_column(col_song)
+        song_cell = Gtk.CellRendererText()
+        song_col = TreeViewColumnText('Name', song_cell, text=0)
+        self.treeview.append_column(song_col)
 
-        artist = Gtk.CellRendererText()
-        col_artist = Widgets.TreeViewColumnText('Aritst', artist, text=1)
-        self.treeview.append_column(col_artist)
+        artist_cell = Gtk.CellRendererText()
+        artist_col = TreeViewColumnText('Aritst', artist_cell, text=1)
+        self.treeview.append_column(artist_col)
 
-        album = Gtk.CellRendererText()
-        col_album = Widgets.TreeViewColumnText('Album', album, text=2)
-        self.treeview.append_column(col_album)
+        album_cell = Gtk.CellRendererText()
+        album_col = TreeViewColumnText('Album', album_cell, text=2)
+        self.treeview.append_column(album_col)
 
-        delete = Gtk.CellRendererPixbuf(icon_name='user-trash-symbolic')
-        col_delete = Widgets.TreeViewColumnIcon('Delete', delete)
-        self.treeview.append_column(col_delete)
+        delete_cell = Gtk.CellRendererPixbuf(
+                icon_name='user-trash-symbolic')
+        delete_col = Widgets.TreeViewColumnIcon('Delete', delete_cell)
+        self.treeview.append_column(delete_col)
         self.connect('key-press-event', self.on_key_pressed)
         
     def on_key_pressed(self, widget, event):
@@ -103,11 +119,31 @@ class NormalSongTab(Gtk.ScrolledWindow):
         selection = treeview.get_selection()
         # use get_selected_rows because of MULTIPLE_SELECTIONS
         model, paths = selection.get_selected_rows()
+        self.drag_data_old_iters = []
         songs = []
         for path in paths:
             song = [i for i in model[path]]
             songs.append(song)
+            _iter = model.get_iter(path)
+            self.drag_data_old_iters.append(_iter)
         sel_data.set_text(json.dumps(songs), -1)
+
+    def on_drag_data_received(self, treeview, drag_context, x, y,
+            sel_data, info, event_time):
+        model = treeview.get_model()
+        data = sel_data.get_text()
+        if len(data) == 0:
+            return
+        drop_info = treeview.get_dest_row_at_pos(x, y)
+        if drop_info is None:
+            return
+        path = drop_info[0]
+        pos = int(str(path))
+        songs = json.loads(data)
+        for song in songs:
+            model.insert(pos, song)
+        for _iter in self.drag_data_old_iters:
+            model.remove(_iter)
 
 
 class PlayList(Gtk.Box):
