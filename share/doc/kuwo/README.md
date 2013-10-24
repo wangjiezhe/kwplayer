@@ -51,6 +51,7 @@ Debian 手动安装依赖包
 * gstreamer1.0-plugins-base
 * gstreamer1.0-plugins-good
 * gstreamer1.0-plugins-ugly
+* gstreamer1.0-libav 音频/视频的解码器
 * gstreamer1.0-x
 * gir1.2-gstreamer-1.0,
 * gir1.2-gst-plugins-base-1.0
@@ -100,6 +101,7 @@ Fedora 中手动安装依赖包
 * gst-plugins-base 根据@mindcat的测试补充进来的
 * gst-plugins-good | gstreamer.01.0-good-plugins
 * gst-plugins-ugly | gstremaer0.10-ugly-plugins
+* gst-libav
 * gstreamer | gstreamer0.10
 * python-gobject
 * leveldb
