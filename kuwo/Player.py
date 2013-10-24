@@ -578,6 +578,9 @@ class Player(Gtk.Box):
         self.playbin.play()
         self.adj_timeout = GLib.timeout_add(250, self.sync_adjustment)
         if load:
+            self.playbin.set_volume(self.app.conf['volume'])
+            print('Player.start_player():')
+            print(self.playbin.get_volume(), '---', self.volume.get_value())
             self.init_meta()
             GLib.timeout_add(1500, self.init_adjustment)
 
@@ -669,17 +672,17 @@ class Player(Gtk.Box):
     def get_volume(self):
         return self.playbin.get_volume()
 
-    def set_volume(self, vol, refresh=True):
-        mod_value = vol ** 3
-        self.app.conf['volume'] = mod_value
-        self.playbin.set_volume(mod_value)
+    def set_volume(self, volume, refresh=True):
+        mod_volume = volume ** 3
+        self.app.conf['volume'] = mod_volume
+        self.playbin.set_volume(mod_volume)
         if refresh:
             self.volume.handler_block(self.volume_sid)
-            self.volume.set_value(vol)
+            self.volume.set_value(volume)
             self.volume.handler_unblock(self.volume_sid)
 
-    def set_volume_cb(self, vol):
-        GLib.idle_add(self.set_volume, vol)
+    def set_volume_cb(self, volume):
+        GLib.idle_add(self.set_volume, volume)
 
     def seek(self, offset):
         if self.play_type == PlayType.NONE:
