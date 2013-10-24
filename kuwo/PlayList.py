@@ -24,7 +24,6 @@ from kuwo import Widgets
 
 _ = Config._
 
-
 DRAG_TARGETS = [
         ('text/plain', Gtk.TargetFlags.SAME_APP, 0),
         ('TEXT', Gtk.TargetFlags.SAME_APP, 1),
@@ -71,20 +70,20 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.add(self.treeview)
 
         song_cell = Gtk.CellRendererText()
-        song_col = TreeViewColumnText('Name', song_cell, text=0)
+        song_col = TreeViewColumnText(_('Name'), song_cell, text=0)
         self.treeview.append_column(song_col)
 
         artist_cell = Gtk.CellRendererText()
-        artist_col = TreeViewColumnText('Aritst', artist_cell, text=1)
+        artist_col = TreeViewColumnText(_('Aritst'), artist_cell, text=1)
         self.treeview.append_column(artist_col)
 
         album_cell = Gtk.CellRendererText()
-        album_col = TreeViewColumnText('Album', album_cell, text=2)
+        album_col = TreeViewColumnText(_('Album'), album_cell, text=2)
         self.treeview.append_column(album_col)
 
         delete_cell = Gtk.CellRendererPixbuf(
                 icon_name='user-trash-symbolic')
-        delete_col = Widgets.TreeViewColumnIcon('Delete', delete_cell)
+        delete_col = Widgets.TreeViewColumnIcon(_('Delete'), delete_cell)
         self.treeview.append_column(delete_col)
         self.connect('key-press-event', self.on_key_pressed)
         
@@ -354,7 +353,6 @@ class PlayList(Gtk.Box):
 
     # Open API for others to call.
     def play_song(self, song, list_name='Default', use_mv=False):
-        print('PlayList.play_song:', song, list_name)
         if not song:
             return
         if list_name is None:
@@ -566,7 +564,6 @@ class PlayList(Gtk.Box):
             left_path += 1
         selection_left = self.treeview_left.get_selection()
         selection_left.select_path(left_path)
-        print('left path:', left_path)
         self.app.popup_page(self.app_page)
 
     # DB operations

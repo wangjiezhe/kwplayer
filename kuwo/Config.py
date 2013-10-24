@@ -56,6 +56,17 @@ class ShortcutMode:
 
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')
+SHORT_CUT_I18N = {
+        'VolumeUp': _('VolumeUp'),
+        'VolumeDown': _('VolumeDown'),
+        'Mute': _('Mute'),
+        'Previous': _('Previous'),
+        'Next': _('Next'),
+        'Pause': _('Pause'),
+        'Play': _('Play'),
+        'Stop': _('Stop'),
+        'Launch': _('Launch'),
+        }
 _default_conf = {
         'window-size': (960, 680),
         'song-dir': os.path.join(CACHE_DIR, 'song'),

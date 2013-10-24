@@ -318,8 +318,9 @@ class Preferences(Gtk.Dialog):
         
         for name in self.app.conf['custom-shortcut']:
             key = self.app.conf['custom-shortcut'][name]
+            i18n_name = Config.SHORT_CUT_I18N[name]
             k, m = Gtk.accelerator_parse(key)
-            self.shortcut_liststore.append([name, k, m, ])
+            self.shortcut_liststore.append([i18n_name, k, m, ])
 
     def run(self):
         self.get_content_area().show_all()
