@@ -676,6 +676,8 @@ class Player(Gtk.Box):
         mod_volume = volume ** 3
         self.app.conf['volume'] = mod_volume
         self.playbin.set_volume(mod_volume)
+        # TODO: remove it
+        Config.dump_conf(self.app.conf)
         if refresh:
             self.volume.handler_block(self.volume_sid)
             self.volume.set_value(volume)

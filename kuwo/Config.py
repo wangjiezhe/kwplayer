@@ -143,6 +143,7 @@ def load_conf():
     return _default_conf
 
 def dump_conf(conf):
+    print('Config.dump_conf()', conf)
     with open(_conf_file, 'w') as fh:
         fh.write(json.dumps(conf, indent=2))
 
