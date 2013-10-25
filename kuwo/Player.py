@@ -17,6 +17,7 @@ from kuwo import Net
 from kuwo.Preferences import Preferences
 from kuwo.PlayerBin import PlayerBin
 from kuwo.PlayerDBus import PlayerDBus
+from kuwo.PlayerNotify import PlayerNotify
 from kuwo import Widgets
 
 _ = Config._
@@ -206,6 +207,7 @@ class Player(Gtk.Box):
         self.playbin.connect('eos', self.on_playbin_eos)
         self.playbin.connect('error', self.on_playbin_error)
         self.dbus = PlayerDBus(self)
+        self.notify = PlayerNotify(self)
 
     def after_init(self):
         self.init_meta()
@@ -397,10 +399,13 @@ class Player(Gtk.Box):
                     Widgets.short_tooltip(info['info'], length=500))
             if info['pic']:
                 self.meta_artUrl = info['pic']
-                self.dbus.update_meta()
                 pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
                         info['pic'], 100, 100)
                 self.artist_pic.set_from_pixbuf(pix)
+            else:
+                self.meta_artUrl = self.app.theme_path['anonymous']
+            self.notify.refresh()
+            self.dbus.update_meta()
             
         song = self.curr_song
         name = Widgets.short_tooltip(song['name'], 45)
@@ -568,9 +573,14 @@ class Player(Gtk.Box):
         self.load_next()
 
     # control player, UI and dbus
+    def is_playing(self):
+    #    return self.playbin.is_playing()
+        return self._is_playing
+
     def start_player(self, load=False):
         if self.play_type == PlayType.NONE:
             return
+        self._is_playing = True
 
         self.dbus.set_Playing()
 
@@ -583,6 +593,7 @@ class Player(Gtk.Box):
             print(self.playbin.get_volume(), '---', self.volume.get_value())
             self.init_meta()
             GLib.timeout_add(1500, self.init_adjustment)
+            self.notify.refresh()
 
     def start_player_cb(self, load=False):
         GLib.idle_add(self.start_player, load)
@@ -590,6 +601,7 @@ class Player(Gtk.Box):
     def pause_player(self):
         if self.play_type == PlayType.NONE:
             return
+        self._is_playing = False
         self.dbus.set_Pause()
         self.play_button.set_icon_name('media-playback-start-symbolic')
         self.playbin.pause()
@@ -614,6 +626,7 @@ class Player(Gtk.Box):
     def stop_player(self):
         if self.play_type == PlayType.NONE:
             return
+        self._is_playing = False
         self.play_button.set_icon_name('media-playback-pause-symbolic')
         self.playbin.stop()
         self.scale.set_value(0)
@@ -674,17 +687,16 @@ class Player(Gtk.Box):
 
     def set_volume(self, volume, refresh=True):
         mod_volume = volume ** 3
+        print('Player.set_volume()', volume, mod_volume)
         self.app.conf['volume'] = mod_volume
         self.playbin.set_volume(mod_volume)
-        # TODO: remove it
-        Config.dump_conf(self.app.conf)
         if refresh:
             self.volume.handler_block(self.volume_sid)
             self.volume.set_value(volume)
             self.volume.handler_unblock(self.volume_sid)
 
-    def set_volume_cb(self, volume):
-        GLib.idle_add(self.set_volume, volume)
+    def set_volume_cb(self, volume, refresh=True):
+        GLib.idle_add(self.set_volume, volume, refresh=refresh)
 
     def seek(self, offset):
         if self.play_type == PlayType.NONE:

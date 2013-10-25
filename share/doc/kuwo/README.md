@@ -163,6 +163,15 @@ Q&A
 `$ export http_proxy="http://127.0.0.1:8080"; kwplayer`
 就可以了.
 
+问: 启动时出现这个错误(arch linux中), `Xlib.error.DisplayConnectionError: Can't connect to display ":0.0": b'No protocol specified\n'`
+答: 因为Arch中启用了Host-based access, 默认情况下, 多媒体键是不可用的. 现在的
+办法是关闭host-based acces, `$ xhost +`. 这个方法是@shmile提供的. 更多信息, 可以
+参考<https://wiki.archlinux.org/index.php/Xhost>以及
+<http://en.wikipedia.org/wiki/X_Window_authorization>
+
+也可以将`xhost + >/dev/null` 这条命令加入到系统启动脚本中, 这样的话, 系统启动时
+就会自动关闭Host-based access了.
+
 
 KNOWN BUGS
 ============
@@ -192,6 +201,9 @@ TODO
 
 截图
 ====
+在gdm的锁屏界面也可以控制kwplayer:
+<img src="screenshot/kwplayer-on-gdm-screen.jpg?raw=true" title="kwplayer on gdm screen" />
+
 播放列表:
 <img src="screenshot/playlist.png?raw=true" title="播放列表" />
 
