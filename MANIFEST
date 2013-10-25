@@ -11,6 +11,7 @@ kuwo/PlayList.py
 kuwo/Player.py
 kuwo/PlayerBin.py
 kuwo/PlayerDBus.py
+kuwo/PlayerNotify.py
 kuwo/Preferences.py
 kuwo/Radio.py
 kuwo/Search.py

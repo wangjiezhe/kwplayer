@@ -183,6 +183,13 @@ class Preferences(Gtk.Dialog):
         status_button.connect('toggled', self.on_status_button_toggled)
         generic_box.pack_start(status_button, False, False, 0)
 
+        notify_button = Gtk.CheckButton(_('Show kwplayer on lock screen'))
+        notify_button.set_tooltip_text(
+                _('Works with gdm3, Gnome3.8 and later'))
+        notify_button.set_active(app.conf['use-notify'])
+        notify_button.connect('toggled', self.on_notify_button_toggled)
+        generic_box.pack_start(notify_button, False, False, 0)
+
         # format tab
         format_box = NoteTab()
         notebook.append_page(format_box, Gtk.Label(_('Format')))
@@ -330,9 +337,14 @@ class Preferences(Gtk.Dialog):
         print('dialog.on_destroy()')
         Config.dump_conf(self.app.conf)
 
+    # generic tab signal handlers
     def on_status_button_toggled(self, button):
         self.app.conf['use-status-icon'] = button.get_active()
 
+    def on_notify_button_toggled(self, button):
+        self.app.conf['use-notify'] = button.get_active()
+
+    # format tab signal handlers
     def on_audio_toggled(self, radiobtn):
         self.app.conf['use-ape'] = radiobtn.get_group()[0].get_active()
 

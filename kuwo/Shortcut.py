@@ -13,6 +13,7 @@ except ImportError as e:
     keybinder_imported = False
     print('Warning: no python3-keybinder module found, global keyboard shortcut will be disabled!')
 
+
 from kuwo import Config
 ShortcutMode = Config.ShortcutMode
 

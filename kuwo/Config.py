@@ -75,6 +75,7 @@ _default_conf = {
         'use-ape': False,
         'use-mkv': False,
         'use-status-icon': True,
+        'use-notify': True,
         'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
         'lrc-back-color': 'rgba(237, 221, 221, 0.28)',
         'lrc-text-size': 22,

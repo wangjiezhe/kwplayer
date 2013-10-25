@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-23 07:36+0800\n"
+"POT-Creation-Date: 2013-10-26 00:37+0800\n"
 "PO-Revision-Date: 2013-10-23 07:51+0800\n"
 "Last-Translator: LiuLang <gsushzhsosgsu@gmail.com>\n"
 "Language-Team: Chinese (traditional)\n"
@@ -16,11 +16,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../kuwo/App.py:114 ../kuwo/Preferences.py:219
+#: ../kuwo/App.py:114 ../kuwo/Preferences.py:226
 msgid "Lyrics"
 msgstr "歌詞"
 
-#: ../kuwo/App.py:118 ../kuwo/PlayList.py:619
+#: ../kuwo/App.py:118 ../kuwo/PlayList.py:618
 msgid "Playlist"
 msgstr "播放列表"
 
@@ -67,7 +67,7 @@ msgstr "暫停/播放"
 msgid "Next Song"
 msgstr "下一首歌"
 
-#: ../kuwo/App.py:238 ../kuwo/Player.py:150 menus.ui.h:3
+#: ../kuwo/App.py:238 ../kuwo/Player.py:151 menus.ui.h:3
 msgid "Quit"
 msgstr "退出"
 
@@ -207,20 +207,20 @@ msgstr "增大音量"
 msgid "Mute"
 msgstr "静音"
 
-#: ../kuwo/Config.py:63 ../kuwo/Player.py:83
+#: ../kuwo/Config.py:63 ../kuwo/Player.py:84 ../kuwo/PlayerNotify.py:59
 msgid "Previous"
 msgstr "前一首"
 
-#: ../kuwo/Config.py:64 ../kuwo/Player.py:95
+#: ../kuwo/Config.py:64 ../kuwo/Player.py:96 ../kuwo/PlayerNotify.py:78
 msgid "Next"
 msgstr "下一首"
 
-#: ../kuwo/Config.py:65
+#: ../kuwo/Config.py:65 ../kuwo/PlayerNotify.py:66
 msgid "Pause"
 msgstr "暫停"
 
-#: ../kuwo/Config.py:66 ../kuwo/Player.py:89 ../kuwo/Radio.py:63
-#: ../kuwo/Widgets.py:141
+#: ../kuwo/Config.py:66 ../kuwo/Player.py:90 ../kuwo/PlayerNotify.py:72
+#: ../kuwo/Radio.py:63 ../kuwo/Widgets.py:141
 msgid "Play"
 msgstr "播放"
 
@@ -260,79 +260,80 @@ msgstr "默認"
 msgid "Favorite"
 msgstr "喜愛"
 
-#: ../kuwo/PlayList.py:320 ../kuwo/PlayList.py:432
+#: ../kuwo/PlayList.py:320 ../kuwo/PlayList.py:431
 msgid "Start Caching"
 msgstr "開始緩存"
 
-#: ../kuwo/PlayList.py:423
+#: ../kuwo/PlayList.py:422
 msgid "Stop Caching"
 msgstr "停止緩存"
 
-#: ../kuwo/PlayList.py:451
+#: ../kuwo/PlayList.py:450
 msgid "Failed to cache song"
 msgstr "緩存歌曲失敗"
 
-#: ../kuwo/PlayList.py:672
+#: ../kuwo/PlayList.py:671
 msgid "Export Songs"
 msgstr "導出歌曲"
 
-#: ../kuwo/PlayList.py:679
+#: ../kuwo/PlayList.py:678
 msgid "Choose export folder"
 msgstr "選擇一個文件夾"
 
-#: ../kuwo/PlayList.py:686
+#: ../kuwo/PlayList.py:685
 msgid "With lyrics"
 msgstr "包含歌詞"
 
-#: ../kuwo/PlayList.py:687
+#: ../kuwo/PlayList.py:686
 msgid "Export lyrics to the same folder"
 msgstr "導出歌詞到相同的目錄"
 
-#: ../kuwo/PlayList.py:698
+#: ../kuwo/PlayList.py:697
 msgid "Export"
 msgstr "導出"
 
-#: ../kuwo/PlayList.py:706
+#: ../kuwo/PlayList.py:705
 msgid "Only cached songs will be exported"
 msgstr "只導出已緩存好的歌曲"
 
-#: ../kuwo/PlayList.py:750
+#: ../kuwo/PlayList.py:749
 msgid "Create this playlist and add songs into it"
 msgstr "創建這個播放列表並加入歌曲"
 
-#: ../kuwo/Player.py:104
+#: ../kuwo/Player.py:105
 msgid "Shuffle"
 msgstr "隨機播放"
 
-#: ../kuwo/Player.py:110
+#: ../kuwo/Player.py:111
 msgid "Repeat"
 msgstr "重複播放"
 
-#: ../kuwo/Player.py:116
+#: ../kuwo/Player.py:117
 msgid "Show MV"
 msgstr "播放 MV"
 
-#: ../kuwo/Player.py:124
+#: ../kuwo/Player.py:125
 msgid "Fullscreen"
 msgstr "全屏"
 
-#: ../kuwo/Player.py:140 ../kuwo/Preferences.py:165 menus.ui.h:1
+#: ../kuwo/Player.py:141 ../kuwo/Preferences.py:165 menus.ui.h:1
 msgid "Preferences"
 msgstr "首選項"
 
-#: ../kuwo/Player.py:146 menus.ui.h:2
+#: ../kuwo/Player.py:147 menus.ui.h:2
 msgid "About"
 msgstr "關於"
 
-#: ../kuwo/Player.py:174 ../kuwo/Player.py:410 ../kuwo/Player.py:414
+#: ../kuwo/Player.py:175 ../kuwo/Player.py:415 ../kuwo/Player.py:419
+#: ../kuwo/PlayerNotify.py:39 ../kuwo/PlayerNotify.py:43
 msgid "Unknown"
 msgstr "未知"
 
-#: ../kuwo/Player.py:239
+#: ../kuwo/Player.py:241
 msgid "Failed to download MV"
 msgstr "下載MV失敗"
 
-#: ../kuwo/Player.py:241
+#: ../kuwo/Player.py:243
 msgid "Failed to download song"
 msgstr "下載歌曲失敗"
 
@@ -348,87 +349,95 @@ msgstr "一般"
 msgid "Close to system tray"
 msgstr "關閉至系統托盤"
 
+#: ../kuwo/Preferences.py:186
+msgid "Show kwplayer on lock screen"
+msgstr "在屏幕鎖定時顯示kwplayer"
+
 #: ../kuwo/Preferences.py:188
+msgid "Works with gdm3, Gnome3.8 and later"
+msgstr "需要gdm, Gnome3.8及以後的版本"
+
+#: ../kuwo/Preferences.py:195
 msgid "Format"
 msgstr "格式"
 
-#: ../kuwo/Preferences.py:190
+#: ../kuwo/Preferences.py:197
 msgid "Prefered Audio Format"
 msgstr "音樂格式"
 
-#: ../kuwo/Preferences.py:192
+#: ../kuwo/Preferences.py:199
 msgid "MP3 (faster)"
 msgstr "MP# (下載更快)"
 
-#: ../kuwo/Preferences.py:196
+#: ../kuwo/Preferences.py:203
 msgid "APE (better)"
 msgstr "APE (音質更好)"
 
-#: ../kuwo/Preferences.py:203
+#: ../kuwo/Preferences.py:210
 msgid "Prefered Video Format"
 msgstr "MV 格式"
 
-#: ../kuwo/Preferences.py:206
+#: ../kuwo/Preferences.py:213
 msgid "MP4 (faster)"
 msgstr "MP4 (下載更快)"
 
-#: ../kuwo/Preferences.py:210
+#: ../kuwo/Preferences.py:217
 msgid "MKV (better)"
 msgstr "MKV (畫質更好)"
 
-#: ../kuwo/Preferences.py:221
+#: ../kuwo/Preferences.py:228
 msgid "Normal Text"
 msgstr "正常文字"
 
-#: ../kuwo/Preferences.py:224 ../kuwo/Preferences.py:237
+#: ../kuwo/Preferences.py:231 ../kuwo/Preferences.py:244
 msgid "text size"
 msgstr "字體大小"
 
-#: ../kuwo/Preferences.py:228 ../kuwo/Preferences.py:241
+#: ../kuwo/Preferences.py:235 ../kuwo/Preferences.py:248
 msgid "text color"
 msgstr "字體顏色"
 
-#: ../kuwo/Preferences.py:234
+#: ../kuwo/Preferences.py:241
 msgid "Highlighted Text"
 msgstr "高亮文字"
 
-#: ../kuwo/Preferences.py:246
+#: ../kuwo/Preferences.py:253
 msgid "Lyrics Text Background color"
 msgstr "歌詞的文字背景色"
 
-#: ../kuwo/Preferences.py:252
+#: ../kuwo/Preferences.py:259
 msgid "Folders"
 msgstr "緩存目錄"
 
-#: ../kuwo/Preferences.py:254
+#: ../kuwo/Preferences.py:261
 msgid "Place to store sogns"
 msgstr "歌曲目錄"
 
-#: ../kuwo/Preferences.py:257
+#: ../kuwo/Preferences.py:264
 msgid "Moving cached songs to new folder"
 msgstr "同時移動已緩存好的歌曲到新目錄"
 
-#: ../kuwo/Preferences.py:260
+#: ../kuwo/Preferences.py:267
 msgid "Place to store MVs"
 msgstr "MV 目錄"
 
-#: ../kuwo/Preferences.py:264
+#: ../kuwo/Preferences.py:271
 msgid "Moving cached MVs to new folder"
 msgstr "同時移動已緩存好的MV到新目錄"
 
-#: ../kuwo/Preferences.py:276
+#: ../kuwo/Preferences.py:283
 msgid "Shortcut"
 msgstr "快捷鍵"
 
-#: ../kuwo/Preferences.py:280
+#: ../kuwo/Preferences.py:287
 msgid "Disable Keyboard Shortcut"
 msgstr "禁用快捷鍵"
 
-#: ../kuwo/Preferences.py:286
+#: ../kuwo/Preferences.py:293
 msgid "Use Default MultiMedia Key"
 msgstr "啓用默認的多媒體鍵"
 
-#: ../kuwo/Preferences.py:293
+#: ../kuwo/Preferences.py:300
 msgid "Use Custom Keyboard Shortcut"
 msgstr "自定義快捷鍵"
 

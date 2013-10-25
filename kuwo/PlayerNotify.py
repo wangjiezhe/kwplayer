@@ -24,12 +24,14 @@ class PlayerNotify:
                 )
 
     def refresh(self):
+        if not self.player.app.conf['use-notify']:
+            return
+
         notify = self.notify
         song = self.player.curr_song
 
-        print('PlayerNotify.refresh')
         notify.clear_hints()
-        notify.set_timeout(4000)
+        #notify.set_timeout(4000)
 
         if len(song['artist']) > 0:
             artist = Widgets.short_tooltip(song['artist'], 20)
