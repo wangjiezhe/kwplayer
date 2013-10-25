@@ -70,6 +70,7 @@ if ldb_imported:
         print('Warning: Only one process can run at a time, quit!')
         sys.exit(1)
 
+
 def empty_func(*args, **kwds):
     pass
 
@@ -131,7 +132,7 @@ def get_nodes(nid, page):
         '&node=',
         str(nid),
         ])
-    print('get_nodes()', url)
+    #print('get_nodes()', url)
     req_content = urlopen(url)
     if req_content is None:
         return (None, 0)
@@ -169,7 +170,7 @@ def get_album(albumid):
         'stype=albuminfo&albumid=',
         str(albumid),
         ])
-    print('get_album():', url)
+    #print('get_album():', url)
     req_content = urlopen(url)
     if req_content is None:
         return None
@@ -204,7 +205,7 @@ def update_album_covers(liststore, path, col, _url):
         'star/albumcover/',
         url,
         ])
-    print('update_album_covers()', url)
+    #print('update_album_covers()', url)
     update_liststore_image(liststore, path, col, url)
 
 def update_mv_image(liststore, path, col, _url):
@@ -227,7 +228,7 @@ def get_toplist_songs(nid):
         '&id=',
         str(nid),
         ])
-    print('get toplist songs(), url:', url)
+    #print('get toplist songs(), url:', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if req_content is None:
@@ -252,7 +253,7 @@ def get_artists(catid, page, prefix):
         ])
     if len(prefix) > 0:
         url = url + '&prefix=' + prefix
-    print('Net.get_artists(), url:', url)
+    #print('Net.get_artists(), url:', url)
     req_content = urlopen(url)
     if req_content is None:
         return (None, 0)
@@ -299,7 +300,7 @@ def get_artist_info(artistid, artist=None):
             'stype=artistinfo&artistid=', 
             str(artistid),
             ])
-    print('Net.get_artist_info, url:', url)
+    #print('Net.get_artist_info, url:', url)
     req_content = urlopen(url)
     if req_content is None:
         return None
@@ -327,7 +328,7 @@ def get_artist_songs(artist, page):
         '&primitive=0&rformat=json&encoding=UTF8&artist=',
         artist,
         ])
-    print('Net.get_artist_songs()', url)
+    #print('Net.get_artist_songs()', url)
     req_content = urlopen(url)
     if req_content is None:
         return (None, 0)
@@ -353,7 +354,7 @@ def get_artist_songs_by_id(artistid, page):
         '&pn=',
         str(page),
         ])
-    print('Net.get_artist_songs_by_id()', url)
+    #print('Net.get_artist_songs_by_id()', url)
     req_content = urlopen(url)
     if req_content is None:
         return (None, 0)
@@ -378,7 +379,7 @@ def get_artist_albums(artistid, page):
         '&pn=',
         str(page),
         ])
-    print('Net.get_artist_albums(), url:', url)
+    #print('Net.get_artist_albums(), url:', url)
     req_content = urlopen(url)
     if req_content is None:
         return (None, 0)
@@ -404,7 +405,7 @@ def get_artist_mv(artistid, page):
         '&pn=',
         str(page),
         ])
-    print('Net.get_artist_mv(), url:', url)
+    #print('Net.get_artist_mv(), url:', url)
     req_content = urlopen(url)
     if req_content is None:
         return (None, 0)
@@ -431,7 +432,7 @@ def get_artist_similar(artistid, page):
         '&artistid=',
         str(artistid),
         ])
-    print('Net.get_artist_similar(), url:', url)
+    #print('Net.get_artist_similar(), url:', url)
     req_content = urlopen(url)
     if req_content is None:
         return (None, 0)
@@ -460,7 +461,7 @@ def get_lrc(song):
     def _parse_lrc():
         url = ('http://newlyric.kuwo.cn/newlyric.lrc?' + 
                 Utils.encode_lrc_url(rid))
-        print('Net._parse_lrc(), url:', url)
+        #print('Net._parse_lrc(), url:', url)
         req_content = urlopen(url, use_cache=False, retries=8)
         if req_content is None:
             return None
@@ -537,7 +538,7 @@ def search_songs(keyword, page):
         '&pn=',
         str(page),
         ])
-    print('search songs:', url)
+    #print('search songs:', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if req_content is None:
@@ -564,7 +565,7 @@ def search_artists(keyword, page):
         '&itemset=newkm&rformat=json&encoding=utf8&all=',
         parse.quote(keyword),
         ])
-    print('Net.search_artists(), ', url)
+    #print('Net.search_artists(), ', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if req_content is None:
@@ -591,7 +592,7 @@ def search_albums(keyword, page):
         '&itemset=newkm&rformat=json&encoding=utf8&all=',
         parse.quote(keyword),
         ])
-    print('search_albums:', url)
+    #print('search_albums:', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if req_content is None:
@@ -618,7 +619,7 @@ def get_index_nodes(nid):
         '&node=',
         str(nid),
         ])
-    print('get_index_nodes():', url)
+    #print('get_index_nodes():', url)
     req_content = urlopen(url)
     if req_content is None:
         return None
@@ -686,7 +687,7 @@ def get_themes_songs(nid, page):
         '&pn=',
         str(page),
         ])
-    print('Net.get themes songs, url:', url)
+    #print('Net.get themes songs, url:', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if req_content is None:
@@ -710,7 +711,7 @@ def get_mv_songs(pid, page):
         '&encode=utf-8&keyset=mvpl&pid=',
         str(pid),
         ])
-    print('Net.get_mv_songs(), url:', url)
+    #print('Net.get_mv_songs(), url:', url)
     req_content = urlopen(url)
     if req_content is None:
         return (None, 0)
@@ -753,7 +754,7 @@ def _get_song_link_raw(song, conf, use_mv=False):
         '&rid=MUSIC_',
         str(song['rid']),
         ])
-    print('Net._get_song_link_raw(), url', url)
+    #print('Net._get_song_link_raw(), url', url)
     req_content = urlopen(url)
     if req_content is None:
         return None
@@ -794,7 +795,7 @@ def get_song_link(song, conf, use_mv=False):
         '&rid=MUSIC_',
         str(song['rid']),
         ])
-    print('Net.get_song_link(), url', url)
+    #print('Net.get_song_link(), url', url)
     song_name = (''.join([
         song['artist'],
         '-',
@@ -886,14 +887,14 @@ class AsyncSong(GObject.GObject):
                 # this signal only emit once.
                 if (received_size > CHUNK_TO_PLAY or percent > 40) \
                         and not can_play_emited:
-                    print('song can be played now')
+                    #print('song can be played now')
                     can_play_emited = True
                     self.emit('can-play', song_path, 'OK')
                 if not chunk:
                     break
                 fh.write(chunk)
             fh.close()
-            print('song downloaded')
+            #print('song downloaded')
             self.emit('downloaded', song_path)
             Utils.iconvtag(song_path, song)
 
@@ -904,12 +905,12 @@ class AsyncSong(GObject.GObject):
             self.emit('downloaded', None)
             return None
         if song_link is True:
-            print('local song exists, signals will be emited:', song_path)
+            #print('local song exists, signals will be emited:', song_path)
             self.emit('can-play', song_path, 'OK')
             self.emit('downloaded', song_path)
             return
         retried = 0
-        print('Net.AsyncSong, song will be downloaded:', song_path)
+        #print('Net.AsyncSong, song will be downloaded:', song_path)
         while retried < MAXTIMES:
             try:
                 req = request.urlopen(song_link)
@@ -959,7 +960,7 @@ class AsyncMV(GObject.GObject):
             received_size = 0
             can_play_emited = False
             content_length = int(req.headers.get('Content-Length'))
-            print('size of file: ', round(content_length / 2**20, 2), 'M')
+            #print('size of file: ', round(content_length / 2**20, 2), 'M')
             fh = open(mv_path, 'wb')
             while True:
                 if self.force_quit:
@@ -975,13 +976,13 @@ class AsyncMV(GObject.GObject):
                 if (received_size > CHUNK_MV_TO_PLAY or percent > 20) \
                         and not can_play_emited:
                     can_play_emited = True
-                    print('mv can play now')
+                    #print('mv can play now')
                     self.emit('can-play', mv_path, 'OK')
                 if not chunk:
                     break
                 fh.write(chunk)
             fh.close()
-            print('mv downloaded')
+            #print('mv downloaded')
             self.emit('downloaded', mv_path)
 
         mv_link, mv_path = get_song_link(song, self.app.conf, True)
@@ -990,12 +991,12 @@ class AsyncMV(GObject.GObject):
             self.emit('downloaded', None)
             return None
         if mv_link is True:
-            print('local song exists, signals will be emited:', mv_path)
+            #print('local song exists, signals will be emited:', mv_path)
             self.emit('can-play', mv_path, 'OK')
             self.emit('downloaded', mv_path)
             return
         retried = 0
-        print('Net.AsyncSong, mv will be downloaded:', mv_path)
+        #print('Net.AsyncSong, mv will be downloaded:', mv_path)
         while retried < MAXTIMES:
             try:
                 req = request.urlopen(mv_link)
