@@ -39,7 +39,7 @@ class App:
         self.app.connect('shutdown', self.on_app_shutdown)
 
         self.conf = Config.load_conf()
-        self.theme = Config.load_theme()
+        self.theme, self.theme_path = Config.load_theme()
 
     def on_app_startup(self, app):
         self.window = Gtk.ApplicationWindow(application=app)

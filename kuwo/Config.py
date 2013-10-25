@@ -143,7 +143,6 @@ def load_conf():
     return _default_conf
 
 def dump_conf(conf):
-    print('Config.dump_conf()', conf)
     with open(_conf_file, 'w') as fh:
         fh.write(json.dumps(conf, indent=2))
 
@@ -157,11 +156,13 @@ def load_theme():
         return None
 
     theme_pix = {}
+    theme_path = {}
     for key in theme:
         filename = os.path.join(THEME_DIR, theme[key])
         if os.path.exists(filename):
             theme_pix[key] = GdkPixbuf.Pixbuf.new_from_file(filename)
+            theme_path[key] = filename
         else:
             print('Failed to open theme icon', filename)
             return None
-    return theme_pix
+    return (theme_pix, theme_path)
