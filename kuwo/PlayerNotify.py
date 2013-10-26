@@ -54,34 +54,58 @@ class PlayerNotify:
         #        self.player.artist_pic.get_pixbuf())
 
         notify.clear_actions()
-        notify.add_action(
-                'media-skip-backward',
-                _('Previous'),
-                self.on_prev_action_activated,
-                None,
-                None)
 
-        if self.player.is_playing():
+        try:
             notify.add_action(
-                    'media-playback-pause',
-                    _('Pause'),
-                    self.on_playpause_action_activated,
+                    'media-skip-backward',
+                    _('Previous'),
+                    self.on_prev_action_activated,
+                    None)
+            if self.player.is_playing():
+                notify.add_action(
+                        'media-playback-pause',
+                        _('Pause'),
+                        self.on_playpause_action_activated,
+                        None)
+            else:
+                notify.add_action(
+                        'media-playback-play',
+                        _('Play'),
+                        self.on_playpause_action_activated,
+                        None)
+            notify.add_action(
+                    'media-skip-forward',
+                    _('Next'),
+                    self.on_next_action_activated,
+                    None)
+        except Exception:
+            notify.add_action(
+                    'media-skip-backward',
+                    _('Previous'),
+                    self.on_prev_action_activated,
                     None,
                     None)
-        else:
+            if self.player.is_playing():
+                notify.add_action(
+                        'media-playback-pause',
+                        _('Pause'),
+                        self.on_playpause_action_activated,
+                        None,
+                        None)
+            else:
+                notify.add_action(
+                        'media-playback-play',
+                        _('Play'),
+                        self.on_playpause_action_activated,
+                        None,
+                        None)
             notify.add_action(
-                    'media-playback-play',
-                    _('Play'),
-                    self.on_playpause_action_activated,
+                    'media-skip-forward',
+                    _('Next'),
+                    self.on_next_action_activated,
                     None,
                     None)
 
-        notify.add_action(
-                'media-skip-forward',
-                _('Next'),
-                self.on_next_action_activated,
-                None,
-                None)
         notify.set_hint('action-icons',
                 GLib.Variant.new_boolean(True))
 
@@ -89,8 +113,8 @@ class PlayerNotify:
         # and the whole notification content will be presented
         # from rhythmbox/plugins/rb-notification-plugin.c
         notify.set_category('x-gnome.music')
-        notify.set_hint('desktop-entry',
-                GLib.Variant.new_string('kwplayer'))
+        #notify.set_hint('desktop-entry',
+        #        GLib.Variant.new_string('kwplayer'))
 
         # show on lock screen
         hint = 'resident'
