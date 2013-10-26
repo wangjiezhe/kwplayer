@@ -58,7 +58,7 @@ class Player(Gtk.Box):
         self.recommend_imgs = None
         self.curr_song = None
 
-        # use this to keep Net.AsyncSong and Net.AsyncMV object
+        # use this to keep Net.AsyncSong object
         self.async_song = None
         self.async_next_song = None
 
@@ -232,7 +232,7 @@ class Player(Gtk.Box):
         self.async_song.get_song(song)
 
     def failed_to_download(self, song_path, status):
-        self.pause_player()
+        self.stop_player_cb()
         
         if status == 'FileNotFoundError':
             Widgets.filesystem_error(self.app.window, song_path)
@@ -270,13 +270,10 @@ class Player(Gtk.Box):
                 self.playbin.load_video(uri, self.app.lrc.xid)
             self.start_player(load=True)
             self.update_player_info()
-        def _load_next():
-            self.load_next()
 
         if status == 'OK':
             GLib.idle_add(_on_song_can_play)
-        elif status == 'URLError':
-            print('current song has no link download, will get net song')
+        else:
             GLib.idle_add(self.failed_to_download, song_path, status)
 
     def on_song_downloaded(self, widget, song_path):
@@ -297,16 +294,12 @@ class Player(Gtk.Box):
             self.dbus.enable_seek()
 
         self.scale.set_sensitive(True)
-        if song_path:
-            GLib.idle_add(_on_song_download)
-        else:
-            #GLib.idle_add(self.failed_to_download, song_path)
-            pass
+        GLib.idle_add(_on_song_download)
 
     def cache_next_song(self):
         if self.play_type == PlayType.MV:
             # NOTE:if next song has no MV, cache will be failed
-            self.async_next_song= Net.AsyncMV(self.app)
+            self.async_next_song= Net.AsyncSong(self.app, use_mv=True)
             self.async_next_song.get_mv(self.next_song)
         elif self.play_type in (PlayType.SONG, PlayType.RADIO):
             self.async_next_song = Net.AsyncSong(self.app)
@@ -484,7 +477,7 @@ class Player(Gtk.Box):
         self.stop_player()
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
-        self.async_song = Net.AsyncMV(self.app)
+        self.async_song = Net.AsyncSong(self.app, use_mv=True)
         self.async_song.connect('chunk-received', self.on_chunk_received)
         self.async_song.connect('can-play', self.on_song_can_play)
         self.async_song.connect('downloaded', self.on_song_downloaded)

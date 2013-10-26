@@ -113,7 +113,6 @@ def iconvtag(song_path, song):
     # Do nothing if python3 version is lower than 3.3
     if not mutagenx_imported:
         return
-    print('Net.iconvtag()', song_path, song)
     def use_id3():
         audio = EasyID3(song_path)
         audio.clear()

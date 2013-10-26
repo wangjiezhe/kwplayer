@@ -841,13 +841,13 @@ class AsyncSong(GObject.GObject):
                 # sogn_path
                 GObject.TYPE_NONE, (str, str)),
             'chunk-received': (GObject.SIGNAL_RUN_LAST,
-                GObject.TYPE_NONE, 
                 # percent
-                (int, )),
+                GObject.TYPE_NONE, (int, )),
             'downloaded': (GObject.SIGNAL_RUN_LAST, 
                 # song_path
                 GObject.TYPE_NONE, (str, ))
             }
+
     def __init__(self, app):
         super().__init__()
         self.app = app
@@ -856,163 +856,68 @@ class AsyncSong(GObject.GObject):
     def destroy(self):
         self.force_quit = True
 
-    def get_song(self, song):
+    def get_song(self, song, use_mv=False):
         '''
         Get the actual link of music file.
         If higher quality of that music unavailable, a lower one is used.
         like this:
         response=url&type=convert_url&format=ape|mp3&rid=MUSIC_3312608
         '''
-        async_call(self._download_song, empty_func, song)
+        async_call(self._download_song, empty_func, song, use_mv)
 
-    def _download_song(self, song):
-        def _wrap(req):
-            received_size = 0
-            can_play_emited = False
-            content_length = int(req.headers.get('Content-Length'))
-            print('size of file: ', round(content_length / 2**20, 2), 'M')
-            fh = open(song_path, 'wb')
-
-            while True:
-                if self.force_quit:
-                    del req
-                    fh.close()
-                    os.remove(song_path)
-                    return
-                chunk = req.read(CHUNK)
-                received_size += len(chunk)
-                percent = int(received_size/content_length * 100)
-                self.emit('chunk-received', percent)
-                #print('percentage:', percent)
-                # this signal only emit once.
-                if (received_size > CHUNK_TO_PLAY or percent > 40) \
-                        and not can_play_emited:
-                    #print('song can be played now')
-                    can_play_emited = True
-                    self.emit('can-play', song_path, 'OK')
-                if not chunk:
-                    break
-                fh.write(chunk)
-            fh.close()
-            #print('song downloaded')
-            self.emit('downloaded', song_path)
-            Utils.iconvtag(song_path, song)
-
-        song_link, song_path = get_song_link(song, self.app.conf)
+    def _download_song(self, song, use_mv):
+        song_link, song_path = get_song_link(song,
+                                             self.app.conf,
+                                             use_mv=use_mv)
+        # this song has no link to download
         if song_link is False:
-            # this song has no link to download
             self.emit('can-play', song_path, 'URLError')
-            self.emit('downloaded', None)
-            return None
+            return
+
+        # check lock song exists
         if song_link is True:
-            #print('local song exists, signals will be emited:', song_path)
             self.emit('can-play', song_path, 'OK')
             self.emit('downloaded', song_path)
             return
-        retried = 0
-        #print('Net.AsyncSong, song will be downloaded:', song_path)
-        while retried < MAXTIMES:
+
+        for retried in range(MAXTIMES):
             try:
                 req = request.urlopen(song_link)
-                _wrap(req)
-                return song
+                received_size = 0
+                can_play_emited = False
+                content_length = int(req.headers.get('Content-Length'))
+                fh = open(song_path, 'wb')
+
+                while True:
+                    if self.force_quit:
+                        del req
+                        fh.close()
+                        os.remove(song_path)
+                        return
+                    chunk = req.read(CHUNK)
+                    received_size += len(chunk)
+                    percent = int(received_size/content_length * 100)
+                    self.emit('chunk-received', percent)
+                    # this signal only emit once.
+                    if (received_size > CHUNK_TO_PLAY or percent > 40) \
+                            and not can_play_emited:
+                        can_play_emited = True
+                        self.emit('can-play', song_path, 'OK')
+                    if not chunk:
+                        break
+                    fh.write(chunk)
+                fh.close()
+                self.emit('downloaded', song_path)
+                Utils.iconvtag(song_path, song)
+                return
+
             except Exception as e:
                 print('AsyncSong._download_song()', e, 'with song_link:',
                         song_link)
-                retried += 1
-        # remember to check song when `downloaded` signal received.
-        if retried == MAXTIMES:
-            print('song failed to download, please check link', song_link)
-            # If failed to download, partial mp3 file needs to be deleted
-            if os.path.exists(song_path):
-                os.remove(song_path)
-                self.emit('can-play', song_path, 'URLError')
-            else:
-                self.emit('can-play', song_path, 'FileNotFoundError')
-            self.emit('downloaded', None)
-            return None
+        if os.path.exists(song_path):
+            os.remove(song_path)
+            self.emit('can-play', song_path, 'URLError')
+        else:
+            self.emit('can-play', song_path, 'FileNotFoundError')
+
 GObject.type_register(AsyncSong)
-
-
-class AsyncMV(GObject.GObject):
-    __gsignals__ = {
-            'can-play': (GObject.SIGNAL_RUN_LAST, 
-                GObject.TYPE_NONE, (str, str)),
-            'chunk-received': (GObject.SIGNAL_RUN_LAST,
-                GObject.TYPE_NONE, 
-                (int, )),
-            'downloaded': (GObject.SIGNAL_RUN_LAST, 
-                GObject.TYPE_NONE, (str, )),
-            }
-    def __init__(self, app):
-        super().__init__()
-        self.app = app
-        self.force_quit = False
-
-    def destroy(self):
-        self.force_quit = True
-
-    def get_mv(self, song):
-        async_call(self._download_mv, empty_func, song)
-
-    def _download_mv(self, song):
-        def _wrap(req):
-            received_size = 0
-            can_play_emited = False
-            content_length = int(req.headers.get('Content-Length'))
-            #print('size of file: ', round(content_length / 2**20, 2), 'M')
-            fh = open(mv_path, 'wb')
-            while True:
-                if self.force_quit:
-                    del req
-                    fh.close()
-                    os.remove(mv_path)
-                    return
-                chunk = req.read(CHUNK)
-                received_size += len(chunk)
-                percent = int(received_size/content_length * 100)
-                self.emit('chunk-received', percent)
-                #print('percentage:', percent)
-                if (received_size > CHUNK_MV_TO_PLAY or percent > 20) \
-                        and not can_play_emited:
-                    can_play_emited = True
-                    #print('mv can play now')
-                    self.emit('can-play', mv_path, 'OK')
-                if not chunk:
-                    break
-                fh.write(chunk)
-            fh.close()
-            #print('mv downloaded')
-            self.emit('downloaded', mv_path)
-
-        mv_link, mv_path = get_song_link(song, self.app.conf, True)
-        if mv_link is False:
-            self.emit('can-play', mv_path, 'URLError')
-            self.emit('downloaded', None)
-            return None
-        if mv_link is True:
-            #print('local song exists, signals will be emited:', mv_path)
-            self.emit('can-play', mv_path, 'OK')
-            self.emit('downloaded', mv_path)
-            return
-        retried = 0
-        #print('Net.AsyncSong, mv will be downloaded:', mv_path)
-        while retried < MAXTIMES:
-            try:
-                req = request.urlopen(mv_link)
-                self.req = req
-                _wrap(req)
-                return mv_path
-            except Exception as e:
-                print('AsyncMV.getmv()', e, 'with mv_link:', mv_link)
-                retried += 1
-        if retried == MAXTIMES:
-            print('mv failed to download, please check link', mv_link)
-            if os.path.exists(mv_path):
-                os.rm(mv_path)
-                self.emit('can-play', mv_path, 'URLError')
-            else:
-                self.emit('can-play', mv_path, 'FileNotFoundError')
-            self.emit('downloaded', None)
-            return None
-GObject.type_register(AsyncMV)
