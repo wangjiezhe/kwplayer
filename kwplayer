@@ -18,7 +18,6 @@ def check_loaded():
     sb = dbus.SessionBus()
     try:
         kw_proxy = sb.get_object(BUS_NAME, MPRIS_PATH)
-        print('kwplayer is already loaded, and will be presented.')
         prop = dbus.Interface(kw_proxy, ROOT_IFACE)
         prop.Raise()
         return True

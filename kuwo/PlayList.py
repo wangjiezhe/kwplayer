@@ -485,15 +485,14 @@ class PlayList(Gtk.Box):
         self.append_cached_song(song)
         Gdk.Window.process_all_updates()
 
-    def get_prev_song(self, repeat=False):
+    def get_prev_song(self, repeat):
         list_name = self.curr_playing[0]
         if list_name is None:
-            return
+            return None
         liststore = self.tabs[list_name].liststore
         path = self.curr_playing[1]
         song_nums = len(liststore)
         if song_nums == 0:
-            self.prev_playing = None
             return None
         if path == 0:
             if repeat:
@@ -505,7 +504,7 @@ class PlayList(Gtk.Box):
         self.prev_playing = path
         return Widgets.song_row_to_dict(liststore[path], start=0)
 
-    def get_next_song(self, repeat=False, shuffle=False):
+    def get_next_song(self, repeat, shuffle):
         list_name = self.curr_playing[0]
         liststore = self.tabs[list_name].liststore
         path = self.curr_playing[1]
@@ -516,7 +515,6 @@ class PlayList(Gtk.Box):
             path = random.randint(0, song_nums-1)
         elif path == song_nums - 1:
             if repeat is False:
-                self.next_playing = None
                 return None
             path = 0
         else:
@@ -525,9 +523,9 @@ class PlayList(Gtk.Box):
         self.next_playing = path
         return Widgets.song_row_to_dict(liststore[path], start=0)
 
-    def play_prev_song(self, repeat, use_mv=False):
-        prev_song = self.get_prev_song(repeat=repeat)
-        if self.prev_playing is None:
+    def play_prev_song(self, repeat, shuffle, use_mv=False):
+        prev_song = self.get_prev_song(repeat)
+        if prev_song is None:
             return
         self.curr_playing[1] = self.prev_playing
         self.locate_curr_song(popup_page=False)
@@ -536,8 +534,10 @@ class PlayList(Gtk.Box):
         else:
             self.app.player.load(prev_song)
 
-    def play_next_song(self, repeat, use_mv=False):
-        next_song = self.get_next_song(repeat=repeat)
+    def play_next_song(self, repeat, shuffle, use_mv=False):
+        next_song = self.get_next_song(repeat, shuffle)
+        if next_song is None:
+            return
         self.curr_playing[1] = self.next_playing
         self.locate_curr_song(popup_page=False)
         if use_mv:

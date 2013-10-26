@@ -281,10 +281,9 @@ class Player(Gtk.Box):
             self.init_adjustment()
             if self.play_type in (PlayType.SONG, PlayType.MV):
                 self.app.playlist.on_song_downloaded(play=True)
-                _repeat = self.repeat_btn.get_active()
-                _shuffle = self.shuffle_btn.get_active()
                 self.next_song = self.app.playlist.get_next_song(
-                        shuffle=_shuffle, repeat=_repeat)
+                        self.repeat_btn.get_active(),
+                        self.shuffle_btn.get_active())
             elif self.play_type == PlayType.RADIO:
                 self.next_song = self.curr_radio_item.get_next_song()
             if self.next_song:
@@ -659,17 +658,14 @@ class Player(Gtk.Box):
                 self.load(self.curr_song)
             return
 
-        _repeat = self.repeat_btn.get_active()
-        _shuffle = self.shuffle_btn.get_active()
-        if self.next_song is None:
-            return
+        repeat = self.repeat_btn.get_active()
+        shuffle = self.shuffle_btn.get_active()
         if self.play_type == PlayType.RADIO:
-            #self.load_radio(self.next_song, self.curr_radio_item)
             self.curr_radio_item.play_next_song()
         elif self.play_type == PlayType.SONG:
-            self.app.playlist.play_next_song(repeat=_repeat, use_mv=False)
+            self.app.playlist.play_next_song(repeat, shuffle, use_mv=False)
         elif self.play_type == PlayType.MV:
-            self.app.playlist.play_next_song(repeat=_repeat, use_mv=True)
+            self.app.playlist.play_next_song(repeat, shuffle, use_mv=True)
 
     def load_next_cb(self):
         GLib.idle_add(self.load_next)
@@ -679,7 +675,6 @@ class Player(Gtk.Box):
 
     def set_volume(self, volume, refresh=True):
         mod_volume = volume ** 3
-        print('Player.set_volume()', volume, mod_volume)
         self.app.conf['volume'] = mod_volume
         self.playbin.set_volume(mod_volume)
         if refresh:
