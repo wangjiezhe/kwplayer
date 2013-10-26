@@ -299,8 +299,8 @@ class Player(Gtk.Box):
     def cache_next_song(self):
         if self.play_type == PlayType.MV:
             # NOTE:if next song has no MV, cache will be failed
-            self.async_next_song= Net.AsyncSong(self.app, use_mv=True)
-            self.async_next_song.get_mv(self.next_song)
+            self.async_next_song= Net.AsyncSong(self.app)
+            self.async_next_song.get_song(self.next_song, use_mv=True)
         elif self.play_type in (PlayType.SONG, PlayType.RADIO):
             self.async_next_song = Net.AsyncSong(self.app)
             self.async_next_song.get_song(self.next_song)
@@ -477,11 +477,11 @@ class Player(Gtk.Box):
         self.stop_player()
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
-        self.async_song = Net.AsyncSong(self.app, use_mv=True)
+        self.async_song = Net.AsyncSong(self.app)
         self.async_song.connect('chunk-received', self.on_chunk_received)
         self.async_song.connect('can-play', self.on_song_can_play)
         self.async_song.connect('downloaded', self.on_song_downloaded)
-        self.async_song.get_mv(song)
+        self.async_song.get_song(song, use_mv=True)
 
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
