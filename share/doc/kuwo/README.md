@@ -83,9 +83,12 @@ Fedora 中手动安装依赖包
 
 * 更新系统. 我用的是mirrors.163.com这个更新源, 速度很好.
 * 使用rpmfushion, 可以参考这篇文章:<http://blog.csdn.net/sabalol/article/details/9286073>
-* 安装gstreamer的一堆依赖, 上面列出的, 名称都大致一样.
-* 安装leveldb 和 python3-plyvel, python3-plyvel是leveldb的另一个python绑定.
-* 安装python3-mutagenx,
+* python3-dbus
+* gstreamer1-plugins-good
+* gstreamer1-plugins-ugly
+* gstreamer1-libav
+* 安装leveldb 和 python3-plyvel
+* 安装python3-mutagenx.
 * 安装python3-xlib 和 python3-keybinder
 
 在Arch 中手动安装依赖包
