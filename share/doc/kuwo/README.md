@@ -90,10 +90,10 @@ Fedora 中手动安装依赖包
 
 在Arch 中手动安装依赖包
 -----------------------
-感谢mindcat为arch写的pkgbuild:
+@mindcat为arch写的pkgbuild, 使用了github上的最新的代码:
 <https://aur.archlinux.org/packages/kwplayer-git/?setlang=en>
-尽管我测试过程中出了一些小的问题; 同时也感谢他对kwplayer在开发过程中提出的
-宝贵建议.
+而@shmilee 写的另一个pkgbuild, 是基于kwplayer的发行版本, 可以在这里得到:
+<0https://aur.archlinux.org/packages/kwplayer/>
 
 [注:] arch中, 默认的python版本是python3.
 
