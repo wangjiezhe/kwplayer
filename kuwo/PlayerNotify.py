@@ -58,6 +58,7 @@ class PlayerNotify:
                 'media-skip-backward',
                 _('Previous'),
                 self.on_prev_action_activated,
+                None,
                 None)
 
         if self.player.is_playing():
@@ -65,18 +66,21 @@ class PlayerNotify:
                     'media-playback-pause',
                     _('Pause'),
                     self.on_playpause_action_activated,
+                    None,
                     None)
         else:
             notify.add_action(
                     'media-playback-play',
                     _('Play'),
                     self.on_playpause_action_activated,
+                    None,
                     None)
 
         notify.add_action(
                 'media-skip-forward',
                 _('Next'),
                 self.on_next_action_activated,
+                None,
                 None)
         notify.set_hint('action-icons',
                 GLib.Variant.new_boolean(True))
