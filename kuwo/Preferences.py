@@ -81,6 +81,7 @@ class ChooseFolder(Gtk.Box):
     def __init__(self, parent, conf_name, toggle_label):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.props.margin_left = MARGIN_LEFT
+        self.props.margin_top = 5
         self.parent = parent
         self.app = parent.app
         self.conf_name = conf_name
@@ -100,15 +101,6 @@ class ChooseFolder(Gtk.Box):
         choose_button.connect('clicked', self.on_choose_button_clicked)
         hbox.pack_start(choose_button, False, False, 0)
 
-        self.check_button = Gtk.CheckButton(toggle_label)
-        self.check_button.set_active(True)
-        self.check_button.props.halign = Gtk.Align.START
-        self.check_button.connect('toggled', self.on_check_button_toggled)
-        self.pack_start(self.check_button, False, False, 0)
-
-        self.progress_bar = Gtk.ProgressBar()
-        self.pack_start(self.progress_bar, False, False, 0)
-
     def on_choose_button_clicked(self, button):
         def on_dialog_file_activated(dialog):
             new_dir = dialog.get_filename()
@@ -116,7 +108,6 @@ class ChooseFolder(Gtk.Box):
             self.dir_entry.set_text(new_dir)
             if new_dir != self.app.conf[self.conf_name]:
                 self.app.conf[self.conf_name] = new_dir
-                GLib.timeout_add(500, self.move_items, new_dir)
             return
 
         dialog = Gtk.FileChooserDialog(_('Choose a Folder'), self.parent,
@@ -130,33 +121,6 @@ class ChooseFolder(Gtk.Box):
             on_dialog_file_activated(dialog)
             return
         dialog.destroy()
-
-    def move_items(self, new_dir):
-        status = self.check_button.get_active()
-        if not status:
-            self.old_dir = new_dir
-            return False
-        self.app.player.pause_player()
-        items = os.listdir(self.old_dir)
-        self.progress_bar.set_fraction(0)
-        length = len(items)
-        i = 0
-        Gdk.Window.process_all_updates()
-        for item in items:
-            shutil.move(os.path.join(self.old_dir, item),
-                    os.path.join(new_dir, item))
-            i += 1
-            self.progress_bar.set_fraction(i / length)
-            Gdk.Window.process_all_updates()
-        self.old_dir = new_dir
-        return False
-
-    def on_check_button_toggled(self, toggle):
-        status = toggle.get_active()
-        if status:
-            self.progress_bar.show_all()
-        else:
-            self.progress_bar.hide()
 
 
 class Preferences(Gtk.Dialog):
