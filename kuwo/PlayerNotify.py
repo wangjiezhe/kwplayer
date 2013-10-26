@@ -17,11 +17,7 @@ _ = Config._
 class PlayerNotify:
     def __init__(self, player):
         self.player = player
-        self.notify = Notify.Notification.new(
-                '',
-                '',
-                'kwplayer'
-                )
+        self.notify = Notify.Notification.new( '', '', 'kwplayer')
 
     def refresh(self):
         if not self.player.app.conf['use-notify']:
@@ -69,7 +65,7 @@ class PlayerNotify:
                         None)
             else:
                 notify.add_action(
-                        'media-playback-play',
+                        'media-playback-start',
                         _('Play'),
                         self.on_playpause_action_activated,
                         None)
@@ -94,7 +90,7 @@ class PlayerNotify:
                         None)
             else:
                 notify.add_action(
-                        'media-playback-play',
+                        'media-playback-start',
                         _('Play'),
                         self.on_playpause_action_activated,
                         None,
