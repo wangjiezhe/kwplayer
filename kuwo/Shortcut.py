@@ -24,7 +24,7 @@ class Shortcut:
         self.callbacks = {
                 'VolumeUp': self.volume_up,
                 'VolumeDown': self.volume_down,
-                'Mute': lambda *args: player.set_volume_cb(0),
+                'Mute': lambda *args: player.toggle_mute_cb(),
                 'Previous': lambda *args: player.load_prev_cb(),
                 'Next': lambda *args: player.load_next_cb(),
                 'Pause': lambda *args: player.play_pause_cb(),

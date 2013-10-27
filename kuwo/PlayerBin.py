@@ -112,6 +112,13 @@ class PlayerBin(GObject.GObject):
     def get_volume(self):
         return self.playbin.get_property('volume')
 
+    def set_mute(self, mute):
+        print('Playbin.set_mute:', mute)
+        self.playbin.set_property('mute', mute)
+
+    def get_mute(self):
+        return self.playbin.get_property('mute')
+
     # private functions
     def enable_bus_sync(self):
         self.bus.enable_sync_message_emission()

@@ -685,6 +685,24 @@ class Player(Gtk.Box):
     def set_volume_cb(self, volume, refresh=True):
         GLib.idle_add(self.set_volume, volume, refresh=refresh)
 
+    def toggle_mute(self):
+        '''
+        Set player to mute or not.
+        '''
+        if self.playbin.get_mute():
+            self.volume.handler_block(self.volume_sid)
+            self.volume.set_value(self.app.conf['volume'])
+            self.volume.handler_unblock(self.volume_sid)
+            self.playbin.set_mute(False)
+        else:
+            self.volume.handler_block(self.volume_sid)
+            self.volume.set_value(0)
+            self.volume.handler_unblock(self.volume_sid)
+            self.playbin.set_mute(True)
+
+    def toggle_mute_cb(self):
+        GLib.idle_add(self.toggle_mute)
+
     def seek(self, offset):
         if self.play_type == PlayType.NONE:
             return
