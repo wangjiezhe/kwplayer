@@ -18,10 +18,10 @@ else:
     PREF = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'share')
 
 LOCALEDIR = os.path.join(PREF, 'locale')
-gettext.bindtextdomain('kuwo', LOCALEDIR)
-gettext.textdomain('kuwo')
-locale.bindtextdomain('kuwo', LOCALEDIR)
-locale.textdomain('kuwo')
+gettext.bindtextdomain('kwplayer', LOCALEDIR)
+gettext.textdomain('kwplayer')
+locale.bindtextdomain('kwplayer', LOCALEDIR)
+locale.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
