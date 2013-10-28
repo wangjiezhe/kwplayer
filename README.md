@@ -181,6 +181,8 @@ KNOWN BUGS
 * 对于Debian Wheezy, 由于gstreamer0.1中不能直接把视频渲染到DrawingArea上,
 在播放MV时视频窗口被被弹出, 这个bug我暂时不能修复; 这个bug在2011年就有人发
 现, 可一直没有得到修复, 再加上后来推出了gstreamer1.0, 看来就更难了.
+* 在退出时, plyvel会报错. 使用python3-leveldb模块, 就不会这样, 主要是
+新版(plyvel-0.6)存在一些问题, 估计等到0.7版, 就能被修复了.
 
 
 TODO
