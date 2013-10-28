@@ -24,7 +24,8 @@ class Shortcut:
         self.callbacks = {
                 'VolumeUp': self.volume_up,
                 'VolumeDown': self.volume_down,
-                'Mute': lambda *args: player.toggle_mute_cb(),
+                'Mute':
+                    lambda *args: player.toggle_mute_cb(),
                 'Previous': lambda *args: player.load_prev_cb(),
                 'Next': lambda *args: player.load_next_cb(),
                 'Pause': lambda *args: player.play_pause_cb(),
@@ -39,16 +40,16 @@ class Shortcut:
             self.keybinder.start()
             
     def volume_up(self, *args):
-        vol = self.player.get_volume() ** 0.33 + 0.1
-        if vol > 1:
-            vol = 1
-        self.player.set_volume_cb(vol)
+        volume = self.player.volume.get_value() + 0.15
+        if volume > 1:
+            volume = 1
+        self.player.set_volume_cb(volume)
 
     def volume_down(self, *args):
-        vol = self.player.get_volume() ** 0.33 - 0.1
-        if vol < 0:
-            vol = 0
-        self.player.set_volume_cb(vol)
+        volume = self.player.volume.get_value() - 0.15
+        if volume < 0:
+            volume = 0
+        self.player.set_volume_cb(volume)
 
     def present_window(self, *args):
         GLib.idle_add(self.player.app.window.present)

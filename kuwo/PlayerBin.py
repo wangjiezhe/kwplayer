@@ -8,6 +8,7 @@ from gi.repository import GObject
 from gi.repository import Gst
 from gi.repository import GstVideo
 
+from gi.repository import Gtk
 
 # Or init threads in another place.
 GObject.threads_init()
@@ -23,6 +24,10 @@ class PlayerBin(GObject.GObject):
                 GObject.TYPE_NONE, (bool, )),
             'error': (GObject.SIGNAL_RUN_LAST, 
                 GObject.TYPE_NONE, (str, )),
+            'mute-changed': (GObject.SIGNAL_RUN_LAST, 
+                GObject.TYPE_NONE, (bool, )),
+            'volume-changed': (GObject.SIGNAL_RUN_LAST, 
+                GObject.TYPE_NONE, (float, )),
             }
     xid = None
     bus_sync_sid = 0
@@ -37,6 +42,10 @@ class PlayerBin(GObject.GObject):
         self.bus.add_signal_watch()
         self.bus.connect('message::eos', self.on_eos)
         self.bus.connect('message::error', self.on_error)
+        self.volume_sid = self.playbin.connect('notify::volume',
+                self.on_volume_changed)
+        self.mute_sid = self.playbin.connect('notify::mute',
+                self.on_mute_changed)
 
     # Open APIs
     def load_audio(self, uri):
@@ -107,14 +116,19 @@ class PlayerBin(GObject.GObject):
         return self.xid
 
     def set_volume(self, vol):
+        self.playbin.handler_block(self.volume_sid)
+        self.playbin.handler_block(self.mute_sid)
         self.playbin.set_property('volume', vol)
+        self.playbin.handler_unblock(self.volume_sid)
+        self.playbin.handler_unblock(self.mute_sid)
 
     def get_volume(self):
         return self.playbin.get_property('volume')
 
     def set_mute(self, mute):
-        print('Playbin.set_mute:', mute)
+        self.playbin.handler_block(self.mute_sid)
         self.playbin.set_property('mute', mute)
+        self.playbin.handler_unblock(self.mute_sid)
 
     def get_mute(self):
         return self.playbin.get_property('mute')
@@ -142,7 +156,12 @@ class PlayerBin(GObject.GObject):
 
     def on_error(self, bus, msg):
         error_msg = msg.parse_error()
-        print('on_error():', error_msg)
         self.emit('error', error_msg)
+
+    def on_volume_changed(self, playbin, volume_name):
+        self.emit('volume-changed', self.get_volume())
+
+    def on_mute_changed(self, playbin, mute_name):
+        self.emit('mute-changed', self.get_mute())
 
 GObject.type_register(PlayerBin)

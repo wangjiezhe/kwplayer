@@ -203,9 +203,12 @@ class Player(Gtk.Box):
 
         # init playbin and dbus
         self.playbin = PlayerBin()
-        self.playbin.set_volume(self.app.conf['volume'])
+        self.playbin.set_volume(self.app.conf['volume'] ** 0.33)
         self.playbin.connect('eos', self.on_playbin_eos)
         self.playbin.connect('error', self.on_playbin_error)
+        self.playbin.connect('mute-changed', self.on_playbin_mute_changed)
+        self.playbin.connect('volume-changed',
+                self.on_playbin_volume_changed)
         self.dbus = PlayerDBus(self)
         self.notify = PlayerNotify(self)
 
@@ -379,9 +382,11 @@ class Player(Gtk.Box):
     def on_scale_change_value(self, scale, scroll_type, value):
         self.seek(value)
 
-    def on_volume_value_changed(self, volume, value):
-        # reduce volume value because in 0~0.2 it is too sensitive
-        self.set_volume(value, refresh=False)
+    def on_volume_value_changed(self, volume_button, volume):
+        self.playbin.set_volume(volume ** 3)
+        self.app.conf['volume'] = volume
+        if self.playbin.get_mute():
+            self.playbin.set_mute(False)
 
     def update_player_info(self):
         def _update_pic(info, error=None):
@@ -560,9 +565,32 @@ class Player(Gtk.Box):
     def on_playbin_eos(self, playbin, eos_msg):
         self.load_next()
 
-    def on_playbin_error(self, widget, error_msg):
+    def on_playbin_error(self, playbin, error_msg):
         print('Player.on_playbin_error(), ', error_msg)
         self.load_next()
+
+    def on_playbin_mute_changed(self, playbin, mute):
+        self.update_gtk_volume_value_cb()
+
+    def on_playbin_volume_changed(self, playbin, volume):
+        self.update_gtk_volume_value_cb()
+
+    def update_gtk_volume_value(self):
+        mute = self.playbin.get_mute()
+        volume = self.playbin.get_volume()
+        if mute:
+                self.volume.handler_block(self.volume_sid)
+                self.volume.set_value(0.0)
+                self.volume.handler_unblock(self.volume_sid)
+        else:
+            self.volume.handler_block(self.volume_sid)
+            self.volume.set_value(volume ** 0.33)
+            self.volume.handler_unblock(self.volume_sid)
+        self.app.conf['volume'] = volume
+
+    def update_gtk_volume_value_cb(self):
+        GLib.idle_add(self.update_gtk_volume_value)
+
 
     # control player, UI and dbus
     def is_playing(self):
@@ -671,34 +699,28 @@ class Player(Gtk.Box):
         GLib.idle_add(self.load_next)
 
     def get_volume(self):
+        return self.volume.get_value()
+
+    def set_volume(self, volume):
+        self.volume.set_value(volume)
+
+    def set_volume_cb(self, volume):
+        GLib.idle_add(self.set_volume, volume)
+
+    def get_volume(self):
         return self.playbin.get_volume()
 
-    def set_volume(self, volume, refresh=True):
-        mod_volume = volume ** 3
-        self.app.conf['volume'] = mod_volume
-        self.playbin.set_volume(mod_volume)
-        if refresh:
-            self.volume.handler_block(self.volume_sid)
-            self.volume.set_value(volume)
-            self.volume.handler_unblock(self.volume_sid)
-
-    def set_volume_cb(self, volume, refresh=True):
-        GLib.idle_add(self.set_volume, volume, refresh=refresh)
-
     def toggle_mute(self):
-        '''
-        Set player to mute or not.
-        '''
-        if self.playbin.get_mute():
+        mute = self.playbin.get_mute()
+        self.playbin.set_mute(not mute)
+        if mute:
             self.volume.handler_block(self.volume_sid)
             self.volume.set_value(self.app.conf['volume'])
             self.volume.handler_unblock(self.volume_sid)
-            self.playbin.set_mute(False)
         else:
             self.volume.handler_block(self.volume_sid)
-            self.volume.set_value(0)
+            self.volume.set_value(0.0)
             self.volume.handler_unblock(self.volume_sid)
-            self.playbin.set_mute(True)
 
     def toggle_mute_cb(self):
         GLib.idle_add(self.toggle_mute)

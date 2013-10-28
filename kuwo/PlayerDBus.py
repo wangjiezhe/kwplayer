@@ -16,7 +16,6 @@ import json
 GObject.threads_init()
 dbus.mainloop.glib.threads_init()
 
-
 BUS_NAME = 'org.mpris.MediaPlayer2.kwplayer'
 MPRIS_PATH = '/org/mpris/MediaPlayer2'
 ROOT_IFACE = 'org.mpris.MediaPlayer2'
@@ -170,8 +169,7 @@ class PlayerDBus(dbus.service.Object):
 
     # player properties
     def get_PlaybackStatus(self):
-        state = self.player.playbin.get_status()
-        if state  == Gst.State.PLAYING:
+        if self.player.is_playing():
             return 'Playing'
         return 'Paused'
 
@@ -216,10 +214,10 @@ class PlayerDBus(dbus.service.Object):
 
 
     def get_Volume(self):
-        return self.player.playbin.get_volume()
+        return self.player.get_volume()
 
-    def set_Volume(self, vol):
-        self.player.set_volume(vol)
+    def set_Volume(self, volume):
+        self.player.set_volume_cb(volume)
 
     def get_Position(self):
         pos = self.player.playbin.get_position()[1] // 1000
