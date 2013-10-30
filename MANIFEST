@@ -23,9 +23,6 @@ kuwo/Utils.py
 kuwo/Widgets.py
 kuwo/__init__.py
 share/applications/kwplayer.desktop
-share/doc/kuwo/HISTORY
-share/doc/kuwo/LICENSE
-share/doc/kuwo/README.md
 share/icons/hicolor/128x128/apps/kwplayer.png
 share/icons/hicolor/24x24/apps/kwplayer.png
 share/icons/hicolor/256x256/apps/kwplayer.png
@@ -43,5 +40,5 @@ share/kuwo/themes/default/lrc-background.jpg
 share/kuwo/themes/default/play.svg
 share/kuwo/themes/default/reset.css
 share/kuwo/ui/menus.ui
-share/locale/zh_CN/LC_MESSAGES/kuwo.mo
-share/locale/zh_TW/LC_MESSAGES/kuwo.mo
+share/locale/zh_CN/LC_MESSAGES/kwplayer.mo
+share/locale/zh_TW/LC_MESSAGES/kwplayer.mo
