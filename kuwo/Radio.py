@@ -225,10 +225,10 @@ class Radio(Gtk.Box):
         self.scrolled_radios = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_radios, True, True, 0)
 
-        # pic, name, id, num of listeners, pic_url
-        self.liststore_radios = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int, 
-                str, str)
-        iconview_radios = Widgets.IconView(self.liststore_radios)
+        # pic, name, id, num of listeners, pic_url, tooltip
+        self.liststore_radios = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, int, str, str, str)
+        iconview_radios = Widgets.IconView(self.liststore_radios, tooltip=5)
         iconview_radios.connect('item_activated',
                 self.on_iconview_radios_item_activated)
         self.scrolled_radios.add(iconview_radios)
@@ -242,11 +242,14 @@ class Radio(Gtk.Box):
             return
         i = 0
         for radio in radios:
-            self.liststore_radios.append([self.app.theme['anonymous'],
-                Widgets.short_str(Widgets.unescape_html(radio['disname'])), 
+            self.liststore_radios.append([
+                self.app.theme['anonymous'],
+                Widgets.unescape_html(radio['disname']), 
                 int(radio['sourceid'].split(',')[0]),
                 Widgets.unescape_html(radio['info']),
-                radio['pic'], ])
+                radio['pic'],
+                Widgets.set_tooltip(radio['disname'], radio['info']),
+                ])
             Net.update_liststore_image(self.liststore_radios, i, 0,
                     radio['pic']),
             i += 1

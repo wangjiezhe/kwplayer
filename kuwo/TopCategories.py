@@ -51,27 +51,30 @@ class TopCategories(Gtk.Box):
 
         self.scrolled_main = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_main, True, True, 0)
-        # logo, name, nid, num of lists(info)
-        self.liststore_main = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int, str)
-        iconview_main = Widgets.IconView(self.liststore_main)
+        # logo, name, nid, num of lists(info), tooltip
+        self.liststore_main = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, int, str, str)
+        iconview_main = Widgets.IconView(self.liststore_main, tooltip=4)
         iconview_main.connect('item_activated', 
                 self.on_iconview_main_item_activated)
         self.scrolled_main.add(iconview_main)
 
         self.scrolled_sub1 = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_sub1, True, True, 0)
-        # logo, name, nid, num of lists(info)
-        self.liststore_sub1 = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int, str)
-        iconview_sub1 = Widgets.IconView(self.liststore_sub1, tooltip=1)
+        # logo, name, nid, num of lists(info), tooltip
+        self.liststore_sub1 = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, int, str, str)
+        iconview_sub1 = Widgets.IconView(self.liststore_sub1, tooltip=4)
         iconview_sub1.connect('item_activated', 
                 self.on_iconview_sub1_item_activated)
         self.scrolled_sub1.add(iconview_sub1)
 
         self.scrolled_sub2 = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_sub2, True, True, 0)
-        # logo, name, nid, info
-        self.liststore_sub2 = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int, str)
-        iconview_sub2 = Widgets.IconView(self.liststore_sub2, tooltip=1)
+        # logo, name, nid, info, tooltip
+        self.liststore_sub2 = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, int, str, str)
+        iconview_sub2 = Widgets.IconView(self.liststore_sub2, tooltip=4)
         iconview_sub2.connect('item_activated', 
                 self.on_iconview_sub2_item_activated)
         self.scrolled_sub2.add(iconview_sub2)
@@ -95,10 +98,13 @@ class TopCategories(Gtk.Box):
             return
         i = 0
         for node in nodes:
-            self.liststore_main.append([self.app.theme['anonymous'],
+            self.liststore_main.append([
+                self.app.theme['anonymous'],
                 Widgets.unescape_html(node['disname']),
                 int(node['id']),
-                Widgets.unescape_html(node['info']), ])
+                Widgets.unescape_html(node['info']),
+                Widgets.set_tooltip(node['disname'], node['info']),
+                ])
             Net.update_liststore_image(self.liststore_main, i, 0, 
                     node['pic'])
             i += 1
@@ -127,10 +133,19 @@ class TopCategories(Gtk.Box):
             i = len(self.liststore_sub1)
             for node in nodes:
                 _id = 'id' if self.use_sub2 else 'sourceid'
-                self.liststore_sub1.append([self.app.theme['anonymous'],
+                if 'tips' in node and len(node['tips']) > 5:
+                    _tooltip = Widgets.set_tooltip_with_song_tips(
+                            node['name'], node['tips'])
+                else:
+                    _tooltip = Widgets.set_tooltip(
+                            node['name'], node['info'])
+                self.liststore_sub1.append([
+                    self.app.theme['anonymous'],
                     Widgets.unescape_html(node['name']),
                     int(node[_id]),
-                    Widgets.unescape_html(node['info']), ])
+                    Widgets.unescape_html(node['info']),
+                    _tooltip,
+                    ])
                 Net.update_liststore_image(self.liststore_sub1, i, 0, 
                         node['pic'])
                 i += 1
@@ -174,10 +189,14 @@ class TopCategories(Gtk.Box):
                 return
             i = len(self.liststore_sub2)
             for node in nodes:
-                self.liststore_sub2.append([self.app.theme['anonymous'],
+                self.liststore_sub2.append([
+                    self.app.theme['anonymous'],
                     Widgets.unescape_html(node['name']),
                     int(node['sourceid']),
-                    Widgets.unescape_html(node['info']), ])
+                    Widgets.unescape_html(node['info']),
+                    Widgets.set_tooltip_with_song_tips(node['name'],
+                        node['tips']),
+                    ])
                 Net.update_liststore_image(self.liststore_sub2, i, 0, 
                         node['pic'])
                 i += 1

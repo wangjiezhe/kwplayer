@@ -14,6 +14,7 @@ import os
 from kuwo import Config
 
 _ = Config._
+
 _html_parser = HTMLParser()
 # Need to unescape twice
 unescape_html = lambda entity: _html_parser.unescape(_html_parser.unescape(entity))
@@ -32,6 +33,24 @@ def tooltip(_str):
 
 def short_tooltip(tooltip, length=10):
     return short_str(html.escape(tooltip.replace('<br>', '\n')), length)
+
+def set_tooltip(head, body):
+    return '<b>{0}</b>\n\n{1}'.format(tooltip(head), tooltip(body))
+
+def set_tooltip_with_song_tips(head, tip):
+    songs = tip.split(';')
+    results = []
+    fmt = '{0}   <small>by <i>{1}</i></small>'
+    for song in songs:
+        if len(song) < 5:
+            continue
+        item = song.split('@')
+        try:
+            results.append(fmt.format(tooltip(item[1]), tooltip(item[3])))
+        except IndexError as e:
+            print(e, item)
+            continue
+    return '<b>{0}</b>\n\n{1}'.format(tooltip(head), '\n'.join(results))
 
 def song_row_to_dict(song_row, start=1):
     song = {
@@ -191,7 +210,9 @@ class IconView(Gtk.IconView):
         # liststore:
         # 0 - logo
         # 1 - name
+        # 2 - id
         # 3 - info
+        # 4 - tooltip
         self.set_pixbuf_column(0)
         if tooltip is not None:
             self.set_tooltip_column(tooltip)

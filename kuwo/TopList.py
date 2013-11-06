@@ -42,10 +42,10 @@ class TopList(Gtk.Box):
 
         self.scrolled_nodes = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_nodes, True, True, 0)
-        # logo, name, nid, info
-        self.liststore_nodes = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int, 
-                str)
-        iconview_nodes = Widgets.IconView(self.liststore_nodes)
+        # logo, name, nid, info, tooltip
+        self.liststore_nodes = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, int, str, str)
+        iconview_nodes = Widgets.IconView(self.liststore_nodes, tooltip=4)
         iconview_nodes.connect('item_activated', 
                 self.on_iconview_nodes_item_activated)
         self.scrolled_nodes.add(iconview_nodes)
@@ -66,10 +66,14 @@ class TopList(Gtk.Box):
             return
         i = 0
         for node in nodes:
-            self.liststore_nodes.append([self.app.theme['anonymous'],
+            self.liststore_nodes.append([
+                self.app.theme['anonymous'],
                 Widgets.unescape_html(node['name']),
                 int(node['sourceid']),
-                Widgets.unescape_html(node['info']), ])
+                Widgets.unescape_html(node['info']),
+                Widgets.set_tooltip_with_song_tips(node['name'],
+                    node['tips']),
+                ])
             Net.update_toplist_node_logo(self.liststore_nodes, i, 0, 
                     node['pic'])
             i += 1

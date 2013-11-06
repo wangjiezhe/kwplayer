@@ -47,9 +47,10 @@ class Themes(Gtk.Box):
 
         self.scrolled_main = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_main, True, True, 0)
-        # pic, name, id, info(num of lists)
-        self.liststore_main = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int, str)
-        iconview_main = Widgets.IconView(self.liststore_main)
+        # pic, name, id, info(num of lists), tooltip
+        self.liststore_main = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, int, str, str)
+        iconview_main = Widgets.IconView(self.liststore_main, tooltip=4)
         iconview_main.connect('item_activated', 
                 self.on_iconview_main_item_activated)
         self.scrolled_main.add(iconview_main)
@@ -58,9 +59,10 @@ class Themes(Gtk.Box):
         self.scrolled_sub.get_vadjustment().connect('value-changed',
                 self.on_scrolled_sub_scrolled)
         self.pack_start(self.scrolled_sub, True, True, 0)
-        # pic, name, sourceid, info(num of lists)
-        self.liststore_sub = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int, str)
-        iconview_sub = Widgets.IconView(self.liststore_sub)
+        # pic, name, sourceid, info(num of lists), tooltip
+        self.liststore_sub = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, int, str, str)
+        iconview_sub = Widgets.IconView(self.liststore_sub, tooltip=4)
         iconview_sub.connect('item_activated', 
                 self.on_iconview_sub_item_activated)
         self.scrolled_sub.add(iconview_sub)
@@ -83,10 +85,13 @@ class Themes(Gtk.Box):
             return
         i = 0
         for node in nodes:
-            self.liststore_main.append([self.app.theme['anonymous'],
-                    Widgets.unescape_html(node['name']),
-                    int(node['nid']),
-                    Widgets.unescape_html(node['info']), ])
+            self.liststore_main.append([
+                self.app.theme['anonymous'],
+                Widgets.unescape_html(node['name']),
+                int(node['nid']),
+                Widgets.unescape_html(node['info']),
+                Widgets.set_tooltip(node['name'], node['info']),
+                ])
             Net.update_liststore_image(self.liststore_main, i, 0, 
                     node['pic'])
             i += 1
@@ -115,10 +120,14 @@ class Themes(Gtk.Box):
             return
         i = len(self.liststore_sub)
         for node in nodes:
-            self.liststore_sub.append([self.app.theme['anonymous'],
+            self.liststore_sub.append([
+                self.app.theme['anonymous'],
                 Widgets.unescape_html(node['name']),
                 int(node['sourceid']),
-                Widgets.unescape_html(node['info']), ])
+                Widgets.unescape_html(node['info']),
+                Widgets.set_tooltip_with_song_tips(node['name'],
+                    node['tips']),
+                ])
             Net.update_liststore_image(self.liststore_sub, i, 0, 
                     node['pic'])
             i += 1

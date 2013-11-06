@@ -89,9 +89,9 @@ class Artists(Gtk.Box):
         self.buttonbox.pack_end(self.artist_control_box, False, False, 0)
 
         # control box for artist's mv
-        # pic, name, artist, album, rid, artistid, albumid
-        self.artist_mv_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, 
-                str, str, int, int, int)
+        # pic, name, artist, album, rid, artistid, albumid, tooltip
+        self.artist_mv_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, str, str, int, int, int, str)
         self.artist_mv_control_box = Widgets.MVControlBox(
                 self.artist_mv_liststore, self.app)
         self.buttonbox.pack_end(self.artist_mv_control_box, False, False, 0)
@@ -142,10 +142,11 @@ class Artists(Gtk.Box):
         self.artists_win.get_vadjustment().connect('value-changed',
                 self.on_artists_win_scrolled)
         self.artists_tab.pack_start(self.artists_win, True, True, 0)
-        # pic, artist name, artist id, num of songs
-        self.artists_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int, 
-                str)
-        artists_iconview = Widgets.IconView(self.artists_liststore)
+        # pic, artist name, artist id, num of songs, tooltip
+        self.artists_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, int, str, str)
+        artists_iconview = Widgets.IconView(self.artists_liststore,
+                tooltip=4)
         artists_iconview.connect('item_activated', 
                 self.on_artists_iconview_item_activated)
         self.artists_win.add(artists_iconview)
@@ -186,7 +187,7 @@ class Artists(Gtk.Box):
         self.artist_albums_tab = Gtk.ScrolledWindow()
         self.artist_notebook.append_page(self.artist_albums_tab,
                 Gtk.Label(_('Albums')))
-        # pic, album, albumid, artist, artistid, info
+        # pic, album, albumid, artist, artistid, info/tooltip
         self.artist_albums_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, 
                 str, int, str, int, str)
         artist_albums_iconview = Widgets.IconView(
@@ -200,7 +201,7 @@ class Artists(Gtk.Box):
         self.artist_notebook.append_page(self.artist_mv_tab, 
                 Gtk.Label(_('MV')))
         artist_mv_iconview = Widgets.IconView(self.artist_mv_liststore,
-                info_pos=2)
+                info_pos=2, tooltip=7)
         artist_mv_iconview.connect('item_activated',
                 self.on_artist_mv_iconview_item_activated)
         self.artist_mv_tab.add(artist_mv_iconview)
@@ -209,11 +210,11 @@ class Artists(Gtk.Box):
         self.artist_similar_tab = Gtk.ScrolledWindow()
         self.artist_notebook.append_page(self.artist_similar_tab, 
                 Gtk.Label(_('Similar')))
-        # pic, artist name, artist id, num of songs
+        # pic, artist name, artist id, num of songs, tooltip
         self.artist_similar_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf,
-                str, int, str)
+                str, int, str, str)
         artist_similar_iconview = Widgets.IconView(
-                self.artist_similar_liststore, info_pos=3)
+                self.artist_similar_liststore, tooltip=4)
         artist_similar_iconview.connect('item_activated',
                 self.on_artist_similar_iconview_item_activated)
         self.artist_similar_tab.add(artist_similar_iconview)
@@ -338,10 +339,14 @@ class Artists(Gtk.Box):
 
         i = len(self.artists_liststore)
         for artist in artists:
-            self.artists_liststore.append([self.app.theme['anonymous'],
+            _info = ' '.join([artist['music_num'], _('songs'), ])
+            self.artists_liststore.append([
+                self.app.theme['anonymous'],
                 Widgets.unescape_html(artist['name']),
                 int(artist['id']), 
-                artist['music_num'] + _(' songs'), ])
+                _info,
+                Widgets.set_tooltip(artist['name'], _info),
+                ])
             Net.update_artist_logo(self.artists_liststore, i, 0, 
                     artist['pic'])
             i += 1
@@ -437,19 +442,14 @@ class Artists(Gtk.Box):
                 return
             i = len(self.artist_albums_liststore)
             for album in albums:
-                if len(album['info']) == 0:
-                    tooltip = Widgets.tooltip(album['name'])
-                else:
-                    tooltip = '<b>{0}</b>\n{1}'.format(
-                            Widgets.tooltip(album['name']),
-                            Widgets.tooltip(album['info']))
                 self.artist_albums_liststore.append([
                     self.app.theme['anonymous'],
                     album['name'],
                     int(album['albumid']),
                     album['artist'],
                     int(album['artistid']),
-                    tooltip, ])
+                    Widgets.set_tooltip(album['name'], album['info']),
+                    ])
                 Net.update_album_covers(self.artist_albums_liststore, i,
                         0, album['pic'])
                 i += 1
@@ -486,7 +486,9 @@ class Artists(Gtk.Box):
                     '',
                     int(mv['musicid']),
                     int(mv['artistid']),
-                    0, ])
+                    0,
+                    Widgets.set_tooltip(mv['name'], mv['artist']),
+                    ])
                 Net.update_mv_image(self.artist_mv_liststore, i, 0,
                         mv['pic'])
                 i += 1
@@ -516,11 +518,14 @@ class Artists(Gtk.Box):
                 return
             i = len(self.artist_similar_liststore)
             for artist in artists:
+                _info = ''.join([artist['songnum'], _(' songs'), ])
                 self.artist_similar_liststore.append([
                     self.app.theme['anonymous'],
                     artist['name'],
                     int(artist['id']),
-                    artist['songnum'] + _(' songs'), ])
+                    _info,
+                    Widgets.set_tooltip(artist['name'], _info),
+                    ])
                 Net.update_artist_logo(self.artist_similar_liststore, i,
                         0, artist['pic'])
                 i += 1
