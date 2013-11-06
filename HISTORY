@@ -1,3 +1,8 @@
+3.1.9 - 2013.11.6
+* Disable notify by default.
+* menu.ui and reset.css removed.
+* Add tooltips to all GtkIconViews.
+
 v3.1.8 - 2013.10.30
 * Fixed: media-playback-play does not exist.
 * Package dependencies in Fedora19 updated.

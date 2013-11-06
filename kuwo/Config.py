@@ -25,7 +25,7 @@ locale.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '3.1.8'
+VERSION = '3.1.9'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>',]
 DESCRIPTION = _('A simple music player on Linux desktop.')
@@ -75,7 +75,7 @@ _default_conf = {
         'use-ape': False,
         'use-mkv': False,
         'use-status-icon': True,
-        'use-notify': True,
+        'use-notify': False,
         'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
         'lrc-back-color': 'rgba(237, 221, 221, 0.28)',
         'lrc-text-size': 22,

@@ -2,8 +2,15 @@
 Name=KW Player
 GenericName=KW Player
 Comment=Play music from Internet
+Name[zh_CN]=KW 音乐
+GenericName[zh_CN]= KW 音乐
+Comment[zh_CN]=KW 音乐
+Name[zh_TW]=KW 音乐
+GenericName[zh_TW]= KW 音乐
+Comment[zh_TW]=KW 音乐
 Exec=kwplayer
 Icon=kwplayer
+StartupNotify=true
 Terminal=false
 Type=Application
-Categories=AudioVideo;Player;
+Categories=AudioVideo;Player;GTK;
