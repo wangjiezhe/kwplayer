@@ -301,8 +301,7 @@ class TreeViewSongs(Gtk.TreeView):
 
 def network_error(parent, msg):
     dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.MODAL,
-            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
-            msg)
+            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, msg)
     dialog.format_secondary_text(
             _('Please check network connection and try again'))
     dialog.run()
@@ -311,9 +310,16 @@ def network_error(parent, msg):
 def filesystem_error(parent, path):
     msg = _('Failed to open file or direcotry')
     dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.MODAL,
-            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
-            msg)
+            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, msg)
     dialog.format_secondary_text(
             _('Please check {0} exists').format(path))
+    dialog.run()
+    dialog.destroy()
+
+def error(app, msg, msg2=None):
+    dialog = Gtk.MessageDialog(app.window, Gtk.DialogFlags.MODAL,
+            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, msg)
+    if msg2 is not None:
+        dialog.format_secondary_text(msg2)
     dialog.run()
     dialog.destroy()

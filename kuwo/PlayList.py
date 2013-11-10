@@ -15,6 +15,7 @@ import os
 import random
 import shutil
 import sqlite3
+import subprocess
 import threading
 import time
 
@@ -315,11 +316,16 @@ class PlayList(Gtk.Box):
             scrolled_win.liststore.append(song)
         if list_name == 'Caching':
             box_caching = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-            buttonbox = Gtk.Box()
+
+            buttonbox = Gtk.Box(spacing=5)
             box_caching.pack_start(buttonbox, False, False, 0)
-            button_start = Gtk.Button(_('Start Caching'))
+            button_start = Gtk.Button(_('Start Cache Service'))
             button_start.connect('clicked', self.switch_caching_daemon)
             buttonbox.pack_start(button_start, False, False, 0)
+            button_open = Gtk.Button(_('Open Cache Folder'))
+            button_open.connect('clicked', self.open_cache_folder)
+            buttonbox.pack_start(button_open, False, False, 0)
+
             box_caching.pack_start(scrolled_win, True, True, 0)
             self.notebook.append_page(box_caching, Gtk.Label(_('Caching')))
             box_caching.show_all()
@@ -414,12 +420,20 @@ class PlayList(Gtk.Box):
         for song in songs:
             self.cache_song(song)
 
+    def open_cache_folder(self, btn):
+        try:
+            subprocess.call(('xdg-open', self.app.conf['song-dir'], ))
+        except Exception as e:
+            print(e)
+            Widgets.error(self.app, _('Failed to call `xdg-open` command'),
+                    str(e))
+
     # song cache daemon
     def switch_caching_daemon(self, btn):
         print('switch caching daemon')
         if not self.cache_enabled:
             self.cache_enabled = True
-            btn.set_label(_('Stop Caching'))
+            btn.set_label(_('Stop Cache Service'))
             self.cache_timeout = GLib.timeout_add(5000, 
                     self.start_cache_daemon)
         else:
@@ -446,7 +460,7 @@ class PlayList(Gtk.Box):
         def _failed_to_download(song_path, status):
             self.cache_enabled = False
             if status == 'URLError':
-                Widget.network_error(self.app.window,
+                Widgets.network_error(self.app.window,
                         _('Failed to cache song'))
             elif status == 'FileNotFoundError':
                 Widgets.filesystem_error(self.app.window, song_path)
