@@ -1,3 +1,11 @@
+3.2.1 - 2013.11.11
+* Fixed: catch `BitPaddendInt` exception; reported by @wangjiezhe
+* Fixed: `shuffle` was not used in play_prev_song()
+* Fixed: volume value mismatch between app.conf and GtkVolume
+* Add 5px between buttons
+* Add a button into caching_playlist, to open current cached folder
+* i18n updated
+
 3.1.9 - 2013.11.6
 * Disable notify by default.
 * menu.ui and reset.css removed.
