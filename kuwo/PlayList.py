@@ -523,7 +523,7 @@ class PlayList(Gtk.Box):
         self.next_playing = path
         return Widgets.song_row_to_dict(liststore[path], start=0)
 
-    def play_prev_song(self, repeat, shuffle, use_mv=False):
+    def play_prev_song(self, repeat, use_mv=False):
         prev_song = self.get_prev_song(repeat)
         if prev_song is None:
             return
