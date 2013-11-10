@@ -26,7 +26,7 @@ class TopList(Gtk.Box):
         self.first_show = True
         app = self.app
 
-        self.buttonbox = Gtk.Box(spacing=0)
+        self.buttonbox = Gtk.Box(spacing=5)
         self.pack_start(self.buttonbox, False, False, 0)
         button_home = Gtk.Button(_('TopList'))
         button_home.connect('clicked', self.on_button_home_clicked)

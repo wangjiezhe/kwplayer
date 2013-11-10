@@ -156,7 +156,9 @@ class Artists(Gtk.Box):
         self.notebook.append_page(self.artist_tab, Gtk.Label(_('Artist')))
 
         # left panel of artist
-        self.artist_buttons = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.artist_buttons = Gtk.Box(spacing=5,
+                orientation=Gtk.Orientation.VERTICAL)
+        self.artist_buttons.props.margin_top = 15
         self.artist_tab.pack_start(self.artist_buttons, False, False, 0)
 
         self.artist_songs_button = ArtistButton(self, _('Songs'), None, 0)

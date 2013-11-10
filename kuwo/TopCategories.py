@@ -25,7 +25,7 @@ class TopCategories(Gtk.Box):
         self.first_show = True
         app = self.app
 
-        self.buttonbox = Gtk.Box()
+        self.buttonbox = Gtk.Box(spacing=5)
         self.pack_start(self.buttonbox, False, False, 0)
 
         self.button_main = Gtk.Button(_('Top Categories'))
