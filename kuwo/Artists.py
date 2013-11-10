@@ -341,7 +341,7 @@ class Artists(Gtk.Box):
 
         i = len(self.artists_liststore)
         for artist in artists:
-            _info = ' '.join([artist['music_num'], _('songs'), ])
+            _info = ' '.join([artist['music_num'], _(' songs'), ])
             self.artists_liststore.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape_html(artist['name']),

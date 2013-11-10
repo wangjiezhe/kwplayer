@@ -442,7 +442,7 @@ class PlayList(Gtk.Box):
             self.cache_enabled = False
             if self.cache_timeout > 0:
                 GLib.source_remove(self.cache_timeout)
-            btn.set_label(_('Start Caching'))
+            btn.set_label(_('Start Cache Service'))
 
     def start_cache_daemon(self):
         if self.cache_enabled:

@@ -149,7 +149,8 @@ class Preferences(Gtk.Dialog):
 
         notify_button = Gtk.CheckButton(_('Show kwplayer on lock screen'))
         notify_button.set_tooltip_text(
-                _('Works with gdm3, Gnome3.8 and later'))
+            _('Only works with gdm3/gnome3.8+\n') + 
+            _('Please disable it on other desktop environments (like KDE)'))
         notify_button.set_active(app.conf['use-notify'])
         notify_button.connect('toggled', self.on_notify_button_toggled)
         generic_box.pack_start(notify_button, False, False, 0)
