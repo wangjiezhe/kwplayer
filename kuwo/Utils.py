@@ -133,7 +133,10 @@ def iconvtag(song_path, song):
         audio.save()
 
     ext = os.path.splitext(song_path)[1].lower()
-    if ext == '.mp3':
-        use_id3()
-    elif ext == '.ape':
-        use_ape()
+    try:
+        if ext == '.mp3':
+            use_id3()
+        elif ext == '.ape':
+            use_ape()
+    except Exception as e:
+        print('Error in Utils.iconvtag():', e)

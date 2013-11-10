@@ -38,7 +38,5 @@ share/kuwo/themes/default/cache.svg
 share/kuwo/themes/default/images.json
 share/kuwo/themes/default/lrc-background.jpg
 share/kuwo/themes/default/play.svg
-share/kuwo/themes/default/reset.css
-share/kuwo/ui/menus.ui
 share/locale/zh_CN/LC_MESSAGES/kwplayer.mo
 share/locale/zh_TW/LC_MESSAGES/kwplayer.mo

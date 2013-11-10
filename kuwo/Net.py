@@ -866,9 +866,16 @@ class AsyncSong(GObject.GObject):
         async_call(self._download_song, empty_func, song, use_mv)
 
     def _download_song(self, song, use_mv):
-        song_link, song_path = get_song_link(song,
-                                             self.app.conf,
-                                             use_mv=use_mv)
+        song_link, song_path = get_song_link(song, self.app.conf,
+                use_mv=use_mv)
+
+        print('Net.AsyncSong._download_song() song link:', song_link)
+        chunk_to_play = CHUNK_TO_PLAY
+        if self.app.conf['use-ape']:
+            chunk_to_play = CHUNK_APE_TO_PLAY
+        if use_mv:
+            chunk_to_play = CHUNK_MV_TO_PLAY
+
         # this song has no link to download
         if song_link is False:
             self.emit('can-play', song_path, 'URLError')
@@ -899,7 +906,7 @@ class AsyncSong(GObject.GObject):
                     percent = int(received_size/content_length * 100)
                     self.emit('chunk-received', percent)
                     # this signal only emit once.
-                    if (received_size > CHUNK_TO_PLAY or percent > 40) \
+                    if (received_size > chunk_to_play or percent > 40) \
                             and not can_play_emited:
                         can_play_emited = True
                         self.emit('can-play', song_path, 'OK')
