@@ -385,7 +385,7 @@ class Player(Gtk.Box):
 
     def on_volume_value_changed(self, volume_button, volume):
         self.playbin.set_volume(volume ** 3)
-        self.app.conf['volume'] = volume
+        self.app.conf['volume'] = volume ** 3
         if self.playbin.get_mute():
             self.playbin.set_mute(False)
 
