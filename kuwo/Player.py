@@ -75,6 +75,7 @@ class Player(Gtk.Box):
         toolbar = Gtk.Toolbar()
         toolbar.set_style(Gtk.ToolbarStyle.ICONS)
         toolbar.get_style_context().add_class(
+                #Gtk.STYLE_CLASS_MENUBAR)
                 Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
         toolbar.set_show_arrow(False)
         toolbar.set_icon_size(ICON_SIZE)

@@ -869,7 +869,7 @@ class AsyncSong(GObject.GObject):
         song_link, song_path = get_song_link(song, self.app.conf,
                 use_mv=use_mv)
 
-        print('Net.AsyncSong._download_song() song link:', song_link)
+        #print('Net.AsyncSong._download_song() song link:', song_link)
         chunk_to_play = CHUNK_TO_PLAY
         if self.app.conf['use-ape']:
             chunk_to_play = CHUNK_APE_TO_PLAY
