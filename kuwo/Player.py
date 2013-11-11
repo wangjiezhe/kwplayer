@@ -74,9 +74,7 @@ class Player(Gtk.Box):
 
         toolbar = Gtk.Toolbar()
         toolbar.set_style(Gtk.ToolbarStyle.ICONS)
-        toolbar.get_style_context().add_class(
-                #Gtk.STYLE_CLASS_MENUBAR)
-                Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
+        toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_MENUBAR)
         toolbar.set_show_arrow(False)
         toolbar.set_icon_size(ICON_SIZE)
         control_box.pack_start(toolbar, False, False, 0)
@@ -99,20 +97,18 @@ class Player(Gtk.Box):
         next_button.connect('clicked', self.on_next_button_clicked)
         toolbar.insert(next_button, 2)
 
-        sep = Gtk.SeparatorToolItem()
-        toolbar.insert(sep, 3)
-
         self.shuffle_btn = Gtk.ToggleToolButton()
         self.shuffle_btn.set_label(_('Shuffle'))
         self.shuffle_btn.set_icon_name('media-playlist-shuffle-symbolic')
-        toolbar.insert(self.shuffle_btn, 4)
+        self.shuffle_btn.props.margin_left = 10
+        toolbar.insert(self.shuffle_btn, 3)
 
         self.repeat_type = RepeatType.NONE
         self.repeat_btn = Gtk.ToggleToolButton()
         self.repeat_btn.set_label(_('Repeat'))
         self.repeat_btn.set_icon_name('media-playlist-repeat-symbolic')
         self.repeat_btn.connect('clicked', self.on_repeat_button_clicked)
-        toolbar.insert(self.repeat_btn, 5)
+        toolbar.insert(self.repeat_btn, 4)
 
         self.show_mv_btn = Gtk.ToggleToolButton()
         self.show_mv_btn.set_label(_('Show MV'))
@@ -120,7 +116,7 @@ class Player(Gtk.Box):
         self.show_mv_btn.set_sensitive(False)
         self.show_mv_sid = self.show_mv_btn.connect('toggled', 
                 self.on_show_mv_toggled)
-        toolbar.insert(self.show_mv_btn, 6)
+        toolbar.insert(self.show_mv_btn, 5)
 
         self.fullscreen_btn = Gtk.ToolButton()
         self.fullscreen_btn.set_label(_('Fullscreen'))
@@ -132,11 +128,11 @@ class Player(Gtk.Box):
                 app.accel_group, key, mod, Gtk.AccelFlags.VISIBLE)
         self.fullscreen_btn.connect('clicked', 
                 self.on_fullscreen_button_clicked)
-        toolbar.insert(self.fullscreen_btn, 7)
+        toolbar.insert(self.fullscreen_btn, 6)
 
         # contro menu
         menu_tool_item = Gtk.ToolItem()
-        toolbar.insert(menu_tool_item, 8)
+        toolbar.insert(menu_tool_item, 7)
         toolbar.child_set_property(menu_tool_item, 'expand', True)
         main_menu = Gtk.Menu()
         pref_item = Gtk.MenuItem(label=_('Preferences'))
@@ -245,7 +241,9 @@ class Player(Gtk.Box):
                 msg = _('Failed to download MV')
             elif self.play_type in (PlayType.SONG, PlayType.RADIO):
                 msg = _('Failed to download song')
-            Widgets.network_error(self.app.window, msg)
+            #Widgets.network_error(self.app.window, msg)
+            print('Error:', msg)
+            self.load_next_cb()
 
     def on_chunk_received(self, widget, percent):
         def _update_fill_level():
@@ -381,7 +379,7 @@ class Player(Gtk.Box):
             button.set_icon_name('media-playlist-repeat-symbolic')
 
     def on_scale_change_value(self, scale, scroll_type, value):
-        self.seek(value)
+        self.seek_cb(value)
 
     def on_volume_value_changed(self, volume_button, volume):
         self.playbin.set_volume(volume ** 3)
@@ -729,7 +727,9 @@ class Player(Gtk.Box):
     def seek(self, offset):
         if self.play_type == PlayType.NONE:
             return
+        self.pause_player()
         self.playbin.seek(offset)
+        GLib.timeout_add(300, self.start_player_cb)
         self.sync_label_by_adjustment()
 
     def seek_cb(self, offset):
