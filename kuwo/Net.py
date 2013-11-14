@@ -67,7 +67,7 @@ if ldb_imported:
             ldb_put = ldb.Put
     except Exception as e:
         ldb_imported = False
-        print('Warning: Only one process can run at a time, quit!')
+        print(e)
         sys.exit(1)
 
 

@@ -81,10 +81,6 @@ class Lrc(Gtk.Box):
         self.lrc_tv.props.pixels_above_lines = 10
         self.lrc_tv.connect('button-press-event',
                 self.on_lrc_tv_button_pressed)
-#        self.lrc_tv.connect('motion-notify-event',
-#                self.on_lrc_tv_motion_notified)
-#        self.lrc_tv.connect('button-release-event',
-#                self.on_lrc_tv_button_released)
         self.lrc_window.add(self.lrc_tv)
 
         # mv window
@@ -101,14 +97,9 @@ class Lrc(Gtk.Box):
 
     def on_lrc_tv_button_pressed(self, widget, event):
         #if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
+        # block right click
         if event.button == 3:
             return True
-
-#    def on_lrc_tv_motion_notified(self, widget, event):
-#        pass
-#
-#    def on_lrc_tv_button_released(self, widget, event):
-#        pass
 
     def set_lrc(self, lrc_txt):
         self.lrc_background = None
