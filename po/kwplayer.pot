@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-11 03:06+0800\n"
+"POT-Creation-Date: 2013-11-14 16:05+1100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,58 +17,58 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../kuwo/App.py:114 ../kuwo/Preferences.py:191
+#: ../kuwo/App.py:107 ../kuwo/Preferences.py:191
 msgid "Lyrics"
 msgstr ""
 
-#: ../kuwo/App.py:118 ../kuwo/PlayList.py:632
+#: ../kuwo/App.py:111 ../kuwo/PlayList.py:640
 msgid "Playlist"
 msgstr ""
 
-#: ../kuwo/App.py:122
+#: ../kuwo/App.py:115
 msgid "Search"
 msgstr ""
 
-#: ../kuwo/App.py:126
+#: ../kuwo/App.py:119
 msgid "Top List"
 msgstr ""
 
-#: ../kuwo/App.py:130
+#: ../kuwo/App.py:123
 msgid "Radio"
 msgstr ""
 
-#: ../kuwo/App.py:134 ../kuwo/Artists.py:167 ../kuwo/Artists.py:204
+#: ../kuwo/App.py:127 ../kuwo/Artists.py:167 ../kuwo/Artists.py:204
 #: ../kuwo/MV.py:29
 msgid "MV"
 msgstr ""
 
-#: ../kuwo/App.py:138 ../kuwo/Artists.py:73 ../kuwo/Artists.py:114
+#: ../kuwo/App.py:131 ../kuwo/Artists.py:73 ../kuwo/Artists.py:114
 #: ../kuwo/Search.py:43 ../kuwo/Search.py:76 ../kuwo/Search.py:170
 #: ../kuwo/Search.py:173 ../kuwo/Search.py:234
 msgid "Artists"
 msgstr ""
 
-#: ../kuwo/App.py:142
+#: ../kuwo/App.py:135
 msgid "Categories"
 msgstr ""
 
-#: ../kuwo/App.py:146 ../kuwo/Themes.py:31
+#: ../kuwo/App.py:139 ../kuwo/Themes.py:31
 msgid "Themes"
 msgstr ""
 
-#: ../kuwo/App.py:220
+#: ../kuwo/App.py:219
 msgid "Show App"
 msgstr ""
 
-#: ../kuwo/App.py:225
+#: ../kuwo/App.py:223
 msgid "Pause/Resume"
 msgstr ""
 
-#: ../kuwo/App.py:230
+#: ../kuwo/App.py:227
 msgid "Next Song"
 msgstr ""
 
-#: ../kuwo/App.py:238 ../kuwo/Player.py:152
+#: ../kuwo/App.py:234 ../kuwo/Player.py:148
 msgid "Quit"
 msgstr ""
 
@@ -96,7 +96,7 @@ msgstr ""
 msgid "Info"
 msgstr ""
 
-#: ../kuwo/Artists.py:250 ../kuwo/PlayList.py:74
+#: ../kuwo/Artists.py:250 ../kuwo/PlayList.py:75
 msgid "Name"
 msgstr ""
 
@@ -132,7 +132,7 @@ msgstr ""
 msgid "Constellation"
 msgstr ""
 
-#: ../kuwo/Artists.py:279 ../kuwo/PlayList.py:82
+#: ../kuwo/Artists.py:279 ../kuwo/PlayList.py:83
 msgid "Album"
 msgstr ""
 
@@ -208,12 +208,12 @@ msgstr ""
 msgid "Mute"
 msgstr ""
 
-#: ../kuwo/Config.py:63 ../kuwo/Player.py:85 ../kuwo/PlayerNotify.py:57
+#: ../kuwo/Config.py:63 ../kuwo/Player.py:83 ../kuwo/PlayerNotify.py:57
 #: ../kuwo/PlayerNotify.py:80
 msgid "Previous"
 msgstr ""
 
-#: ../kuwo/Config.py:64 ../kuwo/Player.py:97 ../kuwo/PlayerNotify.py:74
+#: ../kuwo/Config.py:64 ../kuwo/Player.py:95 ../kuwo/PlayerNotify.py:74
 #: ../kuwo/PlayerNotify.py:100
 msgid "Next"
 msgstr ""
@@ -222,7 +222,7 @@ msgstr ""
 msgid "Pause"
 msgstr ""
 
-#: ../kuwo/Config.py:66 ../kuwo/Player.py:91 ../kuwo/PlayerNotify.py:69
+#: ../kuwo/Config.py:66 ../kuwo/Player.py:89 ../kuwo/PlayerNotify.py:69
 #: ../kuwo/PlayerNotify.py:94 ../kuwo/Radio.py:63 ../kuwo/Widgets.py:160
 msgid "Play"
 msgstr ""
@@ -235,116 +235,120 @@ msgstr ""
 msgid "Launch"
 msgstr ""
 
-#: ../kuwo/Lrc.py:119
+#: ../kuwo/Lrc.py:110
 msgid "No lrc available"
 msgstr ""
 
-#: ../kuwo/PlayList.py:78
+#: ../kuwo/PlayList.py:79
 msgid "Aritst"
 msgstr ""
 
-#: ../kuwo/PlayList.py:87 ../kuwo/Radio.py:81
+#: ../kuwo/PlayList.py:88 ../kuwo/Radio.py:81
 msgid "Delete"
 msgstr ""
 
-#: ../kuwo/PlayList.py:289
+#: ../kuwo/PlayList.py:290
 msgid "Cached"
 msgstr ""
 
-#: ../kuwo/PlayList.py:290 ../kuwo/PlayList.py:330
+#: ../kuwo/PlayList.py:291 ../kuwo/PlayList.py:332
 msgid "Caching"
 msgstr ""
 
-#: ../kuwo/PlayList.py:291
+#: ../kuwo/PlayList.py:292
 msgid "Default"
 msgstr ""
 
-#: ../kuwo/PlayList.py:292 ../kuwo/Radio.py:75
+#: ../kuwo/PlayList.py:293 ../kuwo/Radio.py:75
 msgid "Favorite"
 msgstr ""
 
-#: ../kuwo/PlayList.py:322 ../kuwo/PlayList.py:445
+#: ../kuwo/PlayList.py:323 ../kuwo/PlayList.py:447
 msgid "Start Cache Service"
 msgstr ""
 
-#: ../kuwo/PlayList.py:325
+#: ../kuwo/PlayList.py:327
 msgid "Open Cache Folder"
 msgstr ""
 
-#: ../kuwo/PlayList.py:428
+#: ../kuwo/PlayList.py:430
 msgid "Failed to call `xdg-open` command"
 msgstr ""
 
-#: ../kuwo/PlayList.py:436
+#: ../kuwo/PlayList.py:438
 msgid "Stop Cache Service"
 msgstr ""
 
-#: ../kuwo/PlayList.py:464
+#: ../kuwo/PlayList.py:466
 msgid "Failed to cache song"
 msgstr ""
 
-#: ../kuwo/PlayList.py:685
+#: ../kuwo/PlayList.py:489
+msgid "All songs in caching list have been downloaded."
+msgstr ""
+
+#: ../kuwo/PlayList.py:693
 msgid "Export Songs"
 msgstr ""
 
-#: ../kuwo/PlayList.py:692
+#: ../kuwo/PlayList.py:700
 msgid "Choose export folder"
 msgstr ""
 
-#: ../kuwo/PlayList.py:699
+#: ../kuwo/PlayList.py:707
 msgid "With lyrics"
 msgstr ""
 
-#: ../kuwo/PlayList.py:700
+#: ../kuwo/PlayList.py:708
 msgid "Export lyrics to the same folder"
 msgstr ""
 
-#: ../kuwo/PlayList.py:711
+#: ../kuwo/PlayList.py:719
 msgid "Export"
 msgstr ""
 
-#: ../kuwo/PlayList.py:719
+#: ../kuwo/PlayList.py:727
 msgid "Only cached songs will be exported"
 msgstr ""
 
-#: ../kuwo/PlayList.py:763
+#: ../kuwo/PlayList.py:771
 msgid "Create this playlist and add songs into it"
 msgstr ""
 
-#: ../kuwo/Player.py:106
+#: ../kuwo/Player.py:101
 msgid "Shuffle"
 msgstr ""
 
-#: ../kuwo/Player.py:112
+#: ../kuwo/Player.py:108
 msgid "Repeat"
 msgstr ""
 
-#: ../kuwo/Player.py:118
+#: ../kuwo/Player.py:114
 msgid "Show MV"
 msgstr ""
 
-#: ../kuwo/Player.py:126
+#: ../kuwo/Player.py:122
 msgid "Fullscreen"
 msgstr ""
 
-#: ../kuwo/Player.py:142 ../kuwo/Preferences.py:129
+#: ../kuwo/Player.py:138 ../kuwo/Preferences.py:129
 msgid "Preferences"
 msgstr ""
 
-#: ../kuwo/Player.py:148
+#: ../kuwo/Player.py:144
 msgid "About"
 msgstr ""
 
-#: ../kuwo/Player.py:176 ../kuwo/Player.py:413 ../kuwo/Player.py:417
+#: ../kuwo/Player.py:172 ../kuwo/Player.py:411 ../kuwo/Player.py:415
 #: ../kuwo/PlayerNotify.py:35 ../kuwo/PlayerNotify.py:39
 msgid "Unknown"
 msgstr ""
 
-#: ../kuwo/Player.py:245
+#: ../kuwo/Player.py:241
 msgid "Failed to download MV"
 msgstr ""
 
-#: ../kuwo/Player.py:247
+#: ../kuwo/Player.py:243
 msgid "Failed to download song"
 msgstr ""
 
