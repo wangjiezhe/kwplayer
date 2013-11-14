@@ -17,7 +17,7 @@ _ = Config._
 class PlayerNotify:
     def __init__(self, player):
         self.player = player
-        self.notify = Notify.Notification.new( '', '', 'kwplayer')
+        self.notify = Notify.Notification.new('', '', 'kwplayer')
 
     def refresh(self):
         if not self.player.app.conf['use-notify']:

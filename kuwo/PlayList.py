@@ -10,6 +10,7 @@ from gi.repository import Gio
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
+from gi.repository import Notify
 import json
 import os
 import random
@@ -321,6 +322,7 @@ class PlayList(Gtk.Box):
             box_caching.pack_start(buttonbox, False, False, 0)
             button_start = Gtk.Button(_('Start Cache Service'))
             button_start.connect('clicked', self.switch_caching_daemon)
+            self.button_start = button_start
             buttonbox.pack_start(button_start, False, False, 0)
             button_open = Gtk.Button(_('Open Cache Folder'))
             button_open.connect('clicked', self.open_cache_folder)
@@ -429,12 +431,12 @@ class PlayList(Gtk.Box):
                     str(e))
 
     # song cache daemon
-    def switch_caching_daemon(self, btn):
+    def switch_caching_daemon(self, *args):
         print('switch caching daemon')
-        if not self.cache_enabled:
+        if self.cache_enabled is False:
             self.cache_enabled = True
-            btn.set_label(_('Stop Cache Service'))
-            self.cache_timeout = GLib.timeout_add(5000, 
+            self.button_start.set_label(_('Stop Cache Service'))
+            self.cache_timeout = GLib.timeout_add(3000,
                     self.start_cache_daemon)
         else:
             #if self.cache_job:
@@ -442,7 +444,7 @@ class PlayList(Gtk.Box):
             self.cache_enabled = False
             if self.cache_timeout > 0:
                 GLib.source_remove(self.cache_timeout)
-            btn.set_label(_('Start Cache Service'))
+            self.button_start.set_label(_('Start Cache Service'))
 
     def start_cache_daemon(self):
         if self.cache_enabled:
@@ -481,6 +483,12 @@ class PlayList(Gtk.Box):
         path = 0
         if len(liststore) == 0:
             print('Caching playlist is empty, please add some')
+            self.switch_caching_daemon()
+            Notify.init('kwplayer-cache')
+            notify = Notify.Notification.new('Kwplayer',
+                    _('All songs in caching list have been downloaded.'),
+                    'kwplayer')
+            notify.show()
             return
         song = Widgets.song_row_to_dict(liststore[path], start=0)
         print('song dict to download:', song)
