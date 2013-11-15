@@ -1,3 +1,12 @@
+3.2.2 - 2013.11.15
+* Fixed: failed to clear highlighted tags in lrc view
+* Some blank lines were added to lyrics
+* Outline in GtkScale removed
+* Popup a notifcation when all songs in cache list have been downloaded
+* Automatically load next song when error occurs
+* Use Gtk_CSS_STYLE_MENUBAR (for Gnome3.8+)
+* i18n updated
+
 3.2.1 - 2013.11.11
 * Fixed: catch `BitPaddendInt` exception; reported by @wangjiezhe
 * Fixed: `shuffle` was not used in play_prev_song()

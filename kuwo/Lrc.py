@@ -26,7 +26,7 @@ def list_to_time(time_tags):
 
 def lrc_parser(lrc_txt):
     lines = lrc_txt.split('\n')
-    lrc_obj = [(-5, ''), (-4, ''), (-3, ''), (-2, ''), (-1, ''),]
+    lrc_obj = [(-5, ''), (-4, ''), (-3, ''), (-2, ''), ]
 
     reg_time = re.compile('\[([0-9]{2}):([0-9]{2})(\.[0-9]{1,3})?\]')
     for line in lines:
@@ -104,7 +104,7 @@ class Lrc(Gtk.Box):
 
     def set_lrc(self, lrc_txt):
         self.lrc_background = None
-        self.old_line = 0
+        self.old_line = 1
         self.old_line_iter = None
         if lrc_txt is None:
             print('Failed to get lrc')
@@ -112,14 +112,14 @@ class Lrc(Gtk.Box):
             self.lrc_obj = None
             return
         self.lrc_obj = lrc_parser(lrc_txt)
-        self.lrc_window.get_vadjustment().set_value(0)
         self.lrc_content = [l[1] for l in self.lrc_obj]
 
         self.lrc_buf.remove_all_tags(
                 self.lrc_buf.get_start_iter(),
                 self.lrc_buf.get_end_iter())
         self.lrc_buf.set_text('\n'.join(self.lrc_content))
-        self.sync_lrc(0)
+        #self.sync_lrc(0)
+        self.lrc_window.get_vadjustment().set_value(0)
 
     def sync_lrc(self, timestamp):
         if self.lrc_obj is None:
