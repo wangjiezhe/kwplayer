@@ -25,10 +25,9 @@ def list_to_time(time_tags):
     return int(curr_time * 10**9)
 
 def lrc_parser(lrc_txt):
-    if lrc_txt is None:
-        return None
     lines = lrc_txt.split('\n')
-    lrc_obj = []
+    lrc_obj = [(-5, ''), (-4, ''), (-3, ''), (-2, ''), (-1, ''),]
+
     reg_time = re.compile('\[([0-9]{2}):([0-9]{2})(\.[0-9]{1,3})?\]')
     for line in lines:
         offset = 0
@@ -42,8 +41,10 @@ def lrc_parser(lrc_txt):
         content = line[offset:]
         for tag in tags:
             lrc_obj.append((tag, content))
+    last_time = lrc_obj[-1][0]
+    for i in range(last_time, last_time * 2, last_time // 4):
+        lrc_obj.append((i, '', ))
     return sorted(lrc_obj)
-
 
 class Lrc(Gtk.Box):
     def __init__(self, app):
@@ -103,10 +104,10 @@ class Lrc(Gtk.Box):
 
     def set_lrc(self, lrc_txt):
         self.lrc_background = None
-        self.old_line = -1
+        self.old_line = 0
         self.old_line_iter = None
         if lrc_txt is None:
-            print('failed to get lrc')
+            print('Failed to get lrc')
             self.lrc_buf.set_text(_('No lrc available'))
             self.lrc_obj = None
             return
