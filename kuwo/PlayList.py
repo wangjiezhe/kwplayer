@@ -457,7 +457,10 @@ class PlayList(Gtk.Box):
     def do_cache_song_pool(self):
         def _move_song():
             self.append_cached_song(song)
-            liststore.remove(liststore[path].iter)
+            try:
+                liststore.remove(liststore[path].iter)
+            except IndexError:
+                pass
             Gdk.Window.process_all_updates()
         def _failed_to_download(song_path, status):
             self.cache_enabled = False
