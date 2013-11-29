@@ -245,14 +245,18 @@ class Search(Gtk.Box):
     def search_artist(self, artist):
         self.reset_search_status()
         self.app.popup_page(self.app_page)
+        self.artists_tab_inited = False
         self.search_entry.set_text(artist)
         self.artists_button.set_active(True)
+        self.artists_button.toggled()
 
     def search_album(self, album):
         self.reset_search_status()
         self.app.popup_page(self.app_page)
+        self.albums_tab_inited = False
         self.search_entry.set_text(album)
         self.albums_button.set_active(True)
+        self.albums_button.toggled()
 
     def on_songs_tab_scrolled(self, adj):
         if Widgets.reach_scrolled_bottom(adj) and \
