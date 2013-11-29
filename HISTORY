@@ -1,3 +1,10 @@
+3.2.3 - 2013.11.29
+* Fixed: catch IndexError when caching list is empty
+* Fixed: init Artists widgets by default
+* Fixed: activate album/artist search tab by default
+* Add a fav_artists list to Artist
+* i18n updated
+
 3.2.2 - 2013.11.15
 * Fixed: failed to clear highlighted tags in lrc view
 * Some blank lines were added to lyrics
