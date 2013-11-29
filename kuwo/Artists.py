@@ -62,12 +62,7 @@ class Artists(Gtk.Box):
     def __init__(self, app):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.app = app
-        self.first_show = False
 
-    def first(self):
-        if self.first_show:
-            return
-        self.first_show = True
         app = self.app
         self.buttonbox = Gtk.Box()
         self.pack_start(self.buttonbox, False, False, 0)
@@ -330,9 +325,6 @@ class Artists(Gtk.Box):
                 self.on_fav_artists_iconview_item_activated)
         fav_win.add(fav_artists_iconview)
 
-        self.show_all()
-        self.buttonbox.hide()
-
         prefs = ((_('All'), ''),
                 ('A', 'a'), ('B', 'b'), ('C', 'c'), ('D', 'd'),
                 ('E', 'e'), ('F', 'f'), ('G', 'g'), ('H', 'h'), ('I', 'i'),
@@ -368,6 +360,9 @@ class Artists(Gtk.Box):
 
         # load current favorite artists list
         self.load_fav_artists()
+
+    def first(self):
+        self.buttonbox.hide()
 
     def do_destroy(self):
         self.dump_fav_artists()
@@ -741,7 +736,6 @@ class Artists(Gtk.Box):
         Dump fav_artists to a json file
         '''
         fav_artists = [row[2] for row in self.fav_artists_liststore]
-        print('fav artists:', fav_artists)
         with open(Config.FAV_ARTISTS_JSON, 'w') as fh:
             fh.write(json.dumps(fav_artists))
 
