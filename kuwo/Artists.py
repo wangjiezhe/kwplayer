@@ -6,6 +6,8 @@
 
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
+import json
+import os
 import time
 
 from kuwo import Config
@@ -137,12 +139,25 @@ class Artists(Gtk.Box):
         self.pref_combo.props.margin_top = 15
         artists_left_box.pack_start(self.pref_combo, False, False, 0)
 
+        # favirote artists
+        self.fav_yes_img = Gtk.Image.new_from_pixbuf(
+                self.app.theme['favorite'])
+        self.fav_no_img = Gtk.Image.new_from_pixbuf(
+                self.app.theme['no-favorite'])
+        fav_artists_btn = Gtk.Button(_('Favorite'))
+        fav_artists_btn.props.margin_top = 20
+        fav_artists_btn.props.image = Gtk.Image.new_from_pixbuf(
+                self.app.theme['favorite'])
+        fav_artists_btn.props.always_show_image = True
+        fav_artists_btn.connect('clicked', self.on_fav_artists_btn_clicked)
+        artists_left_box.pack_start(fav_artists_btn, False, False, 0)
+
         # main window of artists
         self.artists_win = Gtk.ScrolledWindow()
         self.artists_win.get_vadjustment().connect('value-changed',
                 self.on_artists_win_scrolled)
         self.artists_tab.pack_start(self.artists_win, True, True, 0)
-        # pic, artist name, artist id, num of songs, tooltip
+        # icon, artist name, artist id, num of songs, tooltip
         self.artists_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf,
                 str, int, str, str)
         artists_iconview = Widgets.IconView(self.artists_liststore,
@@ -170,6 +185,19 @@ class Artists(Gtk.Box):
                 self.artist_songs_button, 3)
         self.artist_info_button = ArtistButton(self, _('Info'),
                 self.artist_songs_button, 4)
+
+        # Add fav_btn to artist_tab
+        fav_curr_artist_btn = Gtk.Button()
+        fav_curr_artist_btn.props.margin_top = 15
+        fav_curr_artist_btn.props.halign = Gtk.Align.CENTER
+        fav_curr_artist_btn.props.image = self.fav_no_img
+        fav_curr_artist_btn.props.always_show_image = True
+        fav_curr_artist_btn.set_tooltip_text(
+                _('Add to favorite artists list'))
+        fav_curr_artist_btn.connect('clicked',
+                self.on_fav_curr_artist_btn_clicked)
+        self.artist_buttons.pack_start(fav_curr_artist_btn, False, False, 0)
+        self.fav_curr_artist_btn = fav_curr_artist_btn
 
         # main window of artist tab
         self.artist_notebook = Gtk.Notebook()
@@ -281,6 +309,27 @@ class Artists(Gtk.Box):
                 self.album_songs_liststore, app)
         album_songs_tab.add(album_songs_treeview)
 
+        # Favorite artists tab (tab 3)
+        fav_artists_tab = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.notebook.append_page(fav_artists_tab, Gtk.Label(_('Favorite')))
+        fav_buttons = Gtk.Box(spacing=5)
+        fav_artists_tab.pack_start(fav_buttons, False, False, 0)
+        fav_main_btn = Gtk.Button(_('Artists'))
+        fav_main_btn.connect('clicked', self.on_fav_main_btn_clicked)
+        fav_buttons.pack_start(fav_main_btn, False, False, 0)
+        fav_label = Gtk.Label(_('Favorite Artists'))
+        fav_buttons.pack_start(fav_label, False, False, 0)
+        fav_win = Gtk.ScrolledWindow()
+        fav_artists_tab.pack_start(fav_win, True, True, 0)
+        # icon, artist name, artist id, tooltip
+        self.fav_artists_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                str, int, str)
+        fav_artists_iconview = Widgets.IconView(self.fav_artists_liststore,
+                info_pos=None, tooltip=3)
+        fav_artists_iconview.connect('item_activated',
+                self.on_fav_artists_iconview_item_activated)
+        fav_win.add(fav_artists_iconview)
+
         self.show_all()
         self.buttonbox.hide()
 
@@ -316,6 +365,12 @@ class Artists(Gtk.Box):
         self.cate_treeview.connect('row_activated', self.on_cate_changed)
         selection.connect('changed', self.on_cate_changed)
         selection.select_path(0)
+
+        # load current favorite artists list
+        self.load_fav_artists()
+
+    def do_destroy(self):
+        self.dump_fav_artists()
 
     def on_cate_changed(self, *args):
         self.append_artists(init=True)
@@ -355,9 +410,9 @@ class Artists(Gtk.Box):
 
     def on_artists_iconview_item_activated(self, iconview, path):
         model = iconview.get_model()
-        artist = model[path][1]
-        artistid = model[path][2]
-        self.show_artist(artist, artistid)
+        artist_name = model[path][1]
+        artist_id = model[path][2]
+        self.show_artist(artist_name, artist_id)
 
     # Song window
     def on_home_button_clicked(self, btn):
@@ -389,6 +444,12 @@ class Artists(Gtk.Box):
         self.album_control_box.hide()
         self.label.set_label(artist)
         self.app.playlist.advise_new_playlist_name(artist)
+
+        if self.check_artist_favorited(artistid):
+            self.fav_curr_artist_btn.props.image = self.fav_yes_img
+        else:
+            self.fav_curr_artist_btn.props.image = self.fav_no_img
+
         # switch to `songs` tab
         if self.artist_songs_button.get_active():
             self.show_artist_songs()
@@ -626,3 +687,80 @@ class Artists(Gtk.Box):
 
     def on_artist_button_clicked(self, button):
         self.show_artist(self.curr_artist_name, self.curr_artist_id)
+
+    # Signal handlers for favorite artists tab
+    def add_to_fav_artists(self, artist_id, init=False):
+        def _append_fav_artist(info, error=None):
+            if info and info['pic'] and len(info['pic']) > 0:
+                pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                        info['pic'], 100, 100)
+            else:
+                pix = self.app.theme['anonymous']
+            if 'info' in info:
+                tip = Widgets.tooltip(info['info'])
+            else:
+                tip = ''
+            self.fav_artists_liststore.append([pix, info['name'],
+                artist_id, tip])
+
+        if init is False and self.check_artist_favorited(artist_id):
+            return
+        Net.async_call(Net.get_artist_info, _append_fav_artist, artist_id)
+
+    def remove_from_fav_artists(self, artist_id):
+        '''
+        Remove an artist from fav_artists_liststore.
+        '''
+        for row in self.fav_artists_liststore:
+            if artist_id == row[2]:
+                self.fav_artists_liststore.remove(row.iter)
+                return
+
+    def check_artist_favorited(self, artist_id):
+        '''
+        Check if this artist in favorite list.
+        '''
+        for row in self.fav_artists_liststore:
+            if artist_id == row[2]:
+                return True
+        return False
+
+    def load_fav_artists(self):
+        '''
+        Load fav_artists from json
+        '''
+        if not os.path.exists(Config.FAV_ARTISTS_JSON):
+            return
+        with open(Config.FAV_ARTISTS_JSON) as fh:
+            fav_artists = json.loads(fh.read())
+        for artist_id in fav_artists:
+            self.add_to_fav_artists(artist_id)
+
+    def dump_fav_artists(self):
+        '''
+        Dump fav_artists to a json file
+        '''
+        fav_artists = [row[2] for row in self.fav_artists_liststore]
+        print('fav artists:', fav_artists)
+        with open(Config.FAV_ARTISTS_JSON, 'w') as fh:
+            fh.write(json.dumps(fav_artists))
+
+    def on_fav_artists_btn_clicked(self, btn):
+        self.notebook.set_current_page(3)
+
+    def on_fav_main_btn_clicked(self, btn):
+        self.notebook.set_current_page(0)
+
+    def on_fav_artists_iconview_item_activated(self, iconview, path):
+        model = iconview.get_model()
+        artist_name = model[path][1]
+        artist_id = model[path][2]
+        self.show_artist(artist_name, artist_id)
+
+    def on_fav_curr_artist_btn_clicked(self, btn):
+        if btn.props.image == self.fav_yes_img:
+            btn.props.image = self.fav_no_img
+            self.remove_from_fav_artists(self.curr_artist_id)
+        else:
+            btn.props.image = self.fav_yes_img
+            self.add_to_fav_artists(self.curr_artist_id)

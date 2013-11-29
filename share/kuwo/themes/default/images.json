@@ -1,7 +1,9 @@
 {
-  "play": "play.svg",
   "add": "add.svg",
-  "cache": "cache.svg",
   "anonymous": "anonymous.png",
-  "app-logo": "app-logo.png"
+  "app-logo": "app-logo.png",
+  "cache": "cache.svg",
+  "favorite": "favorite.svg",
+  "no-favorite": "no-favorite.svg",
+  "play": "play.svg"
 }

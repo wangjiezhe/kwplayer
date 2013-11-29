@@ -46,6 +46,8 @@ CACHE_DB = os.path.join(CACHE_DIR, 'cache.db')
 PLS_JSON = os.path.join(CACHE_DIR, 'pls.json')
 # store radio playlist.
 RADIO_JSON = os.path.join(CACHE_DIR, 'radio.json')
+# favorite artists list.
+FAV_ARTISTS_JSON = os.path.join(CACHE_DIR, 'fav_artists.json')
 
 THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
 

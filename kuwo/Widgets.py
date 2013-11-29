@@ -225,15 +225,16 @@ class IconView(Gtk.IconView):
         self.pack_start(cell_name, True)
         self.add_attribute(cell_name, 'text', 1)
 
-        cell_info = Gtk.CellRendererText()
-        fore_color = Gdk.RGBA(red=136/256, green=139/256, blue=132/256)
-        cell_info.props.foreground_rgba = fore_color
-        cell_info.props.size_points = 9
-        cell_info.props.max_width_chars = 18
-        #cell_info.props.width_chars = 18
-        cell_info.set_alignment(0.5, 0.5)
-        self.pack_start(cell_info, True)
-        self.add_attribute(cell_info, 'text', info_pos)
+        if info_pos is not None:
+            cell_info = Gtk.CellRendererText()
+            fore_color = Gdk.RGBA(red=136/256, green=139/256, blue=132/256)
+            cell_info.props.foreground_rgba = fore_color
+            cell_info.props.size_points = 9
+            cell_info.props.max_width_chars = 18
+            #cell_info.props.width_chars = 18
+            cell_info.set_alignment(0.5, 0.5)
+            self.pack_start(cell_info, True)
+            self.add_attribute(cell_info, 'text', info_pos)
 
 
 class TreeViewSongs(Gtk.TreeView):
