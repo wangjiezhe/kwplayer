@@ -473,7 +473,7 @@ class PlayList(Gtk.Box):
         def _on_can_play(widget, song_path, status, error=None):
             if status == 'OK':
                 return
-            GLib.idle_add(_failed_to_download)
+            GLib.idle_add(_failed_to_download, song_path, status)
 
         def _on_downloaded(widget, song_path, error=None):
             self.cache_job = None
