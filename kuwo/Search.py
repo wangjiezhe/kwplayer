@@ -27,7 +27,7 @@ class Search(Gtk.Box):
         box_top = Gtk.Box(spacing=5)
         self.pack_start(box_top, False, False, 0)
 
-        if Gtk.MINOR_VERSION < 6:
+        if Config.GTK_LE_36:
             self.search_entry = Gtk.Entry()
         else:
             self.search_entry = Gtk.SearchEntry()

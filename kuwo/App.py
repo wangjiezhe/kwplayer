@@ -165,9 +165,11 @@ class App:
 
     def load_styles(self):
         font_size = str(int(self.conf['lrc-text-size']))
-        px = ''
-        if Gtk.MINOR_VERSION > 6:
+        if Config.GTK_LE_36:
+            px = ''
+        else:
             px = 'px'
+
         css = '\n'.join([
             'GtkScrolledWindow.lrc_window {',
                 'transition-property: background-image;',

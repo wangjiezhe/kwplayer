@@ -155,7 +155,7 @@ class Player(Gtk.Box):
         main_menu.show_all()
         menu_image = Gtk.Image()
         menu_image.set_from_icon_name('view-list-symbolic', ICON_SIZE)
-        if Gtk.MINOR_VERSION < 6:
+        if Config.GTK_LE_36:
             menu_btn = Gtk.Button()
             menu_btn.connect('clicked', 
                 self.on_main_menu_button_clicked, main_menu)

@@ -143,7 +143,8 @@ class Artists(Gtk.Box):
         fav_artists_btn.props.margin_top = 20
         fav_artists_btn.props.image = Gtk.Image.new_from_pixbuf(
                 self.app.theme['favorite'])
-        fav_artists_btn.props.always_show_image = True
+        if not Config.GTK_LE_36:
+            fav_artists_btn.props.always_show_image = True
         fav_artists_btn.connect('clicked', self.on_fav_artists_btn_clicked)
         artists_left_box.pack_start(fav_artists_btn, False, False, 0)
 
@@ -186,7 +187,8 @@ class Artists(Gtk.Box):
         fav_curr_artist_btn.props.margin_top = 15
         fav_curr_artist_btn.props.halign = Gtk.Align.CENTER
         fav_curr_artist_btn.props.image = self.fav_no_img
-        fav_curr_artist_btn.props.always_show_image = True
+        if not Config.GTK_LE_36:
+            fav_curr_artist_btn.props.always_show_image = True
         fav_curr_artist_btn.set_tooltip_text(
                 _('Add to favorite artists list'))
         fav_curr_artist_btn.connect('clicked',

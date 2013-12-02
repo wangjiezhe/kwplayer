@@ -6,6 +6,7 @@
 
 import gettext
 from gi.repository import GdkPixbuf
+from gi.repository import Gtk
 import json
 import locale
 import os
@@ -20,8 +21,8 @@ else:
 LOCALEDIR = os.path.join(PREF, 'locale')
 gettext.bindtextdomain('kwplayer', LOCALEDIR)
 gettext.textdomain('kwplayer')
-locale.bindtextdomain('kwplayer', LOCALEDIR)
-locale.textdomain('kwplayer')
+#locale.bindtextdomain('kwplayer', LOCALEDIR)
+#locale.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
@@ -55,6 +56,9 @@ class ShortcutMode:
     NONE = 0
     DEFAULT = 1
     CUSTOM = 2
+
+# Check Gtk version <= 3.6
+GTK_LE_36 = (Gtk.MAJOR_VERSION == 3) and (Gtk.MINOR_VERSION <= 6)
 
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')
