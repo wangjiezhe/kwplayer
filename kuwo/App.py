@@ -76,6 +76,7 @@ class App:
         self.window.show_all()
         # make some changes after main window is shown.
         self.lrc.after_init()
+        self.artists.after_init()
         self.player.after_init()
         self.search.after_init()
         self.shortcut = Shortcut(self.player)

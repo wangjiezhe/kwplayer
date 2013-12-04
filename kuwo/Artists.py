@@ -364,6 +364,9 @@ class Artists(Gtk.Box):
         self.load_fav_artists()
 
     def first(self):
+        pass
+
+    def after_init(self):
         self.buttonbox.hide()
 
     def do_destroy(self):
