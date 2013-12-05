@@ -26,7 +26,7 @@ def list_to_time(time_tags):
 
 def lrc_parser(lrc_txt):
     lines = lrc_txt.split('\n')
-    lrc_obj = [(-5, ''), (-4, ''), (-3, ''), (-2, ''), ]
+    lrc_obj = [(-4, ''), (-3, ''), (-2, ''), ]
 
     reg_time = re.compile('\[([0-9]{2}):([0-9]{2})(\.[0-9]{1,3})?\]')
     for line in lines:
@@ -42,7 +42,7 @@ def lrc_parser(lrc_txt):
         for tag in tags:
             lrc_obj.append((tag, content))
     last_time = lrc_obj[-1][0]
-    for i in range(last_time, last_time * 2, last_time // 4):
+    for i in range(last_time, last_time * 2 + 5, last_time // 4 + 1):
         lrc_obj.append((i, '', ))
     return sorted(lrc_obj)
 
