@@ -15,6 +15,7 @@ import zlib
 mutagenx_imported = False
 if sys.version_info.major >= 3 and sys.version_info.minor >= 3:
     try:
+        from mutagenx.mp3 import MP3
         from mutagenx.easyid3 import EasyID3
         from mutagenx.apev2 import APEv2File
         mutagenx_imported = True
@@ -110,11 +111,8 @@ def parse_radio_songs(txt):
     return songs
 
 def iconvtag(song_path, song):
-    # Do nothing if python3 version is lower than 3.3
-    if not mutagenx_imported:
-        return
     def use_id3():
-        audio = EasyID3(song_path)
+        audio = MP3(song_path, ID3=EasyID3)
         audio.clear()
         audio['title'] = song['name']
         audio['artist'] = song['artist']
@@ -125,12 +123,15 @@ def iconvtag(song_path, song):
         audio = APEv2File(song_path)
         if audio.tags is None:
             audio.add_tags()
-        # TODO: FIXME:
         audio.tags.clear()
         audio.tags['title'] = song['name']
         audio.tags['artist'] = song['artist']
         audio.tags['album'] = song['album']
         audio.save()
+
+    # Do nothing if mutagenx is not imported
+    if not mutagenx_imported:
+        return
 
     ext = os.path.splitext(song_path)[1].lower()
     try:
