@@ -201,17 +201,20 @@ class PlayList(Gtk.Box):
         toolbar.props.icon_size = 1
         add_btn = Gtk.ToolButton()
         add_btn.set_name('Add')
+        add_btn.set_tooltip_text(_('Add a new playlist'))
         add_btn.set_icon_name('list-add-symbolic')
         add_btn.connect('clicked', self.on_add_playlist_button_clicked)
         toolbar.insert(add_btn, 0)
         remove_btn = Gtk.ToolButton()
         remove_btn.set_name('Remove')
+        remove_btn.set_tooltip_text(_('Remove selected playlist'))
         remove_btn.set_icon_name('list-remove-symbolic')
         remove_btn.connect('clicked', 
                 self.on_remove_playlist_button_clicked)
         toolbar.insert(remove_btn, 1)
         export_btn = Gtk.ToolButton()
         export_btn.set_name('Export')
+        export_btn.set_tooltip_text(_('Export songs in selected playlist'))
         export_btn.set_icon_name('media-eject-symbolic')
         export_btn.connect('clicked', 
                 self.on_export_playlist_button_clicked)
