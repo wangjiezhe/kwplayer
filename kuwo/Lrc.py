@@ -103,7 +103,7 @@ class Lrc(Gtk.Box):
             return True
 
     def set_lrc(self, lrc_txt):
-        self.lrc_background = None
+        self.update_background(self.lrc_default_background)
         self.old_line = 1
         self.old_line_iter = None
         if lrc_txt is None:
@@ -155,8 +155,8 @@ class Lrc(Gtk.Box):
         self.lrc_window.show_all()
 
     # styles
-    def update_background(self, filepath, error=None):
-        if filepath == self.lrc_background:
+    def update_background(self, filepath):
+        if filepath is None or filepath == self.lrc_background:
             return
         if filepath and os.path.exists(filepath):
             self.lrc_background = filepath

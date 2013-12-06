@@ -438,8 +438,7 @@ class Player(Gtk.Box):
 
     def update_lrc_background(self, url):
         def _update_background(filepath, error=None):
-            if filepath:
-                self.app.lrc.update_background(filepath)
+            self.app.lrc.update_background(filepath)
         Net.async_call(Net.get_recommend_image, _update_background, url)
 
     # Radio part
