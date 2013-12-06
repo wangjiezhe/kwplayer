@@ -26,7 +26,7 @@ gettext.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '3.2.3'
+VERSION = '3.2.4'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>',]
 DESCRIPTION = _('A simple music player on Linux desktop.')

@@ -1,3 +1,10 @@
+3.2.4 - 2013.12.6
+* Fixed: add two parameters to _failed_to_download()
+* Fixed: GtkButton has no `always_show_image` property before gtk3.6; reported by @leavfin
+* Fixed: hide control box in Aritst tab after inited
+* Fixed: range() arg 3 must not be zero, in Lrc tab
+* Fixed: ID3NoHeaderError accurs when there is no ID3 header in an mp3 file.
+
 3.2.3 - 2013.11.29
 * Fixed: catch IndexError when caching list is empty
 * Fixed: init Artists widgets by default
