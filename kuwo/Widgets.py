@@ -151,11 +151,11 @@ class ControlBox(Gtk.Box):
         self.liststore = liststore
         self.app = app
 
-        button_selectall = Gtk.ToggleButton(_('Select All'))
-        button_selectall.set_active(select_all)
-        button_selectall.connect('toggled', 
+        self.button_selectall = Gtk.ToggleButton(_('Select All'))
+        self.button_selectall.set_active(select_all)
+        self.select_all_sid = self.button_selectall.connect('toggled', 
                 self.on_button_selectall_toggled)
-        self.pack_start(button_selectall, False, False, 0)
+        self.pack_start(self.button_selectall, False, False, 0)
 
         button_play = Gtk.Button(_('Play'))
         button_play.connect('clicked', self.on_button_play_clicked)
@@ -170,6 +170,12 @@ class ControlBox(Gtk.Box):
         button_cache = Gtk.Button(_('Cache'))
         button_cache.connect('clicked', self.on_button_cache_clicked)
         self.pack_start(button_cache, False, False, 0)
+
+    def select_all(self):
+        '''Activate select_all button'''
+        self.button_selectall.handler_block(self.select_all_sid)
+        self.button_selectall.set_active(True)
+        self.button_selectall.handler_unblock(self.select_all_sid)
 
     def on_button_selectall_toggled(self, btn):
         toggled = btn.get_active()

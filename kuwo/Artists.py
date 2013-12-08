@@ -442,6 +442,7 @@ class Artists(Gtk.Box):
         self.artist_button.hide()
         self.artist_mv_control_box.hide()
         self.album_control_box.hide()
+        self.artist_control_box.select_all()
         self.label.set_label(artist)
         self.app.playlist.advise_new_playlist_name(artist)
 
