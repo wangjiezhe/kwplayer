@@ -162,7 +162,6 @@ class PlayList(Gtk.Box):
         # control cache job
         self.cache_enabled = False
         self.cache_job = None
-        self.cache_timeout = 0
 
         self.playlist_menu = Gtk.Menu()
         self.playlist_advice_disname = ''
@@ -435,27 +434,13 @@ class PlayList(Gtk.Box):
 
     # song cache daemon
     def switch_caching_daemon(self, *args):
-        print('switch caching daemon')
         if self.cache_enabled is False:
             self.cache_enabled = True
             self.button_start.set_label(_('Stop Cache Service'))
-            self.cache_timeout = GLib.timeout_add(3000,
-                    self.start_cache_daemon)
+            self.do_cache_song_pool()
         else:
-            #if self.cache_job:
-                #self.cache_job.destroy()
             self.cache_enabled = False
-            if self.cache_timeout > 0:
-                GLib.source_remove(self.cache_timeout)
             self.button_start.set_label(_('Start Cache Service'))
-
-    def start_cache_daemon(self):
-        if self.cache_enabled:
-            if self.cache_job is None:
-                self.do_cache_song_pool()
-            return True
-        else:
-            return False
 
     def do_cache_song_pool(self):
         def _move_song():
@@ -465,7 +450,12 @@ class PlayList(Gtk.Box):
             except IndexError:
                 pass
             Gdk.Window.process_all_updates()
-        def _failed_to_download(song_path, status):
+
+        def _on_can_play(widget, song_path, status, error=None):
+            if status == 'OK':
+                return
+
+            # stop cache service when error occurs
             self.cache_enabled = False
             if status == 'URLError':
                 Widgets.network_error(self.app.window,
@@ -473,22 +463,20 @@ class PlayList(Gtk.Box):
             elif status == 'FileNotFoundError':
                 Widgets.filesystem_error(self.app.window, song_path)
 
-        def _on_can_play(widget, song_path, status, error=None):
-            if status == 'OK':
-                return
-            GLib.idle_add(_failed_to_download, song_path, status)
-
         def _on_downloaded(widget, song_path, error=None):
-            self.cache_job = None
             if song_path:
                 GLib.idle_add(_move_song)
-                return
+            if self.cache_enabled is True:
+                GLib.idle_add(self.do_cache_song_pool)
+
+        if self.cache_enabled is False:
+            return
 
         list_name = 'Caching'
         liststore = self.tabs[list_name].liststore
         path = 0
         if len(liststore) == 0:
-            print('Caching playlist is empty, please add some')
+            print('Caching playlist is empty, please add some songs')
             self.switch_caching_daemon()
             Notify.init('kwplayer-cache')
             notify = Notify.Notification.new('Kwplayer',
