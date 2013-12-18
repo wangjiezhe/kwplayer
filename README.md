@@ -54,6 +54,7 @@ Debian 中手动安装依赖包
 * gstreamer1.0-x
 * gir1.2-gstreamer-1.0,
 * gir1.2-gst-plugins-base-1.0
+* gir1.2-notify-0.7 - notify 的Gtk绑定.
 * gstreamer1.0-pulseaudio
 * leveldb - 强大的NoSQL数据库(用于缓存数据);
 * python3-leveldb  -  leveldb的python3绑定(Fedora中是python3-plyvel);
