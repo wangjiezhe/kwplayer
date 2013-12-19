@@ -85,7 +85,7 @@ _default_conf = {
         'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
         'lrc-back-color': 'rgba(237, 221, 221, 0.28)',
         'lrc-text-size': 22,
-        'lrc-highlighted-text-color': 'rgba(52, 101, 164, 0.999)',
+        'lrc-highlighted-text-color': 'rgba(0, 0, 0, 0.999)',
         'lrc-highlighted-text-size': 26,
         'shortcut-mode': ShortcutMode.DEFAULT,
         'custom-shortcut': {
