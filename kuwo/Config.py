@@ -8,7 +8,7 @@ import gettext
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 import json
-import locale
+#import locale
 import os
 
 if __file__.startswith('/usr/local/'):
