@@ -528,7 +528,11 @@ class Player(Gtk.Box):
                     self.on_window_motion_notified)
             self.playbin.expose_fullscreen()
 
-    def on_window_motion_notified(self, *args):
+    def on_window_motion_notified(self, widget, event):
+        # if mouse_point.y is not in [0, 50], ignore it
+        if event.y > 50:
+            return
+
         # show control_panel and notebook labels
         self.show_all()
         # delay 3 seconds and hide them
