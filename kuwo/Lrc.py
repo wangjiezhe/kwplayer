@@ -124,7 +124,7 @@ class Lrc(Gtk.Box):
         self.lrc_window.get_vadjustment().set_value(0)
 
     def sync_lrc(self, timestamp):
-        if self.lrc_obj is None or len(self.lrc_obj) <= self.old_line_num:
+        if self.lrc_obj is None or len(self.lrc_obj) <= self.old_line_num + 1:
             return
         # current line, do nothing
         if self.lrc_obj[self.old_line_num][0] < timestamp and \
