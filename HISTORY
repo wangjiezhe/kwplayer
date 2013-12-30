@@ -1,3 +1,15 @@
+3.2.5 - 2013.12.30
+* Add tooltip to control buttons
+* Fixed: reset to default background when there are no background images available
+* Fixed: reset select_all button when show_artist() is called
+* Speed up cache service
+* gir1.2-notify-0.7 was added to dependencies list
+* Change highlighted lyrics text color to black
+* Support lyrics background seeking
+* Easier to control fullscreen mode
+* Show control panel only when mouse moves on top side in fullscreen mode
+* Disable access control of X11 server (in python3-keybinder-1.1.2) when needed
+
 3.2.4 - 2013.12.6
 * Fixed: add two parameters to _failed_to_download()
 * Fixed: GtkButton has no `always_show_image` property before gtk3.6; reported by @leavfin

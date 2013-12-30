@@ -8,7 +8,6 @@ import gettext
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 import json
-#import locale
 import os
 
 if __file__.startswith('/usr/local/'):
@@ -21,12 +20,10 @@ else:
 LOCALEDIR = os.path.join(PREF, 'locale')
 gettext.bindtextdomain('kwplayer', LOCALEDIR)
 gettext.textdomain('kwplayer')
-#locale.bindtextdomain('kwplayer', LOCALEDIR)
-#locale.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '3.2.4'
+VERSION = '3.2.5'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>',]
 DESCRIPTION = _('A simple music player on Linux desktop.')
@@ -140,7 +137,7 @@ def load_conf():
         for key in _default_conf:
             if key not in conf:
                 conf[key] = _default_conf[key]
-        # 3.1.5 -> 3.1.6
+        # 3.1.5 -> 3.1.6, remove this after 3.3.0
         if 'Launch' not in conf['custom-shortcut']:
             conf['custom-shortcut']['Launch'] = _default_conf['custom-shortcut']['Launch']
         if 'Launch' not in conf['default-shortcut']:
