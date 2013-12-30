@@ -86,6 +86,7 @@ class Lrc(Gtk.Box):
 
         # mv window
         self.mv_window = Gtk.DrawingArea()
+        self.mv_window.connect('draw', self.on_mv_window_redraw)
         self.pack_start(self.mv_window, True, True, 0)
 
         self.update_background(self.lrc_default_background)
@@ -189,3 +190,9 @@ class Lrc(Gtk.Box):
         fore_rgba.parse(self.app.conf['lrc-highlighted-text-color'])
         self.highlighted_tag.props.size_points = self.app.conf['lrc-highlighted-text-size']
         self.highlighted_tag.props.foreground_rgba = fore_rgba
+
+    def on_mv_window_redraw(self, *args):
+        if self.app.player.get_fullscreen():
+            self.app.player.playbin.expose_fullscreen()
+        else:
+            self.app.player.playbin.expose()

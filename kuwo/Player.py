@@ -120,15 +120,11 @@ class Player(Gtk.Box):
 
         self.fullscreen_btn = Gtk.ToolButton()
         self.fullscreen_btn.set_label(_('Fullscreen'))
-        #self.fullscreen_btn.set_tooltip_text(_('Fullscreen (F11)'))
         self.fullscreen_btn.set_icon_name('view-fullscreen-symbolic')
-        # Does not work when in fullscreen.
-        key, mod = Gtk.accelerator_parse('F11')
-        self.fullscreen_btn.add_accelerator('clicked', 
-                app.accel_group, key, mod, Gtk.AccelFlags.VISIBLE)
         self.fullscreen_btn.connect('clicked', 
                 self.on_fullscreen_button_clicked)
         toolbar.insert(self.fullscreen_btn, 6)
+        self.app.window.connect('key-press-event', self.on_window_key_pressed)
 
         # contro menu
         menu_tool_item = Gtk.ToolItem()
@@ -493,33 +489,53 @@ class Player(Gtk.Box):
                 self.curr_song, self.app.conf, True)
 
     # Fullscreen
+    def get_fullscreen(self):
+        '''Check if player is in fullscreen mode.'''
+        return self.fullscreen_sid > 0
+
+    def toggle_fullscreen(self):
+        '''Switch between fullscreen and unfullscreen mode.'''
+        self.fullscreen_btn.emit('clicked')
+
+    def on_window_key_pressed(self, widget, event):
+        # press Esc to exit fullscreen mode
+        if event.keyval == Gdk.KEY_Escape and self.get_fullscreen():
+            self.toggle_fullscreen()
+        # press F11 to toggle fullscreen mode
+        elif event.keyval == Gdk.KEY_F11:
+            self.toggle_fullscreen()
+
     def on_fullscreen_button_clicked(self, button):
         window = self.app.window
         if self.fullscreen_sid > 0:
+        # unfullscreen
+            self.app.notebook.set_show_tabs(True)
             button.set_icon_name('view-fullscreen-symbolic')
+            self.show()
             window.realize()
             window.unfullscreen()
             window.disconnect(self.fullscreen_sid)
             self.fullscreen_sid = 0
-            self.app.notebook.set_show_tabs(True)
         else:
-            button.set_icon_name('view-restore-symbolic')
+        # fullscreen
             self.app.notebook.set_show_tabs(False)
+            button.set_icon_name('view-restore-symbolic')
             self.app.popup_page(self.app.lrc.app_page)
             self.hide()
             window.realize()
             window.fullscreen()
-            self.fullscreen_sid = window.connect(
-                    'motion-notify-event',
+            self.fullscreen_sid = window.connect('motion-notify-event',
                     self.on_window_motion_notified)
+            self.playbin.expose_fullscreen()
 
     def on_window_motion_notified(self, *args):
-        # show control_panel and notebook label
+        # show control_panel and notebook labels
         self.show_all()
-        # delay 3 seconds to hide them
+        # delay 3 seconds and hide them
         self.fullscreen_timestamp = time.time()
         GLib.timeout_add(3000, self.hide_control_panel_and_label, 
                 self.fullscreen_timestamp)
+        self.playbin.expose_fullscreen()
 
     def hide_control_panel_and_label(self, timestamp):
         if timestamp == self.fullscreen_timestamp and \
