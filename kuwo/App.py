@@ -165,37 +165,58 @@ class App:
         return style_provider
 
     def load_styles(self):
-        font_size = str(int(self.conf['lrc-text-size']))
         if Config.GTK_LE_36:
-            px = ''
+            css = '\n'.join([
+                # transition-property is not supported in Gtk3.4
+                #'GtkScrolledWindow.lrc_window {',
+                #    'transition-property: background-image;',
+                #    'transition-duration: 1s;',
+                #    '}',
+                'GtkScale {',
+                    'outline-color: transparent;',
+                    'outline-offset: 0;',
+                    'outline-style: none;',
+                    'outline-width: 0;',
+                    '}',
+                'GtkTextView.lrc_tv {',
+                    'font-size: {0};'.format(self.conf['lrc-text-size']),
+                    'color: {0};'.format(self.conf['lrc-text-color']),
+                    'border-radius: 0 25 0 50;',
+                    'border-width: 5;',
+                    'background-color: {0};'.format(
+                        self.conf['lrc-back-color']),
+                    '}',
+                '.info-label {',
+                    'color: rgb(136, 139, 132);',
+                    'font-size: 9;',
+                    '}',
+                ])
         else:
-            px = 'px'
+            css = '\n'.join([
+                'GtkScrolledWindow.lrc_window {',
+                    'transition-property: background-image;',
+                    'transition-duration: 1s;',
+                    '}',
+                'GtkScale {',
+                    'outline-color: transparent;',
+                    'outline-offset: 0;',
+                    'outline-style: none;',
+                    'outline-width: 0;',
+                    '}',
+                'GtkTextView.lrc_tv {',
+                    'font-size: {0}px;'.format(self.conf['lrc-text-size']),
+                    'color: {0};'.format(self.conf['lrc-text-color']),
+                    'border-radius: 0px 25px 0px 50px;',
+                    'border-width: 5px;',
+                    'background-color: {0};'.format(
+                        self.conf['lrc-back-color']),
+                    '}',
+                '.info-label {',
+                    'color: rgb(136, 139, 132);',
+                    'font-size: 9px;',
+                    '}',
+                ])
 
-        css = '\n'.join([
-            'GtkScrolledWindow.lrc_window {',
-                'transition-property: background-image;',
-                'transition-duration: 1s;',
-                '}',
-            'GtkScale {',
-                #'border-style: none;',
-                'outline-color: transparent;',
-                'outline-offset: 0;',
-                'outline-style: none;',
-                'outline-width: 0;',
-                '}',
-            'GtkTextView.lrc_tv {',
-                'font-size: {0}{1};'.format(font_size, px),
-                'color: {0};'.format(self.conf['lrc-text-color']),
-                'border-radius: 0 25{0} 0 50{0};'.format(px),
-                'border-width: 5{0};'.format(px),
-                'background-color: {0};'.format(
-                    self.conf['lrc-back-color']),
-                '}',
-            '.info-label {',
-                'color: rgb(136, 139, 132);',
-                'font-size: 9{0};'.format(px),
-                '}',
-            ])
         self.apply_css(self.window, css, overall=True)
 
     def init_status_icon(self):

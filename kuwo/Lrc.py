@@ -176,9 +176,8 @@ class Lrc(Gtk.Box):
         else:
             self.lrc_background = self.lrc_default_background
         css = '\n'.join([
-            'GtkScrolledWindow {',
-                "background-image: url('{0}');".format(
-                    self.lrc_background),
+            'GtkScrolledWindow.lrc_window {',
+                "background-image: url('{0}');".format(self.lrc_background),
             '}',
             ])
         new_provider = self.app.apply_css(self.lrc_window, css,
