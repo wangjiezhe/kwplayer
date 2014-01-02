@@ -9,6 +9,7 @@ import json
 import os
 import sys
 from urllib import parse
+import subprocess
 import zlib
 
 
@@ -138,3 +139,10 @@ def iconvtag(song_path, song):
             use_ape()
     except Exception as e:
         print('Error in Utils.iconvtag():', e)
+
+
+def open_folder(folder):
+    try:
+        subprocess.call(['xdg-open', folder, ])
+    except FileNotFoundError as e:
+        print(e)

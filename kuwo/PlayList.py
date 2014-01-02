@@ -9,7 +9,6 @@ import os
 import random
 import shutil
 import sqlite3
-import subprocess
 import threading
 import time
 from gi.repository import Gdk
@@ -22,6 +21,7 @@ from gi.repository import Notify
 
 from kuwo import Config
 from kuwo import Net
+from kuwo import Utils
 from kuwo import Widgets
 
 _ = Config._
@@ -233,7 +233,6 @@ class PlayList(Gtk.Box):
         GLib.timeout_add(1500, self.init_ui)
 
     def do_destroy(self):
-        print('Playlist.do_destroy()')
         self.conn.commit()
         self.conn.close()
         self.dump_playlists()
@@ -376,7 +375,7 @@ class PlayList(Gtk.Box):
         liststore = self.tabs[list_name].liststore
         rid = song['rid']
         path = self.get_song_path_in_liststore(liststore, rid)
-        if path:
+        if path > -1:
             # curr_playing contains: listname, path
             self.curr_playing = [list_name, path]
             song = Widgets.song_row_to_dict(liststore[path], start=0)
@@ -400,7 +399,7 @@ class PlayList(Gtk.Box):
         liststore = self.tabs[list_name].liststore
         rid = song['rid']
         path = self.get_song_path_in_liststore(liststore, rid)
-        if path:
+        if path > -1:
             return
         liststore.append(Widgets.song_dict_to_row(song))
 
@@ -422,12 +421,7 @@ class PlayList(Gtk.Box):
             self.cache_song(song)
 
     def open_cache_folder(self, btn):
-        try:
-            subprocess.call(('xdg-open', self.app.conf['song-dir'], ))
-        except FileNotFoundError as e:
-            print(e)
-            Widgets.error(
-                    self.app, _('Failed to call `xdg-open` command'), str(e))
+        Utils.open_folder(self.app.conf['song-dir'])
 
     # song cache daemon
     def switch_caching_daemon(self, *args):
@@ -579,8 +573,8 @@ class PlayList(Gtk.Box):
 
     # DB operations
     def append_cached_song(self, song):
-        '''
-        When a new song is cached locally, call this function.
+        '''When a new song is cached locally, call this function.
+
         Insert a new item to database and liststore_cached.
         '''
         # check this song already exists.
@@ -611,7 +605,7 @@ class PlayList(Gtk.Box):
         for i, item in enumerate(liststore):
             if item[pos] == rid:
                 return i
-        return None
+        return -1
 
 
     # left panel
