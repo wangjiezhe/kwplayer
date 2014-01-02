@@ -1,9 +1,10 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import sys
 from gi.repository import Gdk
 from gi.repository import GObject
 from gi.repository import Gst
@@ -18,6 +19,10 @@ GST_LOWER_THAN_1 = (Gst.version()[0] < 1)
 
 
 class PlayerBin(GObject.GObject):
+    '''Gstreamer wrapper.
+
+    PlayerBin uses playbin as GstPipeline.
+    '''
     
     __gsignals__ = {
             'eos': (GObject.SIGNAL_RUN_LAST, 
@@ -38,17 +43,17 @@ class PlayerBin(GObject.GObject):
         screen = Gdk.Screen.get_default()
         self.fullscreen_rect = (0, 0, screen.width(), screen.height())
         
-        if self.playbin is None:
-            print('Gst Error: playbin failed to inited, abort!')
+        if not self.playbin:
+            print('Gst Error: playbin failed to be inited, abort!')
             sys.exit(1)
         self.bus = self.playbin.get_bus()
         self.bus.add_signal_watch()
         self.bus.connect('message::eos', self.on_eos)
         self.bus.connect('message::error', self.on_error)
-        self.volume_sid = self.playbin.connect('notify::volume',
-                self.on_volume_changed)
-        self.mute_sid = self.playbin.connect('notify::mute',
-                self.on_mute_changed)
+        self.volume_sid = self.playbin.connect(
+                'notify::volume', self.on_volume_changed)
+        self.mute_sid = self.playbin.connect(
+                'notify::mute', self.on_mute_changed)
 
     # Open APIs
     def load_audio(self, uri):
@@ -101,8 +106,10 @@ class PlayerBin(GObject.GObject):
         self.seek(offset)
 
     def seek(self, offset):
-        self.playbin.seek_simple(Gst.Format.TIME, 
-                Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT, offset)
+        self.playbin.seek_simple(
+                Gst.Format.TIME,
+                Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT,
+                offset)
 
     def get_duration(self):
         if GST_LOWER_THAN_1:
@@ -139,8 +146,8 @@ class PlayerBin(GObject.GObject):
     # private functions
     def enable_bus_sync(self):
         self.bus.enable_sync_message_emission()
-        self.bus_sync_sid = self.bus.connect('sync-message::element', 
-                self.on_sync_message)
+        self.bus_sync_sid = self.bus.connect(
+                'sync-message::element', self.on_sync_message)
 
     def disable_bus_sync(self):
         if self.bus_sync_sid > 0:
@@ -149,7 +156,7 @@ class PlayerBin(GObject.GObject):
             self.bus_sync_sid = 0
 
     def on_sync_message(self, bus, msg):
-        if msg.get_structure() is None:
+        if not msg.get_structure():
             return
         if msg.get_structure().get_name() == 'prepare-window-handle':
             msg.src.set_window_handle(self.xid)
@@ -164,9 +171,9 @@ class PlayerBin(GObject.GObject):
         if self.bus_sync_sid == 0:
             return
         videosink = self.playbin.props.video_sink
-        if videosink is None:
+        if not videosink:
             return
-        if rect is None:
+        if not rect:
             # reset to default size, used in window mode
             videosink.set_render_rectangle(0, 0, -1, -1)
         else:

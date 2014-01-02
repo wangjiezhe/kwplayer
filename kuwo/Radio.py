@@ -1,16 +1,16 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import json
+import os
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Pango
-import json
-import os
 
 from kuwo import Config
 from kuwo import Net
@@ -65,12 +65,6 @@ class RadioItem(Gtk.EventBox):
         button_play.connect('clicked', self.on_button_play_clicked)
         self.toolbar.insert(button_play, 0)
 
-#        button_next = Gtk.ToolButton()
-#        button_next.set_label(_('Next'))
-#        button_next.set_icon_name('media-skip-forward-symbolic')
-#        button_next.connect('clicked', self.on_button_next_clicked)
-#        self.toolbar.insert(button_next, 1)
-#
         button_favorite = Gtk.ToolButton()
         button_favorite.set_label(_('Favorite'))
         button_favorite.set_icon_name('emblem-favorite-symbolic')
@@ -91,7 +85,7 @@ class RadioItem(Gtk.EventBox):
     
     def init_songs(self):
         def _update_songs(songs, error=None):
-            if songs is None:
+            if not songs:
                 return
             index = self.get_index()
             self.playlists[index]['songs'] = songs
@@ -99,7 +93,8 @@ class RadioItem(Gtk.EventBox):
             self.update_label()
         index = self.get_index()
         if len(self.playlists[index]['songs']) == 0:
-            Net.async_call(Net.get_radio_songs, _update_songs, 
+            Net.async_call(
+                    Net.get_radio_songs, _update_songs, 
                     self.radio_info['radio_id'], self.radio_info['offset'])
     
     def load_more_songs(self):
@@ -111,7 +106,8 @@ class RadioItem(Gtk.EventBox):
         index = self.get_index()
         offset = self.playlists[index]['offset'] + 1
         self.playlists[index]['offset'] = offset
-        Net.async_call(Net.get_radio_songs, _on_more_songs_loaded, 
+        Net.async_call(
+                Net.get_radio_songs, _on_more_songs_loaded, 
                 self.radio_info['radio_id'], offset)
 
     def expand(self):
@@ -143,12 +139,9 @@ class RadioItem(Gtk.EventBox):
         self.label.realize()
 
     def get_index(self):
-        i = 0
-        for radio in self.playlists:
+        for i, radio in enumerate(self.playlists):
             if radio['radio_id'] == self.radio_info['radio_id']:
-                break
-            i += 1
-        return i
+                return i
 
     def play_song(self):
         index = self.get_index()
@@ -199,6 +192,10 @@ class RadioItem(Gtk.EventBox):
 
 
 class Radio(Gtk.Box):
+    '''Radio tab in notebook.'''
+
+    title = _('Radio')
+
     def __init__(self, app):
         super().__init__()
         self.app = app
@@ -226,11 +223,12 @@ class Radio(Gtk.Box):
         self.pack_start(self.scrolled_radios, True, True, 0)
 
         # pic, name, id, num of listeners, pic_url, tooltip
-        self.liststore_radios = Gtk.ListStore(GdkPixbuf.Pixbuf,
-                str, int, str, str, str)
-        iconview_radios = Widgets.IconView(self.liststore_radios, tooltip=5)
-        iconview_radios.connect('item_activated',
-                self.on_iconview_radios_item_activated)
+        self.liststore_radios = Gtk.ListStore(
+                GdkPixbuf.Pixbuf, str, int, str, str, str)
+        iconview_radios = Widgets.IconView(
+                self.liststore_radios, tooltip=5)
+        iconview_radios.connect(
+                'item_activated', self.on_iconview_radios_item_activated)
         self.scrolled_radios.add(iconview_radios)
 
         self.show_all()
@@ -240,8 +238,7 @@ class Radio(Gtk.Box):
         radios, total_page = Net.get_nodes(nid, page)
         if total_page == 0:
             return
-        i = 0
-        for radio in radios:
+        for i, radio in enumerate(radios):
             self.liststore_radios.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape_html(radio['disname']), 
@@ -250,9 +247,8 @@ class Radio(Gtk.Box):
                 radio['pic'],
                 Widgets.set_tooltip(radio['disname'], radio['info']),
                 ])
-            Net.update_liststore_image(self.liststore_radios, i, 0,
-                    radio['pic']),
-            i += 1
+            Net.update_liststore_image(
+                    self.liststore_radios, i, 0, radio['pic']),
         for radio in self.playlists:
             radio_item = RadioItem(radio, self.app)
             self.box_myradio.pack_start(radio_item, False, False, 0)
@@ -271,7 +267,7 @@ class Radio(Gtk.Box):
 
     def dump_playlists(self):
         filepath = Config.RADIO_JSON
-        if self.playlists is not None:
+        if self.playlists:
             with open(filepath, 'w') as fh:
                 fh.write(json.dumps(self.playlists))
         return True

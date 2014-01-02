@@ -1,5 +1,5 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in http://www.gnu.org/licenses/gpl-3.0.html
@@ -15,6 +15,10 @@ Notify.init('kwplayer')
 _ = Config._
 
 class PlayerNotify:
+    '''Notification wrapper.
+
+    Popup a control panel on Gdm3 lock screen.'''
+
     def __init__(self, player):
         self.player = player
         self.notify = Notify.Notification.new('', '', 'kwplayer')
@@ -29,11 +33,11 @@ class PlayerNotify:
         notify.clear_hints()
         #notify.set_timeout(4000)
 
-        if len(song['artist']) > 0:
+        if song['artist']:
             artist = Widgets.short_tooltip(song['artist'], 20)
         else:
             artist = _('Unknown')
-        if len(song['album']) > 0:
+        if song['album']:
             album = Widgets.short_tooltip(song['album'], 30)
         else:
             album = _('Unknown')
@@ -44,10 +48,6 @@ class PlayerNotify:
                 )
         notify.set_hint('image-path', GLib.Variant.new_string(
             self.player.meta_artUrl))
-        #notify.set_hint('icon-name', GLib.Variant.new_string(
-        #    self.player.meta_artUrl))
-        #notify.set_image_from_pixbuf(
-        #        self.player.artist_pic.get_pixbuf())
 
         notify.clear_actions()
 
@@ -74,7 +74,8 @@ class PlayerNotify:
                     _('Next'),
                     self.on_next_action_activated,
                     None)
-        except Exception:
+        except TypeError:
+            # For Fedora 19, which needs 6 parameters.
             notify.add_action(
                     'media-skip-backward',
                     _('Previous'),
@@ -102,15 +103,13 @@ class PlayerNotify:
                     None,
                     None)
 
-        notify.set_hint('action-icons',
-                GLib.Variant.new_boolean(True))
+        notify.set_hint(
+                'action-icons', GLib.Variant.new_boolean(True))
 
         # gnome shell screenlocker will get `x-gnome.music` notification
         # and the whole notification content will be presented
         # from rhythmbox/plugins/rb-notification-plugin.c
         notify.set_category('x-gnome.music')
-        #notify.set_hint('desktop-entry',
-        #        GLib.Variant.new_string('kwplayer'))
 
         # show on lock screen
         hint = 'resident'
@@ -121,13 +120,10 @@ class PlayerNotify:
         notify.show()
 
     def on_prev_action_activated(self, *args):
-        print('on prev_action activated')
         self.player.load_prev_cb()
 
     def on_playpause_action_activated(self, *args):
-        print('on playpause activated', args)
         self.player.play_pause_cb()
 
     def on_next_action_activated(self, *args):
-        print('on next action activated')
         self.player.load_next_cb()

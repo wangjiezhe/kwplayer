@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import sys
 import dbus
 from gi.repository import Gtk
-import sys
 
 
 BUS_NAME = 'org.mpris.MediaPlayer2.kwplayer'
@@ -15,6 +15,10 @@ MPRIS_PATH = '/org/mpris/MediaPlayer2'
 ROOT_IFACE = 'org.mpris.MediaPlayer2'
 
 def check_loaded():
+    '''Check kwplayer is loaded or not.
+    
+    If kwplayer is running, raise kwplayer window and return True,
+    otherwise return False.'''
     sb = dbus.SessionBus()
     try:
         kw_proxy = sb.get_object(BUS_NAME, MPRIS_PATH)
@@ -30,10 +34,8 @@ def load_app():
     sys.exit(app.run(sys.argv))
 
 def main():
-    is_loaded = check_loaded()
-    if not is_loaded:
+    if not check_loaded():
         load_app()
-
 
 if __name__ == '__main__':
     main()

@@ -1,16 +1,9 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
-from gi.repository import Gdk
-from gi.repository import GdkPixbuf
-from gi.repository import Gio
-from gi.repository import GLib
-from gi.repository import GObject
-from gi.repository import Gtk
-from gi.repository import Notify
 import json
 import os
 import random
@@ -19,6 +12,13 @@ import sqlite3
 import subprocess
 import threading
 import time
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import Gio
+from gi.repository import GLib
+from gi.repository import GObject
+from gi.repository import Gtk
+from gi.repository import Notify
 
 from kuwo import Config
 from kuwo import Net
@@ -65,10 +65,10 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.treeview.connect('drag-data-get', self.on_drag_data_get)
         self.treeview.enable_model_drag_dest(
                 DRAG_TARGETS, DRAG_ACTION)
-        self.treeview.connect('drag-data-received',
-                self.on_drag_data_received)
-        self.treeview.connect('row_activated', 
-                self.on_treeview_row_activated)
+        self.treeview.connect(
+                'drag-data-received', self.on_drag_data_received)
+        self.treeview.connect(
+                'row_activated', self.on_treeview_row_activated)
         self.add(self.treeview)
 
         song_cell = Gtk.CellRendererText()
@@ -116,7 +116,7 @@ class NormalSongTab(Gtk.ScrolledWindow):
             model.remove(model[path].iter)
 
     def on_drag_data_get(self, treeview, drag_context, sel_data, info, 
-            time):
+                         time):
         selection = treeview.get_selection()
         # use get_selected_rows because of MULTIPLE_SELECTIONS
         model, paths = selection.get_selected_rows()
@@ -129,14 +129,14 @@ class NormalSongTab(Gtk.ScrolledWindow):
             self.drag_data_old_iters.append(_iter)
         sel_data.set_text(json.dumps(songs), -1)
 
-    def on_drag_data_received(self, treeview, drag_context, x, y,
-            sel_data, info, event_time):
+    def on_drag_data_received(self, treeview, drag_context, x, y, sel_data,
+                              info, event_time):
         model = treeview.get_model()
         data = sel_data.get_text()
-        if len(data) == 0:
+        if data:
             return
         drop_info = treeview.get_dest_row_at_pos(x, y)
-        if drop_info is None:
+        if not drop_info:
             return
         path = drop_info[0]
         pos = int(str(path))
@@ -148,6 +148,10 @@ class NormalSongTab(Gtk.ScrolledWindow):
 
 
 class PlayList(Gtk.Box):
+    '''Playlist tab in notebook.'''
+
+    title = _('PlayList')
+
     def __init__(self, app):
         super().__init__()
 
@@ -178,8 +182,8 @@ class PlayList(Gtk.Box):
         self.treeview_left.set_headers_visible(False)
         list_disname = Gtk.CellRendererText()
         list_disname.connect('edited', self.on_list_disname_edited)
-        col_name = Gtk.TreeViewColumn('List Name', list_disname, 
-                text=0, editable=2)
+        col_name = Gtk.TreeViewColumn(
+                'List Name', list_disname, text=0, editable=2)
         self.treeview_left.append_column(col_name)
         #col_name.props.max_width = 30
         #col_name.props.fixed_width = 30
@@ -188,7 +192,8 @@ class PlayList(Gtk.Box):
         tree_sel.connect('changed', self.on_tree_selection_left_changed)
         self.treeview_left.enable_model_drag_dest(
                 DRAG_TARGETS, DRAG_ACTION)
-        self.treeview_left.connect('drag-data-received',
+        self.treeview_left.connect(
+                'drag-data-received',
                 self.on_treeview_left_drag_data_received)
         box_left.pack_start(self.treeview_left, True, True, 0)
 
@@ -208,15 +213,15 @@ class PlayList(Gtk.Box):
         remove_btn.set_name('Remove')
         remove_btn.set_tooltip_text(_('Remove selected playlist'))
         remove_btn.set_icon_name('list-remove-symbolic')
-        remove_btn.connect('clicked', 
-                self.on_remove_playlist_button_clicked)
+        remove_btn.connect(
+                'clicked', self.on_remove_playlist_button_clicked)
         toolbar.insert(remove_btn, 1)
         export_btn = Gtk.ToolButton()
         export_btn.set_name('Export')
         export_btn.set_tooltip_text(_('Export songs in selected playlist'))
         export_btn.set_icon_name('media-eject-symbolic')
-        export_btn.connect('clicked', 
-                self.on_export_playlist_button_clicked)
+        export_btn.connect(
+                'clicked', self.on_export_playlist_button_clicked)
         toolbar.insert(export_btn, 2)
         box_left.pack_start(toolbar, False, False, 0)
 
@@ -346,13 +351,14 @@ class PlayList(Gtk.Box):
         self.notebook.set_current_page(index)
 
     def on_treeview_left_drag_data_received(self, treeview, drag_context,
-            x, y, sel_data, info, event_time):
+                                            x, y, sel_data, info,
+                                            event_time):
         model = treeview.get_model()
         data = sel_data.get_text()
-        if len(data) == 0:
+        if not data:
             return
         drop_info = treeview.get_dest_row_at_pos(x, y)
-        if drop_info is None:
+        if not drop_info:
             return
         path = drop_info[0]
         songs = json.loads(data)
@@ -365,12 +371,12 @@ class PlayList(Gtk.Box):
     def play_song(self, song, list_name='Default', use_mv=False):
         if not song:
             return
-        if list_name is None:
+        if not list_name:
             list_name = 'Default'
         liststore = self.tabs[list_name].liststore
         rid = song['rid']
         path = self.get_song_path_in_liststore(liststore, rid)
-        if path is not None:
+        if path:
             # curr_playing contains: listname, path
             self.curr_playing = [list_name, path]
             song = Widgets.song_row_to_dict(liststore[path], start=0)
@@ -385,7 +391,7 @@ class PlayList(Gtk.Box):
             self.app.player.load(song)
 
     def play_songs(self, songs):
-        if not songs or len(songs) == 0:
+        if not songs or songs:
             return
         self.add_songs_to_playlist(songs, list_name='Default')
         self.play_song(songs[0])
@@ -394,7 +400,7 @@ class PlayList(Gtk.Box):
         liststore = self.tabs[list_name].liststore
         rid = song['rid']
         path = self.get_song_path_in_liststore(liststore, rid)
-        if path is not None:
+        if path:
             return
         liststore.append(Widgets.song_dict_to_row(song))
 
@@ -408,16 +414,7 @@ class PlayList(Gtk.Box):
 
     def cache_song(self, song):
         rid = song['rid']
-        # first, check if this song exists in cached_db
-        #req = self.get_song_from_cached_db(rid)
-        #if req is not None:
-        #    print('local cache exists, quit')
-        #    return
-        # second, check song in caching_liststore.
         liststore = self.tabs['Caching'].liststore
-        #path = self.get_song_path_in_liststore(liststore, rid)
-        #if path is not None:
-        #    return
         liststore.append(Widgets.song_dict_to_row(song))
 
     def cache_songs(self, songs):
@@ -427,10 +424,10 @@ class PlayList(Gtk.Box):
     def open_cache_folder(self, btn):
         try:
             subprocess.call(('xdg-open', self.app.conf['song-dir'], ))
-        except Exception as e:
+        except FileNotFoundError as e:
             print(e)
-            Widgets.error(self.app, _('Failed to call `xdg-open` command'),
-                    str(e))
+            Widgets.error(
+                    self.app, _('Failed to call `xdg-open` command'), str(e))
 
     # song cache daemon
     def switch_caching_daemon(self, *args):
@@ -458,18 +455,18 @@ class PlayList(Gtk.Box):
             # stop cache service when error occurs
             self.cache_enabled = False
             if status == 'URLError':
-                Widgets.network_error(self.app.window,
-                        _('Failed to cache song'))
+                Widgets.network_error(
+                        self.app.window, _('Failed to cache song'))
             elif status == 'FileNotFoundError':
                 Widgets.filesystem_error(self.app.window, song_path)
 
         def _on_downloaded(widget, song_path, error=None):
             if song_path:
                 GLib.idle_add(_move_song)
-            if self.cache_enabled is True:
+            if self.cache_enabled:
                 GLib.idle_add(self.do_cache_song_pool)
 
-        if self.cache_enabled is False:
+        if not self.cache_enabled:
             return
 
         list_name = 'Caching'
@@ -479,13 +476,14 @@ class PlayList(Gtk.Box):
             print('Caching playlist is empty, please add some songs')
             self.switch_caching_daemon()
             Notify.init('kwplayer-cache')
-            notify = Notify.Notification.new('Kwplayer',
+            notify = Notify.Notification.new(
+                    'Kwplayer',
                     _('All songs in caching list have been downloaded.'),
                     'kwplayer')
             notify.show()
             return
         song = Widgets.song_row_to_dict(liststore[path], start=0)
-        print('song dict to download:', song)
+        print('will download:', song)
         self.cache_job = Net.AsyncSong(self.app)
         self.cache_job.connect('can-play', _on_can_play)
         self.cache_job.connect('downloaded', _on_downloaded)
@@ -503,7 +501,7 @@ class PlayList(Gtk.Box):
 
     def get_prev_song(self, repeat):
         list_name = self.curr_playing[0]
-        if list_name is None:
+        if not list_name:
             return None
         liststore = self.tabs[list_name].liststore
         path = self.curr_playing[1]
@@ -530,7 +528,7 @@ class PlayList(Gtk.Box):
         if shuffle:
             path = random.randint(0, song_nums-1)
         elif path == song_nums - 1:
-            if repeat is False:
+            if not repeat:
                 return None
             path = 0
         else:
@@ -541,7 +539,7 @@ class PlayList(Gtk.Box):
 
     def play_prev_song(self, repeat, use_mv=False):
         prev_song = self.get_prev_song(repeat)
-        if prev_song is None:
+        if not prev_song:
             return
         self.curr_playing[1] = self.prev_playing
         self.locate_curr_song(popup_page=False)
@@ -552,7 +550,7 @@ class PlayList(Gtk.Box):
 
     def play_next_song(self, repeat, shuffle, use_mv=False):
         next_song = self.get_next_song(repeat, shuffle)
-        if next_song is None:
+        if not next_song:
             return
         self.curr_playing[1] = self.next_playing
         self.locate_curr_song(popup_page=False)
@@ -562,24 +560,20 @@ class PlayList(Gtk.Box):
             self.app.player.load(next_song)
 
     def locate_curr_song(self, popup_page=True):
-        '''
-        switch current playlist and select curr_song
-        '''
+        '''switch current playlist and select curr_song.'''
         list_name = self.curr_playing[0]
-        if list_name is None:
+        if not list_name:
             return
         treeview = self.tabs[list_name].treeview
         liststore = treeview.get_model()
         path = self.curr_playing[1]
         treeview.set_cursor(path)
 
-        left_path = 0
-        for item in self.liststore_left:
+        for left_path, item in enumerate(self.liststore_left):
             if list_name == self.liststore_left[left_path][1]:
+                selection_left = self.treeview_left.get_selection()
+                selection_left.select_path(left_path)
                 break
-            left_path += 1
-        selection_left = self.treeview_left.get_selection()
-        selection_left.select_path(left_path)
         if popup_page:
             self.app.popup_page(self.app_page)
 
@@ -614,17 +608,15 @@ class PlayList(Gtk.Box):
         self.cursor.execute(sql, (rid, ))
 
     def get_song_path_in_liststore(self, liststore, rid, pos=3):
-        i = 0
-        for item in liststore:
+        for i, item in enumerate(liststore):
             if item[pos] == rid:
                 return i
-            i += 1
         return None
 
 
     # left panel
     def on_list_disname_edited(self, cell, path, new_name):
-        if len(new_name) == 0:
+        if not new_name:
             return
         old_name = self.liststore_left[path][0]
         self.liststore_left[path][0] = new_name
@@ -654,23 +646,20 @@ class PlayList(Gtk.Box):
     def on_export_playlist_button_clicked(self, button):
         def do_export(button):
             num_songs = len(liststore)
-            i = 0
             export_dir = folder_chooser.get_filename()
             export_lrc = with_lrc.get_active()
-            for item in liststore:
+            for i, item in enumerate(liststore):
                 song = Widgets.song_row_to_dict(item, start=0)
-                song_link, song_path = Net.get_song_link(song, 
-                        self.app.conf)
+                song_link, song_path = Net.get_song_link(
+                        song, self.app.conf)
                 if song_link is not True:
                     continue
-                print('Will export:', song)
                 shutil.copy(song_path, export_dir)
 
                 if export_lrc:
                     (lrc_path, lrc_cached) = Net.get_lrc_path(song)
                     if lrc_cached:
                         shutil.copy(lrc_path, export_dir)
-                i += 1
                 export_prog.set_fraction(i / num_songs)
                 Gdk.Window.process_all_updates()
             dialog.destroy()
@@ -684,8 +673,8 @@ class PlayList(Gtk.Box):
         disname, list_name, editable = model[path]
         liststore = self.tabs[list_name].liststore
 
-        dialog = Gtk.Dialog(_('Export Songs'), self.app.window,
-                Gtk.DialogFlags.MODAL,
+        dialog = Gtk.Dialog(
+                _('Export Songs'), self.app.window, Gtk.DialogFlags.MODAL,
                 (Gtk.STOCK_CLOSE, Gtk.ResponseType.OK,))
         box = dialog.get_content_area()
         box.set_size_request(600, 320)
@@ -730,9 +719,8 @@ class PlayList(Gtk.Box):
 
     def on_advice_menu_item_activated(self, advice_item):
         list_name = str(time.time())
-        self.liststore_left.append([self.playlist_advice_disname,
-                                    list_name,
-                                    True])
+        self.liststore_left.append(
+                [self.playlist_advice_disname, list_name, True])
         self.init_tab(list_name, [])
         advice_item.list_name = list_name
         self.on_menu_item_activated(advice_item)
@@ -744,7 +732,7 @@ class PlayList(Gtk.Box):
 
     def popup_playlist_menu(self, button, songs):
         menu = self.playlist_menu
-        while len(menu.get_children()) > 0:
+        while menu.get_children():
             menu.remove(menu.get_children()[0])
 
         for item in self.liststore_left:
@@ -759,13 +747,12 @@ class PlayList(Gtk.Box):
             sep_item = Gtk.SeparatorMenuItem()
             menu.append(sep_item)
             advice_item = Gtk.MenuItem('+ ' + self.playlist_advice_disname)
-            advice_item.connect('activate',
-                    self.on_advice_menu_item_activated)
+            advice_item.connect(
+                    'activate', self.on_advice_menu_item_activated)
             advice_item.set_tooltip_text(
                     _('Create this playlist and add songs into it'))
             menu.append(advice_item)
 
         menu.songs = songs
         menu.show_all()
-        menu.popup(None, None, None, None, 1, 
-                Gtk.get_current_event_time())
+        menu.popup(None, None, None, None, 1, Gtk.get_current_event_time())

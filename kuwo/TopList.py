@@ -1,5 +1,5 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
@@ -14,6 +14,10 @@ from kuwo import Widgets
 _ = Config._
 
 class TopList(Gtk.Box):
+    '''TopList tab in notebook.'''
+
+    title = _('Top List')
+
     def __init__(self, app):
         super().__init__()
         self.set_orientation(Gtk.Orientation.VERTICAL)
@@ -35,19 +39,19 @@ class TopList(Gtk.Box):
         self.buttonbox.pack_start(self.label, False, False, 0)
 
         # checked, name, artist, album, rid, artistid, albumid
-        self.liststore_songs = Gtk.ListStore(bool, str, str, str, int, int,
-                int)
+        self.liststore_songs = Gtk.ListStore(
+                bool, str, str, str, int, int, int)
         control_box = Widgets.ControlBox(self.liststore_songs, app)
         self.buttonbox.pack_end(control_box, False, False, 0)
 
         self.scrolled_nodes = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_nodes, True, True, 0)
         # logo, name, nid, info, tooltip
-        self.liststore_nodes = Gtk.ListStore(GdkPixbuf.Pixbuf,
-                str, int, str, str)
+        self.liststore_nodes = Gtk.ListStore(
+                GdkPixbuf.Pixbuf, str, int, str, str)
         iconview_nodes = Widgets.IconView(self.liststore_nodes, tooltip=4)
-        iconview_nodes.connect('item_activated', 
-                self.on_iconview_nodes_item_activated)
+        iconview_nodes.connect(
+                'item_activated', self.on_iconview_nodes_item_activated)
         self.scrolled_nodes.add(iconview_nodes)
 
         self.scrolled_songs = Gtk.ScrolledWindow()
@@ -64,19 +68,17 @@ class TopList(Gtk.Box):
         nodes, total_pages = Net.get_nodes(nid, page)
         if total_pages == 0:
             return
-        i = 0
-        for node in nodes:
+        for i, node in enumerate(nodes):
             self.liststore_nodes.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape_html(node['name']),
                 int(node['sourceid']),
                 Widgets.unescape_html(node['info']),
-                Widgets.set_tooltip_with_song_tips(node['name'],
-                    node['tips']),
+                Widgets.set_tooltip_with_song_tips(
+                    node['name'], node['tips']),
                 ])
-            Net.update_toplist_node_logo(self.liststore_nodes, i, 0, 
-                    node['pic'])
-            i += 1
+            Net.update_toplist_node_logo(
+                    self.liststore_nodes, i, 0, node['pic'])
 
     def on_button_home_clicked(self, btn):
         self.scrolled_nodes.show_all()
@@ -95,15 +97,17 @@ class TopList(Gtk.Box):
         self.scrolled_songs.show_all()
 
         songs = Net.get_toplist_songs(nid)
-        if songs is None:
+        if not songs:
             print('Error, failed to get toplist songs')
             return
         self.liststore_songs.clear()
         for song in songs:
-            self.liststore_songs.append([True,
+            self.liststore_songs.append([
+                True,
                 song['name'], 
                 song['artist'],
                 song['album'],
                 int(song['id']), 
                 int(song['artistid']),
-                int(song['albumid']), ])
+                int(song['albumid']),
+                ])

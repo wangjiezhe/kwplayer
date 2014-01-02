@@ -1,5 +1,5 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
@@ -14,6 +14,10 @@ from kuwo import Widgets
 _ = Config._
 
 class MV(Gtk.Box):
+    '''MV tab in notebook.'''
+
+    title = _('MV')
+
     def __init__(self, app):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.app = app
@@ -33,28 +37,28 @@ class MV(Gtk.Box):
         self.buttonbox.pack_start(self.label, False, False, 0)
 
         # pic, name, artist, album, rid, artistid, albumid, tooltip
-        self.liststore_songs = Gtk.ListStore(GdkPixbuf.Pixbuf,
-                str, str, str, int, int, int, str)
-        self.mv_control_box = Widgets.MVControlBox(self.liststore_songs,
-                self.app)
+        self.liststore_songs = Gtk.ListStore(
+                GdkPixbuf.Pixbuf, str, str, str, int, int, int, str)
+        self.mv_control_box = Widgets.MVControlBox(
+                self.liststore_songs, self.app)
         self.buttonbox.pack_end(self.mv_control_box, False, False, 0)
 
         self.scrolled_nodes = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_nodes, True, True, 0)
         # logo, name, nid, info, tooltip
-        self.liststore_nodes = Gtk.ListStore(GdkPixbuf.Pixbuf,
-                str, int, str, str)
+        self.liststore_nodes = Gtk.ListStore(
+                GdkPixbuf.Pixbuf, str, int, str, str)
         iconview_nodes = Widgets.IconView(self.liststore_nodes, tooltip=4)
-        iconview_nodes.connect('item_activated', 
-                self.on_iconview_nodes_item_activated)
+        iconview_nodes.connect(
+                'item_activated', self.on_iconview_nodes_item_activated)
         self.scrolled_nodes.add(iconview_nodes)
 
         self.scrolled_songs = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_songs, True, True, 0)
-        iconview_songs = Widgets.IconView(self.liststore_songs,
-                info_pos=2, tooltip=7)
-        iconview_songs.connect('item_activated', 
-                self.on_iconview_songs_item_activated)
+        iconview_songs = Widgets.IconView(
+                self.liststore_songs, info_pos=2, tooltip=7)
+        iconview_songs.connect(
+                'item_activated', self.on_iconview_songs_item_activated)
         self.scrolled_songs.add(iconview_songs)
 
         self.show_all()
@@ -67,8 +71,7 @@ class MV(Gtk.Box):
             return
         nodes = nodes_wrap['child']
         self.liststore_nodes.clear()
-        i = 0
-        for node in nodes:
+        for i, node in enumerate(nodes):
             self.liststore_nodes.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape_html(node['disname']),
@@ -76,9 +79,8 @@ class MV(Gtk.Box):
                 Widgets.unescape_html(node['info']),
                 Widgets.set_tooltip(node['disname'], node['info']),
                 ])
-            Net.update_liststore_image(self.liststore_nodes, i, 0,
-                    node['pic'])
-            i += 1
+            Net.update_liststore_image(
+                    self.liststore_nodes, i, 0, node['pic'])
 
     def on_iconview_nodes_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -106,19 +108,19 @@ class MV(Gtk.Box):
                     int(song['albumid']),
                     Widgets.set_tooltip(song['name'], song['artist']),
                     ])
-                Net.update_mv_image(self.liststore_songs, i, 0,
-                        song['mvpic'])
+                Net.update_mv_image(
+                        self.liststore_songs, i, 0, song['mvpic'])
                 i += 1
             self.songs_page += 1
             if self.songs_page < self.songs_total - 1:
                 self.append_songs()
 
         if init:
-            self.app.playlist.advise_new_playlist_name(
-                    self.label.get_text())
+            self.app.playlist.advise_new_playlist_name(self.label.get_text())
             self.songs_page = 0
             self.liststore_songs.clear()
-        Net.async_call(Net.get_mv_songs, _append_songs, 
+        Net.async_call(
+                Net.get_mv_songs, _append_songs, 
                 self.curr_node_id, self.songs_page)
 
     def on_iconview_songs_item_activated(self, iconview, path):

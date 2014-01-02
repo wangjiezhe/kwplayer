@@ -1,16 +1,16 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import os
+import re
+import time
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GdkX11
 from gi.repository import Gtk
-import os
-import re
-import time
 
 from kuwo import Config
 
@@ -22,7 +22,7 @@ def list_to_time(time_tags):
         curr_time = int(mm) * 60 + int(ss)
     else:
         curr_time = int(mm) * 60 + int(ss) + float(ml)
-    return int(curr_time * 10**9)
+    return int(curr_time * 10 ** 9)
 
 def lrc_parser(lrc_txt):
     lines = lrc_txt.split('\n')
@@ -47,12 +47,16 @@ def lrc_parser(lrc_txt):
     return sorted(lrc_obj)
 
 class Lrc(Gtk.Box):
+    '''Lyrics tab in notebook.'''
+
+    title = _('Lyrics')
+
     def __init__(self, app):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.app = app
         self.lrc_obj = None
-        self.lrc_default_background = os.path.join(Config.THEME_DIR,
-                'lrc-background.jpg')
+        self.lrc_default_background = os.path.join(
+                Config.THEME_DIR, 'lrc-background.jpg')
         self.lrc_background = None
         self.old_provider = None
 
@@ -80,8 +84,8 @@ class Lrc(Gtk.Box):
         self.lrc_tv.props.cursor_visible = False
         self.lrc_tv.props.justification = Gtk.Justification.CENTER
         self.lrc_tv.props.pixels_above_lines = 10
-        self.lrc_tv.connect('button-press-event',
-                self.on_lrc_tv_button_pressed)
+        self.lrc_tv.connect(
+                'button-press-event', self.on_lrc_tv_button_pressed)
         self.lrc_window.add(self.lrc_tv)
 
         # mv window
@@ -98,8 +102,6 @@ class Lrc(Gtk.Box):
         pass
 
     def on_lrc_tv_button_pressed(self, widget, event):
-        #if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
-        # block right click
         if event.button == 3:
             return True
 
@@ -108,7 +110,7 @@ class Lrc(Gtk.Box):
         self.old_line_num = 1
         self.old_line_iter = None
         self.old_timestamp = -5
-        if lrc_txt is None:
+        if not lrc_txt:
             print('Failed to get lrc')
             self.lrc_buf.set_text(_('No lrc available'))
             self.lrc_obj = None
@@ -124,18 +126,18 @@ class Lrc(Gtk.Box):
         self.lrc_window.get_vadjustment().set_value(0)
 
     def sync_lrc(self, timestamp):
-        if self.lrc_obj is None or len(self.lrc_obj) <= self.old_line_num + 1:
+        if not self.lrc_obj or len(self.lrc_obj) <= self.old_line_num + 1:
             return
         # current line, do nothing
-        if self.lrc_obj[self.old_line_num][0] < timestamp and \
-                timestamp < self.lrc_obj[self.old_line_num + 1][0]:
+        if (self.lrc_obj[self.old_line_num][0] < timestamp and
+            timestamp < self.lrc_obj[self.old_line_num + 1][0]):
             return
 
         line_num = self.old_line_num + 1
         # remove old highlighted tags
-        if self.old_line_num >= 0 and self.old_line_iter is not None:
-            self.lrc_buf.remove_tag(self.highlighted_tag,
-                                    *self.old_line_iter)
+        if self.old_line_num >= 0 and self.old_line_iter:
+            self.lrc_buf.remove_tag(
+                    self.highlighted_tag, *self.old_line_iter)
 
         # backward seeking
         if timestamp < self.old_timestamp:
@@ -143,8 +145,8 @@ class Lrc(Gtk.Box):
                 line_num -= 1
         else:
         # forward seeking
-            while len(self.lrc_obj) > line_num and \
-                    timestamp > self.lrc_obj[line_num][0]:
+            while (len(self.lrc_obj) > line_num and
+                   timestamp > self.lrc_obj[line_num][0]):
                 line_num += 1
         line_num -= 1
 
@@ -180,14 +182,15 @@ class Lrc(Gtk.Box):
                 "background-image: url('{0}');".format(self.lrc_background),
             '}',
             ])
-        new_provider = self.app.apply_css(self.lrc_window, css,
-                old_provider=self.old_provider)
+        new_provider = self.app.apply_css(
+                self.lrc_window, css, old_provider=self.old_provider)
         self.old_provider = new_provider
 
     def update_highlighted_tag(self):
         fore_rgba = Gdk.RGBA()
         fore_rgba.parse(self.app.conf['lrc-highlighted-text-color'])
-        self.highlighted_tag.props.size_points = self.app.conf['lrc-highlighted-text-size']
+        self.highlighted_tag.props.size_points = \
+                self.app.conf['lrc-highlighted-text-size']
         self.highlighted_tag.props.foreground_rgba = fore_rgba
 
     def on_mv_window_redraw(self, *args):

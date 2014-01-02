@@ -1,9 +1,10 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import json
 import dbus
 import dbus.service
 import dbus.mainloop.glib
@@ -11,7 +12,6 @@ from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gst
-import json
 
 GObject.threads_init()
 dbus.mainloop.glib.threads_init()
@@ -59,7 +59,7 @@ class PlayerDBus(dbus.service.Object):
             #'SupportedMimeTypes': (dbus.Array([], signature='s'), None),
             'SupportedMimeTypes':
                 (dbus.Array(MIME_TYPES, signature='s'), None),
-        }
+            }
 
     def _get_player_iface_properties(self):
         return {
@@ -78,11 +78,11 @@ class PlayerDBus(dbus.service.Object):
             'CanPause': (True, None),
             'CanSeek': (False, None),
             'CanControl': (True, None),
-        }
+            }
 
     # interface properties
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss',
-            out_signature='v')
+                         out_signature='v')
     def Get(self, interface, prop):
         (getter, _) = self.properties[interface][prop]
         if callable(getter):
@@ -91,25 +91,28 @@ class PlayerDBus(dbus.service.Object):
             return getter
 
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s',
-            out_signature='a{sv}')
+                         out_signature='a{sv}')
     def GetAll(self, interface):
         getters = {}
         for key, (getter, _) in self.properties[interface].items():
-            getters[key] = getter() if callable(getter) else getter
+            if callable(getter):
+                getters[key] = getter()
+            else:
+                getters[key] = getter
         return getters
 
-    @dbus.service.method(dbus.PROPERTIES_IFACE,
-            in_signature='ssv', out_signature='')
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ssv',
+                         out_signature='')
     def Set(self, interface, prop, value):
         _, setter = self.properties[interface][prop]
-        if setter is not None:
+        if setter:
             setter(value)
-            self.PropertiesChanged(interface,
-                    {prop: self.Get(interface, prop)}, [])
+            self.PropertiesChanged(
+                    interface, {prop: self.Get(interface, prop)}, [])
 
     @dbus.service.signal(dbus.PROPERTIES_IFACE, signature='sa{sv}as')
     def PropertiesChanged(self, interface, changed_properties,
-            invalidated_properties):
+                          invalidated_properties):
         pass
 
     # root iface methods
@@ -187,7 +190,7 @@ class PlayerDBus(dbus.service.Object):
 
     def get_Metadata(self):
         song = self.player.curr_song
-        if song is None:
+        if not song:
             return {'mpris:trackid': ''}
 
         artUrl = self.player.meta_artUrl
@@ -208,7 +211,7 @@ class PlayerDBus(dbus.service.Object):
                 'xesam:album': song['album'],
                 'xesam:url': self.player.meta_url,
                 'mpris:length': self.get_Length(),
-                'mpris:artUrl': 'file://' + artUrl if artUrl != '' else ''
+                'mpris:artUrl': 'file://' + artUrl
                 }
         return dbus.Dictionary(meta_obj, signature='sv')
 
@@ -227,6 +230,7 @@ class PlayerDBus(dbus.service.Object):
         return self.player.can_go_previous()
 
     def get_CanPlay(self):
+        # FIXME:
         return True
         state = self.player.playbin.get_status()
         if state in (Gst.State.PLAYING, Gst.State.PAUSED):
@@ -242,13 +246,13 @@ class PlayerDBus(dbus.service.Object):
         self.Seeked(pos)
 
     def set_Playing(self):
-        self.PropertiesChanged(PLAYER_IFACE,
-                {'PlaybackStatus': 'Playing'}, [])
+        self.PropertiesChanged(
+                PLAYER_IFACE, {'PlaybackStatus': 'Playing'}, [])
         self.update_meta()
 
     def set_Pause(self):
-        self.PropertiesChanged(PLAYER_IFACE,
-                {'PlaybackStatus': 'Paused'}, [])
+        self.PropertiesChanged(
+                PLAYER_IFACE, {'PlaybackStatus': 'Paused'}, [])
 
     def get_Length(self):
         length = self.player.adjustment.get_upper()
@@ -257,8 +261,7 @@ class PlayerDBus(dbus.service.Object):
 
     def update_meta(self):
         meta = self.get_Metadata()
-        self.PropertiesChanged(PLAYER_IFACE,
-                {'Metadata': meta}, [])
+        self.PropertiesChanged(PLAYER_IFACE, {'Metadata': meta}, [])
 
     def enable_seek(self):
         self.PropertiesChanged(PLAYER_IFACE, {'CanSeek': True}, [])

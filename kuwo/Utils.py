@@ -1,5 +1,5 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
@@ -26,15 +26,13 @@ else:
 
 
 def decode_lrc_content(lrc, is_lrcx=False):
-    '''
-    lrc currently is bytes.
-    '''
+    '''lrc currently is bytes. '''
     if lrc[:10] != b'tp=content':
         return None
     index = lrc.index(b'\r\n\r\n')
     lrc_bytes = lrc[index+4:]
     str_lrc = zlib.decompress(lrc_bytes)
-    if is_lrcx is False:
+    if not is_lrcx:
         return str_lrc.decode('gb18030')
     str_bytes = base64.decodebytes(str_lrc)
     return xor_bytes(str_bytes).decode('gb18030')
@@ -65,14 +63,15 @@ def decode_music_file(filename):
     print(result)
 
 def encode_lrc_url(rid):
-    '''
+    '''Get lrc file link.
+
     rid is like '928003'
     like this: 
     will get:
     DBYAHlRcXUlcUVRYXUI0MDYlKjBYV1dLXUdbQhIQEgNbX19LSwAUDEMlDigQHwAMSAsAFBkMHBocF1gABgwPFQ0KHx1JHBwUWF1PHAEXAgsNBApTtMqhhk8OHA0MFhhUrbDNlra/Tx0HHVgoOTomLSZXVltRWF1fCRcPEVJf
     '''
     param = ('user=12345,web,web,web&requester=localhost&req=1&rid=MUSIC_' +
-            str(rid))
+              str(rid))
     str_bytes = xor_bytes(param.encode())
     output = base64.encodebytes(str_bytes).decode()
     return output.replace('\n', '')
@@ -83,19 +82,17 @@ def decode_lrc_url(url):
     return output.decode('gb18030')
 
 def json_loads_single(_str):
-    '''
-    Actually this is not a good idea.
-    '''
+    '''Actually this is not a good idea. '''
     return json.loads(_str.replace('"', '''\\"''').replace("'", '"'))
 
 def encode_uri(text):
     return parse.quote(text, safe='~@#$&()*!+=:;,.?/\'')
 
 def parse_radio_songs(txt):
-    if len(txt) == 0:
+    if not txt:
         return None
     lines = txt.splitlines()
-    if len(lines) == 0 or lines[0] != 'success':
+    if not lines or lines[0] != 'success':
         return None
     songs = []
     for line in lines[2:]:
@@ -121,7 +118,7 @@ def iconvtag(song_path, song):
 
     def use_ape():
         audio = APEv2File(song_path)
-        if audio.tags is None:
+        if not audio.tags:
             audio.add_tags()
         audio.tags.clear()
         audio.tags['title'] = song['name']

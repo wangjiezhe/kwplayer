@@ -1,16 +1,16 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import sys
+import time
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
-import sys
-import time
 
 from kuwo import Config
 from kuwo import Net
@@ -114,15 +114,15 @@ class Player(Gtk.Box):
         self.show_mv_btn.set_label(_('Show MV'))
         self.show_mv_btn.set_icon_name('video-x-generic-symbolic')
         self.show_mv_btn.set_sensitive(False)
-        self.show_mv_sid = self.show_mv_btn.connect('toggled', 
-                self.on_show_mv_toggled)
+        self.show_mv_sid = self.show_mv_btn.connect(
+                'toggled', self.on_show_mv_toggled)
         toolbar.insert(self.show_mv_btn, 5)
 
         self.fullscreen_btn = Gtk.ToolButton()
         self.fullscreen_btn.set_label(_('Fullscreen'))
         self.fullscreen_btn.set_icon_name('view-fullscreen-symbolic')
-        self.fullscreen_btn.connect('clicked', 
-                self.on_fullscreen_button_clicked)
+        self.fullscreen_btn.connect(
+                'clicked', self.on_fullscreen_button_clicked)
         toolbar.insert(self.fullscreen_btn, 6)
         self.app.window.connect('key-press-event', self.on_window_key_pressed)
 
@@ -132,29 +132,30 @@ class Player(Gtk.Box):
         toolbar.child_set_property(menu_tool_item, 'expand', True)
         main_menu = Gtk.Menu()
         pref_item = Gtk.MenuItem(label=_('Preferences'))
-        pref_item.connect('activate',
-                self.on_main_menu_pref_activate)
+        pref_item.connect(
+                'activate', self.on_main_menu_pref_activate)
         main_menu.append(pref_item)
         sep_item = Gtk.SeparatorMenuItem()
         main_menu.append(sep_item)
         about_item = Gtk.MenuItem(label=_('About'))
-        about_item.connect('activate',
-                self.on_main_menu_about_activate)
+        about_item.connect(
+                'activate', self.on_main_menu_about_activate)
         main_menu.append(about_item)
         quit_item = Gtk.MenuItem(label=_('Quit'))
         key, mod = Gtk.accelerator_parse('<Ctrl>Q')
-        quit_item.add_accelerator('activate', 
-                app.accel_group, key, mod, Gtk.AccelFlags.VISIBLE)
-        quit_item.connect('activate', 
-                self.on_main_menu_quit_activate)
+        quit_item.add_accelerator(
+                'activate', app.accel_group, key, mod,
+                Gtk.AccelFlags.VISIBLE)
+        quit_item.connect(
+                'activate', self.on_main_menu_quit_activate)
         main_menu.append(quit_item)
         main_menu.show_all()
         menu_image = Gtk.Image()
         menu_image.set_from_icon_name('view-list-symbolic', ICON_SIZE)
         if Config.GTK_LE_36:
             menu_btn = Gtk.Button()
-            menu_btn.connect('clicked', 
-                self.on_main_menu_button_clicked, main_menu)
+            menu_btn.connect(
+                    'clicked', self.on_main_menu_button_clicked, main_menu)
         else:
             menu_btn = Gtk.MenuButton()
             menu_btn.set_popup(main_menu)
@@ -164,8 +165,8 @@ class Player(Gtk.Box):
         menu_btn.set_image(menu_image)
         menu_tool_item.add(menu_btn)
 
-        self.label = Gtk.Label('<b>{0}</b> <i>by {0}</i>'.format(
-            _('Unknown')))
+        self.label = Gtk.Label(
+                '<b>{0}</b> <i>by {0}</i>'.format(_('Unknown')))
         self.label.props.use_markup = True
         self.label.props.xalign = 0
         self.label.props.margin_left = 10
@@ -190,8 +191,8 @@ class Player(Gtk.Box):
         self.volume = Gtk.VolumeButton()
         self.volume.props.use_symbolic = True
         self.volume.set_value(app.conf['volume'] ** 0.33)
-        self.volume_sid = self.volume.connect('value-changed',
-                self.on_volume_value_changed)
+        self.volume_sid = self.volume.connect(
+                'value-changed', self.on_volume_value_changed)
         scale_box.pack_start(self.volume, False, False, 0)
 
         # init playbin and dbus
@@ -200,8 +201,8 @@ class Player(Gtk.Box):
         self.playbin.connect('eos', self.on_playbin_eos)
         self.playbin.connect('error', self.on_playbin_error)
         self.playbin.connect('mute-changed', self.on_playbin_mute_changed)
-        self.playbin.connect('volume-changed',
-                self.on_playbin_volume_changed)
+        self.playbin.connect(
+                'volume-changed', self.on_playbin_volume_changed)
         self.dbus = PlayerDBus(self)
         self.notify = PlayerNotify(self)
 
@@ -385,7 +386,7 @@ class Player(Gtk.Box):
 
     def update_player_info(self):
         def _update_pic(info, error=None):
-            if info is None or error:
+            if not info or error:
                 return
             self.artist_pic.set_tooltip_text(
                     Widgets.short_tooltip(info['info'], length=500))
@@ -401,11 +402,11 @@ class Player(Gtk.Box):
             
         song = self.curr_song
         name = Widgets.short_tooltip(song['name'], 45)
-        if len(song['artist']) > 0:
+        if song['artist']:
             artist = Widgets.short_tooltip(song['artist'], 20)
         else:
             artist = _('Unknown')
-        if len(song['album']) > 0:
+        if song['album']:
             album = Widgets.short_tooltip(song['album'], 30)
         else:
             album = _('Unknown')
@@ -414,7 +415,8 @@ class Player(Gtk.Box):
         self.label.set_label(label)
         self.app.window.set_title(name)
         self.artist_pic.set_from_pixbuf(self.app.theme['anonymous'])
-        Net.async_call(Net.get_artist_info, _update_pic, 
+        Net.async_call(
+                Net.get_artist_info, _update_pic, 
                 song['artistid'], song['artist'])
 
     def get_lrc(self):
@@ -425,11 +427,12 @@ class Player(Gtk.Box):
     def get_recommend_lists(self):
         self.recommend_imgs = None
         def _on_list_received(imgs, error=None):
-            if imgs is None or len(imgs) < 10:
+            if not imgs or len(imgs) < 10:
                 self.recommend_imgs = None
             else:
                 self.recommend_imgs = imgs.splitlines()
-        Net.async_call(Net.get_recommend_lists, _on_list_received, 
+        Net.async_call(
+                Net.get_recommend_lists, _on_list_received, 
                 self.curr_song['artist'])
 
     def update_lrc_background(self, url):
@@ -439,7 +442,8 @@ class Player(Gtk.Box):
 
     # Radio part
     def load_radio(self, song, radio_item):
-        '''
+        '''Load Radio song.
+
         song from radio, only contains name, artist, rid, artistid
         Remember to update its information.
         '''
@@ -485,7 +489,8 @@ class Player(Gtk.Box):
         def _update_mv_link(mv_args, error=None):
             mv_link, mv_path = mv_args
             self.show_mv_btn.set_sensitive(mv_link is not False)
-        Net.async_call(Net.get_song_link, _update_mv_link,
+        Net.async_call(
+                Net.get_song_link, _update_mv_link,
                 self.curr_song, self.app.conf, True)
 
     # Fullscreen
@@ -524,8 +529,8 @@ class Player(Gtk.Box):
             self.hide()
             window.realize()
             window.fullscreen()
-            self.fullscreen_sid = window.connect('motion-notify-event',
-                    self.on_window_motion_notified)
+            self.fullscreen_sid = window.connect(
+                    'motion-notify-event', self.on_window_motion_notified)
             self.playbin.expose_fullscreen()
 
     def on_window_motion_notified(self, widget, event):
@@ -537,20 +542,21 @@ class Player(Gtk.Box):
         self.show_all()
         # delay 3 seconds and hide them
         self.fullscreen_timestamp = time.time()
-        GLib.timeout_add(3000, self.hide_control_panel_and_label, 
+        GLib.timeout_add(
+                3000, self.hide_control_panel_and_label, 
                 self.fullscreen_timestamp)
         self.playbin.expose_fullscreen()
 
     def hide_control_panel_and_label(self, timestamp):
-        if timestamp == self.fullscreen_timestamp and \
-                self.fullscreen_sid > 0:
+        if (timestamp == self.fullscreen_timestamp and 
+                self.fullscreen_sid > 0):
             self.app.notebook.set_show_tabs(False)
             self.hide()
 
     # menu button
     def on_main_menu_button_clicked(self, button, main_menu):
-        main_menu.popup(None, None, None, None, 1, 
-            Gtk.get_current_event_time())
+        main_menu.popup(
+                None, None, None, None, 1, Gtk.get_current_event_time())
 
     def on_main_menu_pref_activate(self, menu_item):
         dialog = Preferences(self.app)
@@ -597,9 +603,9 @@ class Player(Gtk.Box):
         mute = self.playbin.get_mute()
         volume = self.playbin.get_volume()
         if mute:
-                self.volume.handler_block(self.volume_sid)
-                self.volume.set_value(0.0)
-                self.volume.handler_unblock(self.volume_sid)
+            self.volume.handler_block(self.volume_sid)
+            self.volume.set_value(0.0)
+            self.volume.handler_unblock(self.volume_sid)
         else:
             self.volume.handler_block(self.volume_sid)
             self.volume.set_value(volume ** 0.33)
@@ -612,7 +618,7 @@ class Player(Gtk.Box):
 
     # control player, UI and dbus
     def is_playing(self):
-    #    return self.playbin.is_playing()
+        #return self.playbin.is_playing()
         return self._is_playing
 
     def start_player(self, load=False):

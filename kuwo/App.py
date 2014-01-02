@@ -1,21 +1,20 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import os
+import sys
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GObject
 from gi.repository import Gtk
-import os
-import sys
 
 from kuwo import Config
 # ~/.config/kuwo and ~/.cache/kuwo need to be created at first time
 Config.check_first()
 _ = Config._
-
 from kuwo.Artists import Artists
 from kuwo.Lrc import Lrc
 from kuwo.MV import MV
@@ -30,6 +29,7 @@ from kuwo.Shortcut import Shortcut
 
 GObject.threads_init()
 DBUS_APP_NAME = 'org.liulang.kwplayer'
+
 
 class App:
     def __init__(self):
@@ -69,17 +69,21 @@ class App:
         self.notebook.connect('switch-page', self.on_notebook_switch_page)
         self.init_status_icon()
 
-        # load styles
+        # load default styles when all widgets have been constructed.
         self.load_styles()
 
     def on_app_activate(self, app):
         self.window.show_all()
-        # make some changes after main window is shown.
+        # Make some changes after main window is shown.
+        # Like hiding some unnecessory widgets.
         self.lrc.after_init()
         self.artists.after_init()
         self.player.after_init()
         self.search.after_init()
         self.shortcut = Shortcut(self.player)
+
+    def on_app_shutdown(self, app):
+        Config.dump_conf(self.conf)
 
     def run(self, argv):
         self.app.run(argv)
@@ -88,9 +92,6 @@ class App:
         self.window.destroy()
         self.shortcut.quit()
         self.app.quit()
-
-    def on_app_shutdown(self, app):
-        Config.dump_conf(self.conf)
 
     def on_main_window_resized(self, window, event=None):
         self.conf['window-size'] = window.get_size()
@@ -104,67 +105,66 @@ class App:
 
     def init_notebook(self):
         self.lrc = Lrc(self)
-        self.lrc.app_page = self.notebook.append_page(
-                self.lrc, Gtk.Label(_('Lyrics')))
+        self.append_page(self.lrc)
 
         self.playlist = PlayList(self)
-        self.playlist.app_page = self.notebook.append_page(
-                self.playlist, Gtk.Label(_('Playlist')))
+        self.append_page(self.playlist)
 
         self.search = Search(self)
-        self.search.app_page = self.notebook.append_page(
-                self.search, Gtk.Label(_('Search')))
+        self.append_page(self.search)
 
         self.toplist = TopList(self)
-        self.toplist.app_page = self.notebook.append_page(
-                self.toplist, Gtk.Label(_('Top List')))
+        self.append_page(self.toplist)
 
         self.radio = Radio(self)
-        self.radio.app_page = self.notebook.append_page(
-                self.radio, Gtk.Label(_('Radio')))
+        self.append_page(self.radio)
 
         self.mv = MV(self)
-        self.mv.app_page = self.notebook.append_page(
-                self.mv, Gtk.Label(_('MV')))
+        self.append_page(self.mv)
 
         self.artists = Artists(self)
-        self.artists.app_page = self.notebook.append_page(
-                self.artists, Gtk.Label(_('Artists')))
+        self.append_page(self.artists)
 
         self.topcategories = TopCategories(self)
-        self.topcategories.app_page = self.notebook.append_page(
-                self.topcategories, Gtk.Label(_('Categories')))
+        self.append_page(self.topcategories)
 
         self.themes = Themes(self)
-        self.themes.app_page = self.notebook.append_page(
-                self.themes, Gtk.Label(_('Themes')))
+        self.append_page(self.themes)
 
     def on_notebook_switch_page(self, notebook, page, page_num):
         page.first()
 
+    def append_page(self, widget):
+        '''Append a new widget to notebook.'''
+        label = Gtk.Label(widget.title)
+        widget.app_page = self.notebook.append_page(widget, label)
+
     def popup_page(self, page):
+        '''Switch to this widget in notebook.'''
         self.notebook.set_current_page(page)
 
     def apply_css(self, widget, css, old_provider=None, overall=False):
+        '''Update CssProvider of this widget.'''
         # CssProvider needs bytecode
         style_provider = Gtk.CssProvider()
-        _css = css.encode()
-        style_provider.load_from_data(_css)
+        css_encoded = css.encode()
+        style_provider.load_from_data(css_encoded)
         if overall:
             Gtk.StyleContext.add_provider_for_screen(
                 Gdk.Screen.get_default(), style_provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-            if old_provider is not None:
+            if old_provider:
                 Gtk.StyleContext.remove_provider_for_screen(
                     Gdk.Screen.get_default(), style_provider)
         else:
-            widget.get_style_context().add_provider(style_provider,
-                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-            if old_provider is not None:
+            widget.get_style_context().add_provider(
+                    style_provider,Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            if old_provider:
                 widget.get_style_context().remove_provider(old_provider)
         return style_provider
 
     def load_styles(self):
+        '''Load default CssStyle.'''
         if Config.GTK_LE_36:
             css = '\n'.join([
                 # transition-property is not supported in Gtk3.4
@@ -227,8 +227,7 @@ class App:
         # left click
         self.status_icon.connect('activate', self.on_status_icon_activate)
         # right click
-        self.status_icon.connect('popup_menu', 
-                self.on_status_icon_popup_menu)
+        self.status_icon.connect('popup_menu', self.on_status_icon_popup_menu)
 
     def on_status_icon_activate(self, status_icon):
         is_visible = self.window.is_visible()
@@ -238,7 +237,7 @@ class App:
             self.window.present()
 
     def on_status_icon_popup_menu(self, status_icon, event_button, 
-            event_time):
+                                  event_time):
         menu = Gtk.Menu()
         show_item = Gtk.MenuItem(label=_('Show App') )
         show_item.connect('activate', self.on_status_icon_show_app_activate)

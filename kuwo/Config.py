@@ -1,14 +1,16 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
 import gettext
-from gi.repository import GdkPixbuf
-from gi.repository import Gtk
 import json
 import os
+import sys
+from gi.repository import GdkPixbuf
+from gi.repository import GLib
+from gi.repository import Gtk
 
 if __file__.startswith('/usr/local/'):
     PREF = '/usr/local/share'
@@ -25,7 +27,7 @@ _ = gettext.gettext
 APPNAME = _('KW Player')
 VERSION = '3.2.5'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
-AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>',]
+AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
 DESCRIPTION = _('A simple music player on Linux desktop.')
 
 HOME_DIR = os.path.expanduser('~')
@@ -111,24 +113,14 @@ _default_conf = {
 
 def check_first():
     if not os.path.exists(CONF_DIR):
-        try:
-            os.makedirs(CONF_DIR)
-        except Exception as e:
-            print(e)
+        os.makedirs(CONF_DIR)
     if not os.path.exists(CACHE_DIR):
-        try:
-            os.makedirs(CACHE_DIR)
-            os.mkdir(IMG_DIR)
-            os.mkdir(IMG_LARGE_DIR)
-            os.mkdir(_default_conf['song-dir'])
-            os.mkdir(_default_conf['mv-dir'])
-        except Exception as e:
-            print(e)
-    if not os.path.exists(LRC_DIR):
-        try:
-            os.mkdir(LRC_DIR)
-        except Exception as e:
-            print(e)
+        os.makedirs(CACHE_DIR)
+        os.mkdir(IMG_DIR)
+        os.mkdir(IMG_LARGE_DIR)
+        os.mkdir(_default_conf['song-dir'])
+        os.mkdir(_default_conf['mv-dir'])
+        os.mkdir(LRC_DIR)
 
 def load_conf():
     if os.path.exists(_conf_file):
@@ -137,11 +129,6 @@ def load_conf():
         for key in _default_conf:
             if key not in conf:
                 conf[key] = _default_conf[key]
-        # 3.1.5 -> 3.1.6, remove this after 3.3.0
-        if 'Launch' not in conf['custom-shortcut']:
-            conf['custom-shortcut']['Launch'] = _default_conf['custom-shortcut']['Launch']
-        if 'Launch' not in conf['default-shortcut']:
-            conf['default-shortcut']['Launch'] = _default_conf['default-shortcut']['Launch']
         return conf
     dump_conf(_default_conf)
     return _default_conf
@@ -155,18 +142,18 @@ def load_theme():
     try:
         with open(theme_file) as fh:
             theme = json.loads(fh.read())
-    except Exception as e:
+    except ValueError as e:
         print(e)
-        return None
+        sys.exit(1)
 
     theme_pix = {}
     theme_path = {}
-    for key in theme:
-        filename = os.path.join(THEME_DIR, theme[key])
-        if os.path.exists(filename):
-            theme_pix[key] = GdkPixbuf.Pixbuf.new_from_file(filename)
-            theme_path[key] = filename
-        else:
-            print('Failed to open theme icon', filename)
-            return None
+    for img_name in theme:
+        filepath = os.path.join(THEME_DIR, theme[img_name])
+        try:
+            theme_pix[img_name] = GdkPixbuf.Pixbuf.new_from_file(filepath)
+            theme_path[img_name] = filepath
+        except GLib.GError as e:
+            print(e)
+            sys.exit(1)
     return (theme_pix, theme_path)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
@@ -18,14 +18,13 @@ from kuwo import Config
 def build_data_files():
     data_files = []
     for dir, dirs, files in os.walk('share'):
-        #target = os.path.join('share', dir)
         target = dir
         if files:
             files = [os.path.join(dir, f) for f in files]
             data_files.append((target, files))
     return data_files
 
-# will be installed to /usr/local/bin
+# kwplayer will be installed to /usr/local/bin
 scripts = ['kwplayer', ]
 
 if __name__ == '__main__':

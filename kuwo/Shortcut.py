@@ -1,5 +1,5 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in http://www.gnu.org/licenses/gpl-3.0.html
@@ -11,8 +11,8 @@ try:
     keybinder_imported = True
 except ImportError as e:
     keybinder_imported = False
-    print('Warning: no python3-keybinder module found, global keyboard shortcut will be disabled!')
-
+    print('Warning: no python3-keybinder module found,',
+          'global keyboard shortcut will be disabled!')
 
 from kuwo import Config
 ShortcutMode = Config.ShortcutMode
@@ -24,8 +24,7 @@ class Shortcut:
         self.callbacks = {
                 'VolumeUp': self.volume_up,
                 'VolumeDown': self.volume_down,
-                'Mute':
-                    lambda *args: player.toggle_mute_cb(),
+                'Mute': lambda *args: player.toggle_mute_cb(),
                 'Previous': lambda *args: player.load_prev_cb(),
                 'Next': lambda *args: player.load_next_cb(),
                 'Pause': lambda *args: player.play_pause_cb(),
@@ -71,6 +70,5 @@ class Shortcut:
         self.bind_keys()
 
     def quit(self):
-        print('Shortcut.quit')
         if keybinder_imported:
             self.keybinder.stop()

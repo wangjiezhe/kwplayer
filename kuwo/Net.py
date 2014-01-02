@@ -1,21 +1,22 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
-from gi.repository import GdkPixbuf
-from gi.repository import GObject
-from gi.repository import Gtk
 import hashlib
 import json
 import math
 import os
 import sys
 import threading
-import urllib.error
+from urllib.error import URLError
 from urllib import parse
 from urllib import request
+from gi.repository import GdkPixbuf
+from gi.repository import GLib
+from gi.repository import GObject
+from gi.repository import Gtk
 
 from kuwo import Config
 from kuwo import Utils
@@ -28,9 +29,9 @@ SEARCH = 'http://search.kuwo.cn/r.s?'
 SONG = 'http://antiserver.kuwo.cn/anti.s?'
 
 CHUNK = 2 ** 14
-CHUNK_TO_PLAY = 2 ** 21     # 2M
+CHUNK_TO_PLAY = 2 ** 21      # 2M
 CHUNK_APE_TO_PLAY = 2 ** 23  # 8M
-CHUNK_MV_TO_PLAY = 2 ** 23  # 8M
+CHUNK_MV_TO_PLAY = 2 ** 23   # 8M
 MAXTIMES = 3
 TIMEOUT = 30
 SONG_NUM = 100
@@ -70,7 +71,6 @@ if ldb_imported:
         print(e)
         sys.exit(1)
 
-
 def empty_func(*args, **kwds):
     pass
 
@@ -84,7 +84,6 @@ def async_call(func, func_done, *args):
             result = func(*args)
         except Exception as e:
             error = e
-
         GObject.idle_add(lambda: func_done(result, error))
 
     thread = threading.Thread(target=do_call, args=args)
@@ -104,7 +103,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
     if use_cache and ldb_imported:
         try:
             content = ldb_get(key)
-            if content is not None:
+            if content:
                 return content
         except KeyError:
             pass
@@ -116,7 +115,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
             if use_cache and ldb_imported:
                 ldb_put(key, req_content)
             return req_content
-        except Exception as e:
+        except URLError as e:
             print('Error: Net.urlopen', e, 'url:', url)
             retried += 1
     return None
@@ -134,11 +133,11 @@ def get_nodes(nid, page):
         ])
     #print('get_nodes()', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return (None, 0)
     try:
         nodes_wrap = json.loads(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_nodes:', e, 'with url:', url)
         return (None, 0)
     nodes = nodes_wrap['child']
@@ -172,11 +171,11 @@ def get_album(albumid):
         ])
     #print('get_album():', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return None
     try:
         songs_wrap = Utils.json_loads_single(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_album()', e, 'with url:', url)
         return None
     songs = songs_wrap['musiclist']
@@ -184,14 +183,14 @@ def get_album(albumid):
 
 def update_liststore_image(liststore, path, col, url):
     def _update_image(filepath, error=None):
-        if filepath is None or error:
+        if not filepath or error:
             return
         try:
             pix = GdkPixbuf.Pixbuf.new_from_file_at_size(filepath, 100, 100)
             liststore[path][col] = pix
-        except Exception as e:
+        except GLib.GError as e:
             print('Error: Net.update_liststore_image:', e, 
-                    'with filepath:', filepath, 'url:', url)
+                  'with filepath:', filepath, 'url:', url)
     if len(url) < 10:
         return
     async_call(get_image, _update_image, url)
@@ -231,12 +230,12 @@ def get_toplist_songs(nid):
     #print('get toplist songs(), url:', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
-        if req_content is None:
+        if not req_content:
             return None
         req_cache[url] = req_content
     try:
         songs_wrap = json.loads(req_cache[url].decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_toplist_songs:', e, 'with url:', url)
         return None
     return songs_wrap['musiclist']
@@ -255,11 +254,11 @@ def get_artists(catid, page, prefix):
         url = url + '&prefix=' + prefix
     #print('Net.get_artists(), url:', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return (None, 0)
     try:
         artists_wrap = Utils.json_loads_single(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_artists:', e, 'with url:', url)
         return (None, 0)
     pages = int(artists_wrap['total'])
@@ -279,13 +278,13 @@ def get_artist_pic_url(pic_path):
 
 def update_artist_logo(liststore, path, col, pic_path):
     url = get_artist_pic_url(pic_path)
-    if url is None:
+    if not url:
         return
     update_liststore_image(liststore, path, col, url)
 
 def get_artist_info(artistid, artist=None):
-    '''
-    Get artist info, if cached, just return it.
+    '''Get artist info, if cached, just return it.
+
     Artist pic is also retrieved and saved to info['pic']
     '''
     if artistid == 0:
@@ -302,11 +301,11 @@ def get_artist_info(artistid, artist=None):
             ])
     #print('Net.get_artist_info, url:', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return None
     try:
         info = Utils.json_loads_single(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_artist_info:', e, 'with url:', url)
         return None
     # set logo size to 100x100
@@ -330,11 +329,11 @@ def get_artist_songs(artist, page):
         ])
     #print('Net.get_artist_songs()', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return (None, 0)
     try:
         songs_wrap = Utils.json_loads_single(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_artist_songs:', e, 'with url:', url)
         return (None, 0)
     songs = songs_wrap['abslist']
@@ -342,9 +341,6 @@ def get_artist_songs(artist, page):
     return (songs, pages)
 
 def get_artist_songs_by_id(artistid, page):
-    '''
-    http://search.kuwo.cn/r.s?stype=artist2music&artistid=266&pn=0&rn=20
-    '''
     url = ''.join([
         SEARCH,
         'stype=artist2music&artistid=',
@@ -356,11 +352,11 @@ def get_artist_songs_by_id(artistid, page):
         ])
     #print('Net.get_artist_songs_by_id()', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return (None, 0)
     try:
         songs_wrap = Utils.json_loads_single(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get-artist_songs_by_id:', e, 'with url:', url)
         return (None, 0)
     songs = songs_wrap['musiclist']
@@ -368,8 +364,6 @@ def get_artist_songs_by_id(artistid, page):
     return (songs, pages)
 
 def get_artist_albums(artistid, page):
-    '''http://search.kuwo.cn/r.s?stype=albumlist&artistid=336&sortby=1&rn=20&pn=0
-    '''
     url = ''.join([
         SEARCH,
         'stype=albumlist&sortby=1&rn=',
@@ -381,11 +375,11 @@ def get_artist_albums(artistid, page):
         ])
     #print('Net.get_artist_albums(), url:', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return (None, 0)
     try:
         albums_wrap = Utils.json_loads_single(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error:', e)
         return (None, 0)
     albums = albums_wrap['albumlist']
@@ -393,9 +387,6 @@ def get_artist_albums(artistid, page):
     return (albums, pages)
 
 def get_artist_mv(artistid, page):
-    '''
-    http://search.kuwo.cn/r.s?stype=mvlist&artistid=336&sortby=0&rn=20&pn=0
-    '''
     url = ''.join([
         SEARCH,
         'stype=mvlist&sortby=0&rn=',
@@ -407,11 +398,11 @@ def get_artist_mv(artistid, page):
         ])
     #print('Net.get_artist_mv(), url:', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return (None, 0)
     try:
         mvs_wrap = Utils.json_loads_single(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_artist_mv:', e, 'with url:', url)
         return (None, 0)
     mvs = mvs_wrap['mvlist']
@@ -419,10 +410,7 @@ def get_artist_mv(artistid, page):
     return (mvs, pages)
 
 def get_artist_similar(artistid, page):
-    '''
-    http://search.kuwo.cn/r.s?stype=similarartist&artistid=336&sortby=0&rn=20&pn=0
-    Only has 10 items
-    '''
+    '''Only has 10 items'''
     url = ''.join([
         SEARCH,
         'stype=similarartist&sortby=0&rn=',
@@ -434,11 +422,11 @@ def get_artist_similar(artistid, page):
         ])
     #print('Net.get_artist_similar(), url:', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return (None, 0)
     try:
        artists_wrap = Utils.json_loads_single(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_artist_similar:', e, 'with url:', url)
         return (None, 0)
     artists = artists_wrap['artistlist']
@@ -463,7 +451,7 @@ def get_lrc(song):
                 Utils.encode_lrc_url(rid))
         #print('Net._parse_lrc(), url:', url)
         req_content = urlopen(url, use_cache=False, retries=8)
-        if req_content is None:
+        if not req_content:
             return None
         try:
             lrc = Utils.decode_lrc_content(req_content)
@@ -479,15 +467,13 @@ def get_lrc(song):
             return fh.read()
 
     lrc = _parse_lrc()
-    if lrc is None:
-        return None
-    try:
-        with open(lrc_path, 'w') as fh:
-            fh.write(lrc)
-        return lrc
-    except Exception as e:
-        print('Error: Net.get_lrc(): ', e)
-        return None
+    if lrc:
+        try:
+            with open(lrc_path, 'w') as fh:
+                fh.write(lrc)
+        except FileNotFoundError as e:
+            print('Error: Net.get_lrc(): ', e)
+    return lrc
 
 def get_recommend_lists(artist):
     url = ''.join([
@@ -497,17 +483,15 @@ def get_recommend_lists(artist):
         Utils.encode_uri(artist),
         ])
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return None
     return req_content.decode()
 
 def get_recommend_image(_url):
-    '''
-    Get big cover image about this artist, normally 1024x768
-    '''
+    '''Get big cover image about this artist, normally 1024x768'''
     def _get_image(url): 
         req_content = urlopen(url, use_cache=False)
-        if req_content is None:
+        if not req_content:
             return None
         return req_content
 
@@ -521,7 +505,7 @@ def get_recommend_image(_url):
         return filepath
 
     image = _get_image(url)
-    if image is None:
+    if not image:
         return None
     with open(filepath, 'wb') as fh:
         fh.write(image)
@@ -541,12 +525,12 @@ def search_songs(keyword, page):
     #print('search songs:', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
-        if req_content is None:
+        if not req_content:
             return (None, 0, 0)
         req_cache[url] = req_content
     try:
         songs_wrap = Utils.json_loads_single(req_cache[url].decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.search_song:', e, 'with url:', url)
         return (None, 0, 0)
     hit = int(songs_wrap['TOTAL'])
@@ -568,12 +552,12 @@ def search_artists(keyword, page):
     #print('Net.search_artists(), ', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
-        if req_content is None:
+        if not req_content:
             return (None, 0, 0)
         req_cache[url] = req_content
     try:
         artists_wrap = Utils.json_loads_single(req_cache[url].decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.search_artists():', e, 'with url:', url)
         return (None, 0, 0)
     hit = int(artists_wrap['TOTAL'])
@@ -595,12 +579,12 @@ def search_albums(keyword, page):
     #print('search_albums:', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
-        if req_content is None:
+        if not req_content:
             return (None, 0, 0)
         req_cache[url] = req_content
     try:
         albums_wrap = Utils.json_loads_single(req_cache[url].decode())
-    except Exception as e:
+    except ValueError  as e:
         print('Error: Net.search_albums():', e, 'with url:', url)
         return (None, 0, 0)
     hit = int(albums_wrap['total'])
@@ -609,9 +593,7 @@ def search_albums(keyword, page):
     return (albums, hit, pages)
 
 def get_index_nodes(nid):
-    '''
-    Get content of nodes from nid=2 to nid=15
-    '''
+    '''Get content of nodes from nid=2 to nid=15'''
     url = ''.join([
         QUKU,
         'op=query&fmt=json&src=mbox&cont=ninfo&pn=0&rn=',
@@ -621,11 +603,11 @@ def get_index_nodes(nid):
         ])
     #print('get_index_nodes():', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return None
     try:
         nodes_wrap = json.loads(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_index_nodes():', e, 'with url:', url)
         return None
     return nodes_wrap
@@ -633,7 +615,7 @@ def get_index_nodes(nid):
 def get_themes_main():
     def append_to_nodes(nid, use_child=True):
         nodes_wrap = get_index_nodes(nid)
-        if nodes_wrap is None:
+        if not nodes_wrap:
             return None
         if use_child:
             # node is limited to 10, no more are needed.
@@ -690,12 +672,12 @@ def get_themes_songs(nid, page):
     #print('Net.get themes songs, url:', url)
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
-        if req_content is None:
+        if not req_content:
             return (None, 0)
         req_cache[url] = req_content
     try:
         songs_wrap = json.loads(req_cache[url].decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_themes_songs():', e, 'with url:', url)
         return (None, 0)
     pages = math.ceil(int(songs_wrap['total']) / SONG_NUM)
@@ -713,11 +695,11 @@ def get_mv_songs(pid, page):
         ])
     #print('Net.get_mv_songs(), url:', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return (None, 0)
     try:
         songs_wrap = json.loads(req_content.decode())
-    except Exception as e:
+    except ValueError as e:
         print('Error: Net.get_mv_songs():', e, 'with url:', url)
         return (None, 0)
     songs = songs_wrap['musiclist']
@@ -737,7 +719,7 @@ def get_radio_songs(nid, offset):
         str(offset),
         ])
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return None
     songs = Utils.parse_radio_songs(req_content.decode('gbk'))
     return songs
@@ -756,7 +738,7 @@ def _get_song_link_raw(song, conf, use_mv=False):
         ])
     #print('Net._get_song_link_raw(), url', url)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return None
     song_link = req_content.decode()
     if len(song_link) < 20:
@@ -773,9 +755,9 @@ def _get_song_link_raw(song, conf, use_mv=False):
     return (song_link, song_path)
 
 def get_song_link(song, conf, use_mv=False):
-    '''
-    song is song_info dict.
-    conf, is used to to read conf['use-ape'], conf['use-mkv'],
+    '''song is song_info dict.
+
+    @conf, is used to to read conf['use-ape'], conf['use-mkv'],
     conf['song-dir'] and song['mv-dir'].
     use_mv, default is False, which will get mp3 link.
     Return:
@@ -811,22 +793,23 @@ def get_song_link(song, conf, use_mv=False):
         # if song/MV exists, just return it
         return (True, song_path)
     req_content = urlopen(url)
-    if req_content is None:
+    if not req_content:
         return (False, song_path)
     song_link = req_content.decode()
     if len(song_link) < 20:
         return (False, song_path)
     song_list = song_link.split('/')
     song_link = '/'.join(song_list[:3] + song_list[5:])
-    song_path = os.path.splitext(song_path)[0] + os.path.splitext(
-            song_link)[1]
+    song_path = ''.join([os.path.splitext(song_path)[0],
+                         os.path.splitext(song_link)[1]])
     if os.path.exists(song_path):
         return (True, song_path)
     return (song_link, song_path)
 
 
 class AsyncSong(GObject.GObject):
-    '''
+    '''Download song(including MV).
+
     Use Gobject to emit signals:
     register three signals: can-play and downloaded
     if `can-play` emited, player will receive a filename which have
@@ -857,8 +840,8 @@ class AsyncSong(GObject.GObject):
         self.force_quit = True
 
     def get_song(self, song, use_mv=False):
-        '''
-        Get the actual link of music file.
+        '''Get the actual link of music file.
+
         If higher quality of that music unavailable, a lower one is used.
         like this:
         response=url&type=convert_url&format=ape|mp3&rid=MUSIC_3312608
@@ -866,8 +849,8 @@ class AsyncSong(GObject.GObject):
         async_call(self._download_song, empty_func, song, use_mv)
 
     def _download_song(self, song, use_mv):
-        song_link, song_path = get_song_link(song, self.app.conf,
-                use_mv=use_mv)
+        song_link, song_path = get_song_link(
+                song, self.app.conf, use_mv=use_mv)
 
         #print('Net.AsyncSong._download_song() song link:', song_link)
         chunk_to_play = CHUNK_TO_PLAY
@@ -906,8 +889,8 @@ class AsyncSong(GObject.GObject):
                     percent = int(received_size/content_length * 100)
                     self.emit('chunk-received', percent)
                     # this signal only emit once.
-                    if (received_size > chunk_to_play or percent > 40) \
-                            and not can_play_emited:
+                    if ((received_size > chunk_to_play or percent > 40) and
+                            not can_play_emited):
                         can_play_emited = True
                         self.emit('can-play', song_path, 'OK')
                     if not chunk:
@@ -918,9 +901,9 @@ class AsyncSong(GObject.GObject):
                 Utils.iconvtag(song_path, song)
                 return
 
-            except Exception as e:
-                print('AsyncSong._download_song()', e, 'with song_link:',
-                        song_link)
+            except URLError as e:
+                print('AsyncSong._download_song()', e,
+                      'with song_link:', song_link)
         if os.path.exists(song_path):
             os.remove(song_path)
             self.emit('can-play', song_path, 'URLError')

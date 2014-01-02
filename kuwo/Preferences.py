@@ -1,15 +1,15 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import os
+import shutil
 from gi.repository import Gdk
 from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Pango
-import os
-import shutil
 
 from kuwo import Config
 from kuwo import Widgets
@@ -110,10 +110,11 @@ class ChooseFolder(Gtk.Box):
                 self.app.conf[self.conf_name] = new_dir
             return
 
-        dialog = Gtk.FileChooserDialog(_('Choose a Folder'), self.parent,
+        dialog = Gtk.FileChooserDialog(
+                _('Choose a Folder'), self.parent,
                 Gtk.FileChooserAction.SELECT_FOLDER,
                 (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                    Gtk.STOCK_OK, Gtk.ResponseType.OK))
+                 Gtk.STOCK_OK, Gtk.ResponseType.OK))
 
         dialog.connect('file-activated', on_dialog_file_activated)
         response = dialog.run()
@@ -126,7 +127,8 @@ class ChooseFolder(Gtk.Box):
 class Preferences(Gtk.Dialog):
     def __init__(self, app):
         self.app = app
-        super().__init__(_('Preferences'), app.window, 0,
+        super().__init__(
+                _('Preferences'), app.window, 0,
                 (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE,))
         self.set_modal(True)
         self.set_transient_for(app.window)
@@ -193,12 +195,12 @@ class Preferences(Gtk.Dialog):
         lrc_normal_text_label = Widgets.BoldLabel(_('Normal Text'))
         lrc_box.pack_start(lrc_normal_text_label, False, True, 0)
 
-        lrc_normal_text_size = FontBox(_('text size'),
-                app.conf, 'lrc-text-size', use_margin=True)
+        lrc_normal_text_size = FontBox(
+                _('text size'), app.conf, 'lrc-text-size', use_margin=True)
         lrc_box.pack_start(lrc_normal_text_size, False, True, 0)
 
-        lrc_normal_text_color = ColorBox(_('text color'),
-                app.conf, 'lrc-text-color', use_margin=True)
+        lrc_normal_text_color = ColorBox(
+                _('text color'), app.conf, 'lrc-text-color', use_margin=True)
         lrc_box.pack_start(lrc_normal_text_color, False, True, 0)
         lrc_normal_text_color.props.margin_bottom = 10
 
@@ -206,17 +208,19 @@ class Preferences(Gtk.Dialog):
                 _('Highlighted Text'))
         lrc_box.pack_start(lrc_highlighted_text_label, False, True, 0)
 
-        lrc_highlighted_text_size = FontBox(_('text size'),
-                app.conf, 'lrc-highlighted-text-size', use_margin=True)
+        lrc_highlighted_text_size = FontBox(
+                _('text size'), app.conf, 'lrc-highlighted-text-size',
+                use_margin=True)
         lrc_box.pack_start(lrc_highlighted_text_size, False, True, 0)
 
-        lrc_highlighted_text_color = ColorBox(_('text color'),
-                app.conf, 'lrc-highlighted-text-color', use_margin=True)
+        lrc_highlighted_text_color = ColorBox(
+                _('text color'), app.conf, 'lrc-highlighted-text-color',
+                use_margin=True)
         lrc_highlighted_text_color.props.margin_bottom = 10
         lrc_box.pack_start(lrc_highlighted_text_color, False, True, 0)
 
-        lrc_word_back_color = ColorBox(_('Lyrics Text Background color'),
-                app.conf, 'lrc-back-color')
+        lrc_word_back_color = ColorBox(
+                _('Lyrics Text Background color'), app.conf, 'lrc-back-color')
         lrc_box.pack_start(lrc_word_back_color, False, True, 0)
 
         # folders tab
@@ -225,15 +229,15 @@ class Preferences(Gtk.Dialog):
 
         song_folder_label = Widgets.BoldLabel(_('Place to store sogns'))
         folder_box.pack_start(song_folder_label, False, False, 0)
-        song_folder = ChooseFolder(self, 'song-dir', 
-                _('Moving cached songs to new folder'))
+        song_folder = ChooseFolder(
+                self, 'song-dir', _('Moving cached songs to new folder'))
         folder_box.pack_start(song_folder, False, False, 0)
 
         mv_folder_label = Widgets.BoldLabel(_('Place to store MVs'))
         mv_folder_label.props.margin_top = MARGIN_TOP
         folder_box.pack_start(mv_folder_label, False, False, 0)
-        mv_folder = ChooseFolder(self, 'mv-dir',
-                _('Moving cached MVs to new folder'))
+        mv_folder = ChooseFolder(
+                self, 'mv-dir', _('Moving cached MVs to new folder'))
         folder_box.pack_start(mv_folder, False, False, 0)
 
         self.notebook = notebook
@@ -250,21 +254,21 @@ class Preferences(Gtk.Dialog):
         self.shortcut_win = Gtk.ScrolledWindow()
 
         disable_btn = Gtk.RadioButton(_('Disable Keyboard Shortcut'))
-        disable_btn.connect('toggled', self.on_shortcut_btn_toggled,
-                ShortcutMode.NONE)
+        disable_btn.connect(
+                'toggled', self.on_shortcut_btn_toggled, ShortcutMode.NONE)
         disable_btn.set_active(curr_mode == ShortcutMode.NONE)
         box.pack_start(disable_btn, False, False, 0)
 
         default_btn = Gtk.RadioButton(_('Use Default MultiMedia Key'))
-        default_btn.connect('toggled', self.on_shortcut_btn_toggled,
-                ShortcutMode.DEFAULT)
+        default_btn.connect(
+                'toggled', self.on_shortcut_btn_toggled, ShortcutMode.DEFAULT)
         default_btn.join_group(disable_btn)
         default_btn.set_active(curr_mode == ShortcutMode.DEFAULT)
         box.pack_start(default_btn, False, False, 0)
 
         custom_btn = Gtk.RadioButton(_('Use Custom Keyboard Shortcut'))
-        custom_btn.connect('toggled', self.on_shortcut_btn_toggled,
-                ShortcutMode.CUSTOM)
+        custom_btn.connect(
+                'toggled', self.on_shortcut_btn_toggled, ShortcutMode.CUSTOM)
         custom_btn.join_group(default_btn)
         custom_btn.set_active(curr_mode == ShortcutMode.CUSTOM)
         box.pack_start(custom_btn, False, False, 0)
@@ -284,8 +288,8 @@ class Preferences(Gtk.Dialog):
 
         key_cell = Gtk.CellRendererAccel(editable=True)
         key_cell.connect('accel-edited', self.on_shortcut_key_cell_edited)
-        key_col = Gtk.TreeViewColumn('Shortcut Key', key_cell,
-                accel_key=1, accel_mods=2)
+        key_col = Gtk.TreeViewColumn(
+                'Shortcut Key', key_cell, accel_key=1, accel_mods=2)
         tv.append_column(key_col)
         
         for name in self.app.conf['custom-shortcut']:
@@ -324,7 +328,7 @@ class Preferences(Gtk.Dialog):
         self.shortcut_win.set_sensitive(mode == ShortcutMode.CUSTOM)
 
     def on_shortcut_key_cell_edited(self, accel, path, key, mod,
-            hardware_keycode):
+                                    hardware_keycode):
         accel_key = Gtk.accelerator_name(key, mod)
         name = self.shortcut_liststore[path][0]
         self.shortcut_liststore[path][1] = key
