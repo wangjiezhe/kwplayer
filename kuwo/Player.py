@@ -166,7 +166,7 @@ class Player(Gtk.Box):
         menu_tool_item.add(menu_btn)
 
         self.label = Gtk.Label(
-                '<b>{0}</b> <i>by {0}</i>'.format(_('Unknown')))
+                '<b>{0}</b> <small>by {0}</small>'.format(_('Unknown')))
         self.label.props.use_markup = True
         self.label.props.xalign = 0
         self.label.props.margin_left = 10
@@ -410,7 +410,7 @@ class Player(Gtk.Box):
             album = Widgets.short_tooltip(song['album'], 30)
         else:
             album = _('Unknown')
-        label = '<b>{0}</b> <i><small>by {1} from {2}</small></i>'.format(
+        label = '<b>{0}</b> <small>by {1} from {2}</small>'.format(
                 name, artist, album)
         self.label.set_label(label)
         self.app.window.set_title(name)

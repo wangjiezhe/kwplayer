@@ -173,7 +173,7 @@ class Lrc(Gtk.Box):
     def update_background(self, filepath):
         if filepath is None or filepath == self.lrc_background:
             return
-        if filepath and os.path.exists(filepath):
+        if os.path.exists(filepath):
             self.lrc_background = filepath
         else:
             self.lrc_background = self.lrc_default_background

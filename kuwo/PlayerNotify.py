@@ -43,7 +43,7 @@ class PlayerNotify:
             album = _('Unknown')
         notify.update(
                 song['name'],
-                'by <i>{0}</i> from <i>{1}</i>'.format(artist, album),
+                'by {0} from {1}'.format(artist, album),
                 self.player.meta_artUrl
                 )
         notify.set_hint('image-path', GLib.Variant.new_string(
