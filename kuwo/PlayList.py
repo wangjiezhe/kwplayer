@@ -8,8 +8,6 @@ import json
 import os
 import random
 import shutil
-import sqlite3
-import threading
 import time
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
@@ -95,9 +93,6 @@ class NormalSongTab(Gtk.ScrolledWindow):
             model, paths = selection.get_selected_rows()
             # paths needs to be reversed, or else an IndexError throwed.
             for path in reversed(paths):
-                if self.list_name == 'Cached':
-                    self.app.playlist.remove_song_from_cached_db(
-                            model[path][3])
                 model.remove(model[path].iter)
 
     def on_treeview_row_activated(self, treeview, path, column):
@@ -111,8 +106,6 @@ class NormalSongTab(Gtk.ScrolledWindow):
         elif index == 2:
             self.app.search.search_album(song['album'])
         elif index == 3:
-            if self.list_name == 'Cached':
-                self.app.playlist.remove_song_from_cached_db(song['rid'])
             model.remove(model[path].iter)
 
     def on_drag_data_get(self, treeview, drag_context, sel_data, info, 
@@ -133,7 +126,7 @@ class NormalSongTab(Gtk.ScrolledWindow):
                               info, event_time):
         model = treeview.get_model()
         data = sel_data.get_text()
-        if data:
+        if not data:
             return
         drop_info = treeview.get_dest_row_at_pos(x, y)
         if not drop_info:
@@ -156,7 +149,6 @@ class PlayList(Gtk.Box):
         super().__init__()
 
         self.app = app
-        self.first_show = False
         self.tabs = {}
         # self.lists_name contains playlists name
         self.lists_name = []
@@ -169,9 +161,6 @@ class PlayList(Gtk.Box):
 
         self.playlist_menu = Gtk.Menu()
         self.playlist_advice_disname = ''
-
-        self.conn = sqlite3.connect(Config.SONG_DB)
-        self.cursor = self.conn.cursor()
 
         box_left = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.pack_start(box_left, False, False, 0)
@@ -233,44 +222,19 @@ class PlayList(Gtk.Box):
         GLib.timeout_add(1500, self.init_ui)
 
     def do_destroy(self):
-        self.conn.commit()
-        self.conn.close()
         self.dump_playlists()
         if self.cache_job:
             self.cache_job.destroy()
 
     def first(self):
-        pass
+        selection = self.treeview_left.get_selection()
+        selection.select_path(Gtk.TreePath(1))
 
     def init_ui(self):
-        def commit_db():
-            try:
-                self.conn.commit()
-            except sqlite3.ProgramingError as e:
-                pass
-            return True
-
-        self.init_table()
         self.load_playlists()
         # dump playlists to dist every 5 minites
         GLib.timeout_add(300000, self.dump_playlists)
-        # commit to sqlite db
-        GLib.timeout_add(300000, commit_db)
         return False
-
-    def init_table(self):
-        sql = '''
-        CREATE TABLE IF NOT EXISTS `songs` (
-        name CHAR,
-        artist CHAR,
-        album CHAR,
-        rid INTEGER,
-        artistid INTEGER,
-        albumid INTEGER
-        )
-        '''
-        self.cursor.execute(sql)
-        self.conn.commit()
 
     def dump_playlists(self):
         filepath = Config.PLS_JSON
@@ -281,8 +245,6 @@ class PlayList(Gtk.Box):
         playlists = {'_names_': names}
         for name in names:
             list_name = name[1]
-            if list_name == 'Cached':
-                continue
             liststore = self.tabs[list_name].liststore
             playlists[list_name] = [list(p) for p in liststore]
         with open(filepath, 'w') as fh:
@@ -293,7 +255,6 @@ class PlayList(Gtk.Box):
         filepath = Config.PLS_JSON
         _default = {
                 '_names_': [
-                    [_('Cached'), 'Cached', False],
                     [_('Caching'), 'Caching', False],
                     [_('Default'), 'Default', False],
                     [_('Favorite'), 'Favorite', False],
@@ -311,10 +272,7 @@ class PlayList(Gtk.Box):
         for playlist in playlists['_names_']:
             self.liststore_left.append(playlist)
             disname, list_name, editable = playlist
-            if list_name == 'Cached':
-                songs = self.get_all_cached_songs_from_db()
-            else:
-                songs = playlists[list_name]
+            songs = playlists[list_name]
             self.init_tab(list_name, songs)
 
     def init_tab(self, list_name, songs):
@@ -404,8 +362,22 @@ class PlayList(Gtk.Box):
         liststore.append(Widgets.song_dict_to_row(song))
 
     def add_songs_to_playlist(self, songs, list_name='Default'):
-        for song in songs:
-            self.add_song_to_playlist(song, list_name=list_name)
+        def start():
+            tree.freeze_child_notify()
+            for song in songs:
+                rid = song['rid']
+                path = self.get_song_path_in_liststore(liststore, rid)
+                if path > -1:
+                    continue
+                liststore.append(Widgets.song_dict_to_row(song))
+
+        def stop(*args):
+            tree.thaw_child_notify()
+            Gdk.Window.process_all_updates()
+
+        liststore = self.tabs[list_name].liststore
+        tree = self.tabs[list_name].treeview
+        Net.async_call(start, stop)
 
     def add_song_to_favorite(self, song):
         _list_name = 'Favorite'
@@ -435,7 +407,6 @@ class PlayList(Gtk.Box):
 
     def do_cache_song_pool(self):
         def _move_song():
-            self.append_cached_song(song)
             try:
                 liststore.remove(liststore[path].iter)
             except IndexError:
@@ -485,12 +456,10 @@ class PlayList(Gtk.Box):
 
     # Others
     def on_song_downloaded(self, play=False):
-        # copy this song from current playing list to cached_list.
         list_name = self.curr_playing[0]
         liststore = self.tabs[list_name].liststore
         path = self.curr_playing[1]
         song = Widgets.song_row_to_dict(liststore[path], start=0)
-        self.append_cached_song(song)
         Gdk.Window.process_all_updates()
 
     def get_prev_song(self, repeat):
@@ -570,36 +539,6 @@ class PlayList(Gtk.Box):
                 break
         if popup_page:
             self.app.popup_page(self.app_page)
-
-    # DB operations
-    def append_cached_song(self, song):
-        '''When a new song is cached locally, call this function.
-
-        Insert a new item to database and liststore_cached.
-        '''
-        # check this song already exists.
-        req = self.get_song_from_cached_db(song['rid'])
-        if req:
-            return
-        song_list = Widgets.song_dict_to_row(song)
-        sql = 'INSERT INTO `songs` values(?, ?, ?, ?, ?, ?)'
-        self.cursor.execute(sql, song_list)
-        self.tabs['Cached'].liststore.append(song_list)
-
-    def get_all_cached_songs_from_db(self):
-        # TODO: use scrollbar to dynamically load.
-        sql = 'SELECT * FROM `songs`'
-        result = self.cursor.execute(sql)
-        return result
-
-    def get_song_from_cached_db(self, rid):
-        sql = 'SELECT * FROM `songs` WHERE rid=? LIMIT 1'
-        result = self.cursor.execute(sql, (rid, ))
-        return result.fetchone()
-
-    def remove_song_from_cached_db(self, rid):
-        sql = 'DELETE FROM `songs` WHERE rid=?'
-        self.cursor.execute(sql, (rid, ))
 
     def get_song_path_in_liststore(self, liststore, rid, pos=3):
         for i, item in enumerate(liststore):
@@ -730,7 +669,7 @@ class PlayList(Gtk.Box):
             menu.remove(menu.get_children()[0])
 
         for item in self.liststore_left:
-            if item[1] in ('Cached', 'Caching'):
+            if item[1] in ('Caching', ):
                 continue
             menu_item = Gtk.MenuItem(item[0])
             menu_item.list_name = item[1]
