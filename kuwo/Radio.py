@@ -199,14 +199,10 @@ class Radio(Gtk.Box):
     def __init__(self, app):
         super().__init__()
         self.app = app
-        self.first_show = False
         self.playlists = None
         self.load_playlists()
 
     def first(self):
-        if self.first_show:
-            return
-        self.first_show = True
         app = self.app
 
         # left side panel

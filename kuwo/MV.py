@@ -21,12 +21,8 @@ class MV(Gtk.Box):
     def __init__(self, app):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.app = app
-        self.first_show = False
 
     def first(self):
-        if self.first_show:
-            return
-        self.first_show = True
         app = self.app
         self.buttonbox = Gtk.Box(spacing=5)
         self.pack_start(self.buttonbox, False, False, 0)

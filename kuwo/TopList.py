@@ -22,12 +22,8 @@ class TopList(Gtk.Box):
         super().__init__()
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.app = app
-        self.first_show = False
 
     def first(self):
-        if self.first_show:
-            return
-        self.first_show = True
         app = self.app
 
         self.buttonbox = Gtk.Box(spacing=5)

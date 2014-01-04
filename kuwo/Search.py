@@ -193,14 +193,16 @@ class Search(Gtk.Box):
         if reset_status:
             self.liststore_artists.clear()
         Net.async_call(
-                Net.search_artists, _append_artists, keyword, self.artists_page)
+                Net.search_artists, _append_artists,
+                keyword,self.artists_page)
 
     def show_albums(self, reset_status=False):
         def _append_albums(albums_args, error=None):
             albums, hit, self.albums_total = albums_args
             if hit == 0:
                 if reset_status:
-                    self.albums_button.set_label('{0} (0)'.format(_('Albums')))
+                    self.albums_button.set_label(
+                            '{0} (0)'.format(_('Albums')))
                 return
             self.albums_button.set_label(
                     '{0} ({1})'.format(_('Albums'), hit))
@@ -230,7 +232,8 @@ class Search(Gtk.Box):
         if reset_status:
             self.liststore_albums.clear()
         Net.async_call(
-                Net.search_albums, _append_albums, keyword, self.albums_page)
+                Net.search_albums, _append_albums,
+                keyword, self.albums_page)
 
     def reset_search_status(self):
         self.songs_tab_inited = False

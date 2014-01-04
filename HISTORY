@@ -1,3 +1,11 @@
+3.2.6 - 2014.1.5
+* Cached playlist is removed
+* Italic font style is removed
+* It is faster to append thousands of songs to a playlist
+* Fixed: failed to move songs in a playlist, reported by @wangjiezhe
+* Fixed: transition-property is not supported in Gtk3.4.
+* Fixed: index out of range in Lrc.sync_lrc()
+
 3.2.5 - 2013.12.30
 * Add tooltip to control buttons
 * Fixed: reset to default background when there are no background images available

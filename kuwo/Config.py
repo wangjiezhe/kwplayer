@@ -7,10 +7,12 @@
 import gettext
 import json
 import os
+import shutil
 import sys
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
 from gi.repository import Gtk
+
 
 if __file__.startswith('/usr/local/'):
     PREF = '/usr/local/share'
@@ -25,7 +27,7 @@ gettext.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '3.2.5'
+VERSION = '3.2.6'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
 DESCRIPTION = _('A simple music player on Linux desktop.')
@@ -38,8 +40,6 @@ IMG_DIR = os.path.join(CACHE_DIR, 'images')
 IMG_LARGE_DIR = os.path.join(CACHE_DIR, 'images_large')
 # lyrics are putted here
 LRC_DIR = os.path.join(CACHE_DIR, 'lrc')
-# song index
-SONG_DB = os.path.join(CACHE_DIR, 'music.sqlite')
 # url requests are stored here.
 CACHE_DB = os.path.join(CACHE_DIR, 'cache.db')
 # store playlists, `cached` not included.
@@ -73,6 +73,7 @@ SHORT_CUT_I18N = {
         'Launch': _('Launch'),
         }
 _default_conf = {
+        'version': VERSION,
         'window-size': (960, 680),
         'song-dir': os.path.join(CACHE_DIR, 'song'),
         'mv-dir': os.path.join(CACHE_DIR, 'mv'),
@@ -122,6 +123,21 @@ def check_first():
         os.mkdir(_default_conf['mv-dir'])
         os.mkdir(LRC_DIR)
 
+def mig_5_6(conf):
+    '''Merge configuration from v3.2.5 to 3.2.6'''
+    shutil.copy(PLS_JSON, PLS_JSON + '.bak')
+    with open(PLS_JSON) as fh:
+        pls = json.loads(fh.read())
+    cached = pls['_names_'][0]
+    if cached[1] == 'Cached':
+        pls['_names_'] = pls['_names_'][1:]
+        with open(PLS_JSON, 'w') as fh:
+            fh.write(json.dumps(pls))
+
+    conf['version'] = VERSION
+    dump_conf(conf)
+    return conf
+
 def load_conf():
     if os.path.exists(_conf_file):
         with open(_conf_file) as fh:
@@ -129,6 +145,9 @@ def load_conf():
         for key in _default_conf:
             if key not in conf:
                 conf[key] = _default_conf[key]
+        #if 'version' not in conf:
+        #    conf = mig_5_6(conf)
+        conf = mig_5_6(conf)
         return conf
     dump_conf(_default_conf)
     return _default_conf

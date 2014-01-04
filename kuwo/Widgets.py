@@ -1,15 +1,17 @@
 
-# Copyright (C) 2013 LiuLang <gsushzhsosgsu@gmail.com>
+# Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
-from gi.repository import Gdk
-from gi.repository import GdkPixbuf
-from gi.repository import Gtk
 import html
 from html.parser import HTMLParser
 import os
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import GLib
+from gi.repository import Gtk
+
 
 from kuwo import Config
 
@@ -68,6 +70,34 @@ def song_dict_to_row(song):
     song_row = [song['name'], song['artist'], song['album'], 
             int(song['rid']), int(song['artistid']), int(song['albumid']),]
     return song_row
+
+def tree_append_items(tree, items):
+    '''A faster way to append many items to GtkTreeModel at a time.
+
+    When appending many items to a model , app will lose response, which
+    is really annoying.
+    From:http://faq.pygtk.org/index.py?req=show&file=faq13.043.htp
+    @tree a GtkTreeView
+    @items a list of items
+    '''
+    def append_generator(step=100):
+        n = 0
+        tree.freeze_child_notify()
+        for item in items:
+            model.append(item)
+            n += 1
+            if (n % step) == 0:
+                tree.thaw_child_notify()
+                yield True
+                tree.freeze_child_notify()
+        # stop idle_add()
+        tree.thaw_child_notify()
+        return False
+
+    model = tree.get_model()
+    loader = append_generator()
+    GLib.idle_add(loader.__next__)
+
 
 class ListRadioButton(Gtk.RadioButton):
     def __init__(self, label, last_button=None):
@@ -161,6 +191,7 @@ class ControlBox(Gtk.Box):
         button_play.connect('clicked', self.on_button_play_clicked)
         self.pack_start(button_play, False, False, 0)
 
+        # GtkMenuButton is new in Gtk3.6
         #button_add = Gtk.MenuButton(_('Add to Playlist'))
         #button_add.set_menu_model(self.app.playlist.playlist_menu_model)
         button_add = Gtk.Button(_('Add to Playlist'))

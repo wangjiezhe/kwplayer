@@ -104,6 +104,7 @@ class App:
             return False
 
     def init_notebook(self):
+        self.tab_first_show = []
         self.lrc = Lrc(self)
         self.append_page(self.lrc)
 
@@ -132,7 +133,9 @@ class App:
         self.append_page(self.themes)
 
     def on_notebook_switch_page(self, notebook, page, page_num):
-        page.first()
+        if page not in self.tab_first_show:
+            page.first()
+            self.tab_first_show.append(page)
 
     def append_page(self, widget):
         '''Append a new widget to notebook.'''
