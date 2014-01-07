@@ -70,9 +70,9 @@ class MV(Gtk.Box):
         for i, node in enumerate(nodes):
             self.liststore_nodes.append([
                 self.app.theme['anonymous'],
-                Widgets.unescape_html(node['disname']),
+                Widgets.unescape(node['disname']),
                 int(node['sourceid']),
-                Widgets.unescape_html(node['info']),
+                Widgets.unescape(node['info']),
                 Widgets.set_tooltip(node['disname'], node['info']),
                 ])
             Net.update_liststore_image(
@@ -96,9 +96,9 @@ class MV(Gtk.Box):
             for song in songs:
                 self.liststore_songs.append([
                     self.app.theme['anonymous'],
-                    song['name'],
-                    song['artist'],
-                    song['album'],
+                    Widgets.unescape(song['name']),
+                    Widgets.unescape(song['artist']),
+                    Widgets.unescape(song['album']),
                     int(song['id']),
                     int(song['artistid']), 
                     int(song['albumid']),

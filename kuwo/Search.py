@@ -149,8 +149,9 @@ class Search(Gtk.Box):
             for song in songs:
                 self.liststore_songs.append([
                     False,
-                    song['SONGNAME'],
-                    song['ARTIST'], song['ALBUM'],
+                    Widgets.unescape(song['SONGNAME']),
+                    Widgets.unescape(song['ARTIST']),
+                    Widgets.unescape(song['ALBUM']),
                     int(song['MUSICRID'][6:]),
                     int(song['ARTISTID']),
                     int(song['ALBUMID']),
@@ -179,9 +180,9 @@ class Search(Gtk.Box):
             for artist in artists:
                 self.liststore_artists.append([
                     self.app.theme['anonymous'],
-                    artist['ARTIST'],
+                    Widgets.unescape(artist['ARTIST']),
                     int(artist['ARTISTID']), 
-                    artist['COUNTRY'],
+                    Widgets.unescape(artist['COUNTRY']),
                     ])
                 Net.update_artist_logo(
                         self.liststore_artists, i, 0, artist['PICPATH'])
@@ -208,17 +209,15 @@ class Search(Gtk.Box):
                     '{0} ({1})'.format(_('Albums'), hit))
             i = len(self.liststore_albums)
             for album in albums:
-                if len(album['info']) == 0:
-                    tooltip = Widgets.tooltip(album['name'])
+                if 'info' in album and album['info']:
+                    tooltip = Widgets.set_tooltip(album['name'], album['info'])
                 else:
-                    tooltip = '<b>{0}</b>\n{1}'.format(
-                            Widgets.tooltip(album['name']),
-                            Widgets.tooltip(album['info']))
+                    tooltip = Widgets.escape(album['name'])
                 self.liststore_albums.append([
                     self.app.theme['anonymous'],
-                    album['name'],
+                    Widgets.unescape(album['name']),
                     int(album['albumid']), 
-                    album['artist'],
+                    Widgets.unescape(album['artist']),
                     int(album['artistid']),
                     tooltip,
                     ])

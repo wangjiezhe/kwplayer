@@ -86,9 +86,9 @@ class Themes(Gtk.Box):
         for i, node in enumerate(nodes):
             self.liststore_main.append([
                 self.app.theme['anonymous'],
-                Widgets.unescape_html(node['name']),
+                Widgets.unescape(node['name']),
                 int(node['nid']),
-                Widgets.unescape_html(node['info']),
+                Widgets.unescape(node['info']),
                 Widgets.set_tooltip(node['name'], node['info']),
                 ])
             Net.update_liststore_image(
@@ -120,9 +120,9 @@ class Themes(Gtk.Box):
         for node in nodes:
             self.liststore_sub.append([
                 self.app.theme['anonymous'],
-                Widgets.unescape_html(node['name']),
+                Widgets.unescape(node['name']),
                 int(node['sourceid']),
-                Widgets.unescape_html(node['info']),
+                Widgets.unescape(node['info']),
                 Widgets.set_tooltip_with_song_tips(
                     node['name'], node['tips']),
                 ])
@@ -157,9 +157,9 @@ class Themes(Gtk.Box):
         for song in songs:
             self.liststore_songs.append([
                 True,
-                song['name'],
-                song['artist'],
-                song['album'],
+                Widgets.unescape(song['name']),
+                Widgets.unescape(song['artist']),
+                Widgets.unescape(song['album']),
                 int(song['id']),
                 int(song['artistid']), 
                 int(song['albumid']),

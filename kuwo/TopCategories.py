@@ -99,9 +99,9 @@ class TopCategories(Gtk.Box):
         for i, node in enumerate(nodes):
             self.liststore_main.append([
                 self.app.theme['anonymous'],
-                Widgets.unescape_html(node['disname']),
+                Widgets.unescape(node['disname']),
                 int(node['id']),
-                Widgets.unescape_html(node['info']),
+                Widgets.unescape(node['info']),
                 Widgets.set_tooltip(node['disname'], node['info']),
                 ])
             Net.update_liststore_image(
@@ -139,9 +139,9 @@ class TopCategories(Gtk.Box):
                             node['name'], node['info'])
                 self.liststore_sub1.append([
                     self.app.theme['anonymous'],
-                    Widgets.unescape_html(node['name']),
+                    Widgets.unescape(node['name']),
                     int(node[_id]),
-                    Widgets.unescape_html(node['info']),
+                    Widgets.unescape(node['info']),
                     _tooltip,
                     ])
                 Net.update_liststore_image(
@@ -190,9 +190,9 @@ class TopCategories(Gtk.Box):
             for node in nodes:
                 self.liststore_sub2.append([
                     self.app.theme['anonymous'],
-                    Widgets.unescape_html(node['name']),
+                    Widgets.unescape(node['name']),
                     int(node['sourceid']),
-                    Widgets.unescape_html(node['info']),
+                    Widgets.unescape(node['info']),
                     Widgets.set_tooltip_with_song_tips(
                         node['name'], node['tips']),
                     ])
@@ -233,9 +233,9 @@ class TopCategories(Gtk.Box):
                 for song in songs:
                     self.liststore_songs.append([
                         True,
-                        song['name'], 
-                        song['artist'],
-                        self.curr_list_name, 
+                        Widgets.unescape(song['name']), 
+                        Widgets.unescape(song['artist']),
+                        Widgets.unescape(self.curr_list_name), 
                         int(song['id']),
                         int(song['artistid']), 
                         int(self.curr_list_id),
@@ -245,9 +245,9 @@ class TopCategories(Gtk.Box):
             for song in songs:
                 self.liststore_songs.append([
                     True,
-                    song['name'],
-                    song['artist'],
-                    song['album'],
+                    Widgets.unescape(song['name']),
+                    Widgets.unescape(song['artist']),
+                    Widgets.unescape(song['album']),
                     int(song['id']),
                     int(song['artistid']), 
                     int(song['albumid']),

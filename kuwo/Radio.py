@@ -237,9 +237,9 @@ class Radio(Gtk.Box):
         for i, radio in enumerate(radios):
             self.liststore_radios.append([
                 self.app.theme['anonymous'],
-                Widgets.unescape_html(radio['disname']), 
+                Widgets.unescape(radio['disname']), 
                 int(radio['sourceid'].split(',')[0]),
-                Widgets.unescape_html(radio['info']),
+                Widgets.unescape(radio['info']),
                 radio['pic'],
                 Widgets.set_tooltip(radio['disname'], radio['info']),
                 ])

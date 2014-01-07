@@ -404,7 +404,7 @@ class Artists(Gtk.Box):
             _info = ' '.join([artist['music_num'], _(' songs'), ])
             self.artists_liststore.append([
                 self.app.theme['anonymous'],
-                Widgets.unescape_html(artist['name']),
+                Widgets.unescape(artist['name']),
                 int(artist['id']), 
                 _info,
                 Widgets.set_tooltip(artist['name'], _info),
@@ -479,9 +479,9 @@ class Artists(Gtk.Box):
             for song in songs:
                 self.artist_songs_liststore.append([
                     True,
-                    song['name'], 
-                    song['artist'],
-                    song['album'], 
+                    Widgets.unescape(song['name']),
+                    Widgets.unescape(song['artist']),
+                    Widgets.unescape(song['album']),
                     int(song['musicrid']),
                     int(song['artistid']), 
                     int(song['albumid']),
@@ -516,9 +516,9 @@ class Artists(Gtk.Box):
             for album in albums:
                 self.artist_albums_liststore.append([
                     self.app.theme['anonymous'],
-                    album['name'],
+                    Widgets.unescape(album['name']),
                     int(album['albumid']),
-                    album['artist'],
+                    Widgets.unescape(album['artist']),
                     int(album['artistid']),
                     Widgets.set_tooltip(album['name'], album['info']),
                     ])
@@ -554,8 +554,8 @@ class Artists(Gtk.Box):
             for mv in mvs:
                 self.artist_mv_liststore.append([
                     self.app.theme['anonymous'],
-                    mv['name'],
-                    mv['artist'],
+                    Widgets.unescape(mv['name']),
+                    Widgets.unescape(mv['artist']),
                     '',
                     int(mv['musicid']),
                     int(mv['artistid']),
@@ -595,7 +595,7 @@ class Artists(Gtk.Box):
                 _info = ''.join([artist['songnum'], _(' songs'), ])
                 self.artist_similar_liststore.append([
                     self.app.theme['anonymous'],
-                    artist['name'],
+                    Widgets.unescape(artist['name']),
                     int(artist['id']),
                     _info,
                     Widgets.set_tooltip(artist['name'], _info),
@@ -638,7 +638,7 @@ class Artists(Gtk.Box):
             self.artist_info_constellation.set(info, 'constellation')
             if info and 'info' in info:
                 self.artist_info_textbuffer.set_text(
-                        Widgets.tooltip(info['info']))
+                        Widgets.escape(info['info']))
             else:
                 self.artist_info_textbuffer.set_text('')
 
@@ -689,9 +689,9 @@ class Artists(Gtk.Box):
             for song in songs:
                 self.album_songs_liststore.append([
                     True,
-                    song['name'],
-                    song['artist'],
-                    self.curr_album_name,
+                    Widgets.unescape(song['name']),
+                    Widgets.unescape(song['artist']),
+                    Widgets.unescape(self.curr_album_name),
                     int(song['id']),
                     int(song['artistid']),
                     int(self.curr_album_id), ])
@@ -712,7 +712,7 @@ class Artists(Gtk.Box):
             else:
                 pix = self.app.theme['anonymous']
             if 'info' in info:
-                tip = Widgets.tooltip(info['info'])
+                tip = Widgets.escape(info['info'])
             else:
                 tip = ''
             self.fav_artists_liststore.append(
@@ -748,6 +748,8 @@ class Artists(Gtk.Box):
     def dump_fav_artists(self):
         '''Dump fav_artists to a json file'''
         fav_artists = [row[2] for row in self.fav_artists_liststore]
+        if not fav_artists:
+            return
         with open(Config.FAV_ARTISTS_JSON, 'w') as fh:
             fh.write(json.dumps(fav_artists))
 

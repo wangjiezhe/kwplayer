@@ -304,6 +304,8 @@ class PlayList(Gtk.Box):
     def on_tree_selection_left_changed(self, tree_sel):
         model, tree_iter = tree_sel.get_selected()
         path = model.get_path(tree_iter)
+        if path is None:
+            return
         index = path.get_indices()[0]
         self.notebook.set_current_page(index)
 

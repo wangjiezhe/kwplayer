@@ -17,9 +17,12 @@ from kuwo import Config
 
 _ = Config._
 
-_html_parser = HTMLParser()
-# Need to unescape twice
-unescape_html = lambda entity: _html_parser.unescape(_html_parser.unescape(entity))
+def unescape(tooltip):
+    html_parser = HTMLParser()
+    return html_parser.unescape(html_parser.unescape(tooltip))
+
+def escape(tooltip):
+    return GLib.markup_escape_text(tooltip.replace('<br>', '\n'))
 
 def short_str(_str, length=10):
     if len(_str) > length:
@@ -29,30 +32,27 @@ def short_str(_str, length=10):
 def reach_scrolled_bottom(adj):
     return adj.get_upper() - adj.get_page_size() - adj.get_value() < 80
 
-# deprecated
-def tooltip(_str):
-    return html.escape(_str.replace('<br>', '\n'))
-
 def short_tooltip(tooltip, length=10):
-    return short_str(html.escape(tooltip.replace('<br>', '\n')), length)
+    return short_str(escape(tooltip), length)
 
-def set_tooltip(head, body):
-    return '<b>{0}</b>\n\n{1}'.format(tooltip(head), tooltip(body))
+def set_tooltip(head, body=''):
+    return '<b>{0}</b>\n\n{1}'.format(
+            escape(unescape(head)), escape(unescape(body)))
 
 def set_tooltip_with_song_tips(head, tip):
     songs = tip.split(';')
     results = []
-    fmt = '{0}   <small>by <i>{1}</i></small>'
+    fmt = '{0}   <small>by {1}</small>'
     for song in songs:
         if len(song) < 5:
             continue
         item = song.split('@')
         try:
-            results.append(fmt.format(tooltip(item[1]), tooltip(item[3])))
+            results.append(fmt.format(escape(item[1]), escape(item[3])))
         except IndexError as e:
             print(e, item)
             continue
-    return '<b>{0}</b>\n\n{1}'.format(tooltip(head), '\n'.join(results))
+    return '<b>{0}</b>\n\n{1}'.format(escape(head), '\n'.join(results))
 
 def song_row_to_dict(song_row, start=1):
     song = {
