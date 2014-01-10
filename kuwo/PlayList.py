@@ -70,7 +70,7 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.add(self.treeview)
 
         song_cell = Gtk.CellRendererText()
-        song_col = TreeViewColumnText(_('Name'), song_cell, text=0)
+        song_col = TreeViewColumnText(_('Title'), song_cell, text=0)
         self.treeview.append_column(song_col)
 
         artist_cell = Gtk.CellRendererText()
