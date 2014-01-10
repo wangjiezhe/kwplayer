@@ -92,7 +92,7 @@ def tree_append_items(tree, items):
                 tree.freeze_child_notify()
         # stop idle_add()
         tree.thaw_child_notify()
-        return False
+        yield False
 
     model = tree.get_model()
     loader = append_generator()
