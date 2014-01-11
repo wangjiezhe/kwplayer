@@ -136,8 +136,9 @@ def mig_5_6(conf):
             with open(PLS_JSON, 'w') as fh:
                 fh.write(json.dumps(pls))
 
-    conf['version'] = VERSION
-    dump_conf(conf)
+    if 'version' not in conf:
+        conf['version'] = VERSION
+        dump_conf(conf)
     return conf
 
 def load_conf():
@@ -147,8 +148,6 @@ def load_conf():
         for key in _default_conf:
             if key not in conf:
                 conf[key] = _default_conf[key]
-        #if 'version' not in conf:
-        #    conf = mig_5_6(conf)
         conf = mig_5_6(conf)
         return conf
     dump_conf(_default_conf)
