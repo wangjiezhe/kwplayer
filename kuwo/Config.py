@@ -125,14 +125,16 @@ def check_first():
 
 def mig_5_6(conf):
     '''Merge configuration from v3.2.5 to 3.2.6'''
-    shutil.copy(PLS_JSON, PLS_JSON + '.bak')
-    with open(PLS_JSON) as fh:
-        pls = json.loads(fh.read())
-    cached = pls['_names_'][0]
-    if cached[1] == 'Cached':
-        pls['_names_'] = pls['_names_'][1:]
-        with open(PLS_JSON, 'w') as fh:
-            fh.write(json.dumps(pls))
+    if os.path.exists(PLS_JSON):
+        shutil.copy(PLS_JSON, PLS_JSON + '.bak')
+        with open(PLS_JSON) as fh:
+            pls = json.loads(fh.read())
+
+        cached = pls['_names_'][0]
+        if cached[1] == 'Cached':
+            pls['_names_'] = pls['_names_'][1:]
+            with open(PLS_JSON, 'w') as fh:
+                fh.write(json.dumps(pls))
 
     conf['version'] = VERSION
     dump_conf(conf)
