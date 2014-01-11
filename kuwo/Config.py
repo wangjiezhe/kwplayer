@@ -27,7 +27,7 @@ gettext.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '3.2.6'
+VERSION = '3.2.7'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
 DESCRIPTION = _('A simple music player on Linux desktop.')
@@ -148,6 +148,7 @@ def load_conf():
         for key in _default_conf:
             if key not in conf:
                 conf[key] = _default_conf[key]
+        # will removed in 3.2.8
         conf = mig_5_6(conf)
         return conf
     dump_conf(_default_conf)

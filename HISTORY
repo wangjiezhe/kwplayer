@@ -1,3 +1,9 @@
+3.2.7 - 2014.1.11
+* Fixed: unescaping html markups in artist name and album name
+* Fixed: `return` and `yield cannot mix together in python3.2 and before; reported by @Inocr
+* i18n updated; reported by @MJsaka
+* Fixed: make sure PLS_JSON(playlist file) exists; reported by @Inocr
+
 3.2.6 - 2014.1.5
 * Cached playlist is removed
 * Italic font style is removed
