@@ -29,7 +29,7 @@ DRAG_TARGETS = [
         ('TEXT', Gtk.TargetFlags.SAME_APP, 1),
         ('STRING', Gtk.TargetFlags.SAME_APP, 2),
         ]
-DRAG_ACTION = Gdk.DragAction.DEFAULT | Gdk.DragAction.COPY
+DRAG_ACTIONS = Gdk.DragAction.MOVE
 
 class TreeViewColumnText(Widgets.TreeViewColumnText):
     def __init__(self, *args, **kwds):
@@ -59,10 +59,10 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.treeview.enable_model_drag_source(
                 Gdk.ModifierType.BUTTON1_MASK,
                 DRAG_TARGETS,
-                DRAG_ACTION)
+                DRAG_ACTIONS)
         self.treeview.connect('drag-data-get', self.on_drag_data_get)
         self.treeview.enable_model_drag_dest(
-                DRAG_TARGETS, DRAG_ACTION)
+                DRAG_TARGETS, DRAG_ACTIONS)
         self.treeview.connect(
                 'drag-data-received', self.on_drag_data_received)
         self.treeview.connect(
@@ -111,7 +111,6 @@ class NormalSongTab(Gtk.ScrolledWindow):
     def on_drag_data_get(self, treeview, drag_context, sel_data, info, 
                          time):
         selection = treeview.get_selection()
-        # use get_selected_rows because of MULTIPLE_SELECTIONS
         model, paths = selection.get_selected_rows()
         self.drag_data_old_iters = []
         songs = []
@@ -180,7 +179,7 @@ class PlayList(Gtk.Box):
         tree_sel = self.treeview_left.get_selection()
         tree_sel.connect('changed', self.on_tree_selection_left_changed)
         self.treeview_left.enable_model_drag_dest(
-                DRAG_TARGETS, DRAG_ACTION)
+                DRAG_TARGETS, DRAG_ACTIONS)
         self.treeview_left.connect(
                 'drag-data-received',
                 self.on_treeview_left_drag_data_received)
@@ -239,8 +238,8 @@ class PlayList(Gtk.Box):
     def dump_playlists(self):
         filepath = Config.PLS_JSON
         names = [list(p) for p in self.liststore_left]
-        # There must be at least 4 playlists.
-        if len(names) < 4:
+        # There must be at least 3 playlists.
+        if len(names) < 3:
             return True
         playlists = {'_names_': names}
         for name in names:
