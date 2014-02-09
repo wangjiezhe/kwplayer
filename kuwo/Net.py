@@ -98,6 +98,7 @@ def hash_str(_str):
 def urlopen(_url, use_cache=True, retries=MAXTIMES):
     # set host port from 81 to 80, to fix image problem
     url = _url.replace(':81', '')
+    print('Net.urlopen:', url, ', use_cache:', use_cache)
     # hash the url to accelerate string compare speed in db.
     key = hash_byte(url)
     if use_cache and ldb_imported:
@@ -846,11 +847,13 @@ class AsyncSong(GObject.GObject):
         like this:
         response=url&type=convert_url&format=ape|mp3&rid=MUSIC_3312608
         '''
+        print('AsyncSong.get_song():', song, 'use_mv: ', use_mv)
         async_call(self._download_song, empty_func, song, use_mv)
 
     def _download_song(self, song, use_mv):
         song_link, song_path = get_song_link(
                 song, self.app.conf, use_mv=use_mv)
+        print('Async_song.download_song:', song_link, song_path)
 
         #print('Net.AsyncSong._download_song() song link:', song_link)
         chunk_to_play = CHUNK_TO_PLAY
@@ -887,6 +890,7 @@ class AsyncSong(GObject.GObject):
                     chunk = req.read(CHUNK)
                     received_size += len(chunk)
                     percent = int(received_size/content_length * 100)
+                    print(percent)
                     self.emit('chunk-received', percent)
                     # this signal only emit once.
                     if ((received_size > chunk_to_play or percent > 40) and

@@ -186,6 +186,8 @@ class Preferences(Gtk.Dialog):
         radio_mkv.join_group(radio_mp4)
         radio_mkv.set_active(app.conf['use-mkv'])
         radio_mkv.connect('toggled', self.on_video_toggled)
+        radio_mkv.set_tooltip_text(
+                _( 'Please use this format when using Karaoke'))
         format_box.pack_start(radio_mkv, False, False, 0)
 
         # lyrics tab

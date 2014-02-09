@@ -79,7 +79,7 @@ _default_conf = {
         'mv-dir': os.path.join(CACHE_DIR, 'mv'),
         'volume': 0.08,
         'use-ape': False,
-        'use-mkv': False,
+        'use-mkv': True,
         'use-status-icon': True,
         'use-notify': False,
         'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
