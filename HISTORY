@@ -1,3 +1,9 @@
+3.2.8 - 2014.2.9
+* Fixed: failed to save playlist; reported by @MJsaka
+* Fixed: add a scrolledWindow to wrap playlist treeview; reported by @saiatsai
+* Fixed: Support Karaoke mode
+* i18n updated
+
 3.2.7 - 2014.1.11
 * Fixed: unescaping html markups in artist name and album name
 * Fixed: `return` and `yield cannot mix together in python3.2 and before; reported by @Inocr
