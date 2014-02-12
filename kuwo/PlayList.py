@@ -29,7 +29,7 @@ DRAG_TARGETS = [
         ('TEXT', Gtk.TargetFlags.SAME_APP, 1),
         ('STRING', Gtk.TargetFlags.SAME_APP, 2),
         ]
-DRAG_ACTION = Gdk.DragAction.DEFAULT | Gdk.DragAction.COPY
+DRAG_ACTIONS = Gdk.DragAction.MOVE
 
 class TreeViewColumnText(Widgets.TreeViewColumnText):
     def __init__(self, *args, **kwds):
@@ -59,10 +59,10 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.treeview.enable_model_drag_source(
                 Gdk.ModifierType.BUTTON1_MASK,
                 DRAG_TARGETS,
-                DRAG_ACTION)
+                DRAG_ACTIONS)
         self.treeview.connect('drag-data-get', self.on_drag_data_get)
         self.treeview.enable_model_drag_dest(
-                DRAG_TARGETS, DRAG_ACTION)
+                DRAG_TARGETS, DRAG_ACTIONS)
         self.treeview.connect(
                 'drag-data-received', self.on_drag_data_received)
         self.treeview.connect(
@@ -111,7 +111,6 @@ class NormalSongTab(Gtk.ScrolledWindow):
     def on_drag_data_get(self, treeview, drag_context, sel_data, info, 
                          time):
         selection = treeview.get_selection()
-        # use get_selected_rows because of MULTIPLE_SELECTIONS
         model, paths = selection.get_selected_rows()
         self.drag_data_old_iters = []
         songs = []
@@ -165,26 +164,31 @@ class PlayList(Gtk.Box):
         box_left = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.pack_start(box_left, False, False, 0)
 
-        # disname, name/uuid, deletable/editable
-        self.liststore_left = Gtk.ListStore(str, str, bool)
+        win_left = Gtk.ScrolledWindow()
+        box_left.pack_start(win_left, True, True, 0)
+
+        # disname, name/uuid, deletable/editable, tooltip(escaped disname)
+        self.liststore_left = Gtk.ListStore(str, str, bool, str)
         self.treeview_left = Gtk.TreeView(model=self.liststore_left)
         self.treeview_left.set_headers_visible(False)
+        self.treeview_left.set_tooltip_column(3)
         list_disname = Gtk.CellRendererText()
         list_disname.connect('edited', self.on_list_disname_edited)
         col_name = Gtk.TreeViewColumn(
                 'List Name', list_disname, text=0, editable=2)
         self.treeview_left.append_column(col_name)
-        #col_name.props.max_width = 30
-        #col_name.props.fixed_width = 30
-        #col_name.props.min_width = 15
+        #col_name.props.max_width = 75
+        #col_name.props.fixed_width = 75
+        #col_name.props.min_width = 70
+        col_name.props.sizing = Gtk.TreeViewColumnSizing.FIXED
         tree_sel = self.treeview_left.get_selection()
         tree_sel.connect('changed', self.on_tree_selection_left_changed)
         self.treeview_left.enable_model_drag_dest(
-                DRAG_TARGETS, DRAG_ACTION)
+                DRAG_TARGETS, DRAG_ACTIONS)
         self.treeview_left.connect(
                 'drag-data-received',
                 self.on_treeview_left_drag_data_received)
-        box_left.pack_start(self.treeview_left, True, True, 0)
+        win_left.add(self.treeview_left)
 
         toolbar = Gtk.Toolbar()
         toolbar.get_style_context().add_class(
@@ -238,9 +242,9 @@ class PlayList(Gtk.Box):
 
     def dump_playlists(self):
         filepath = Config.PLS_JSON
-        names = [list(p) for p in self.liststore_left]
-        # There must be at least 4 playlists.
-        if len(names) < 4:
+        names = [list(p[:-1]) for p in self.liststore_left]
+        # There must be at least 3 playlists.
+        if len(names) < 3:
             return True
         playlists = {'_names_': names}
         for name in names:
@@ -270,8 +274,10 @@ class PlayList(Gtk.Box):
             playlists = _default
 
         for playlist in playlists['_names_']:
-            self.liststore_left.append(playlist)
             disname, list_name, editable = playlist
+            tooltip = Widgets.escape(disname)
+            self.liststore_left.append(
+                    [disname, list_name, editable, tooltip])
             songs = playlists[list_name]
             self.init_tab(list_name, songs)
 
@@ -560,7 +566,9 @@ class PlayList(Gtk.Box):
         list_name = str(time.time())
         disname = _('Playlist')
         editable = True
-        _iter = self.liststore_left.append([disname, list_name, editable])
+        tooltip = Widgets.escape(disname)
+        _iter = self.liststore_left.append(
+                [disname, list_name, editable, tooltip])
         selection = self.treeview_left.get_selection()
         selection.select_iter(_iter)
         self.init_tab(list_name, [])
@@ -572,7 +580,7 @@ class PlayList(Gtk.Box):
             return
         path = model.get_path(_iter)
         index = path.get_indices()[0]
-        disname, list_name, editable = model[path]
+        disname, list_name, editable, tooltip = model[path]
         if not editable:
             return
         self.notebook.remove_page(index)
@@ -654,8 +662,9 @@ class PlayList(Gtk.Box):
 
     def on_advice_menu_item_activated(self, advice_item):
         list_name = str(time.time())
+        tooltip = Widgets.escape(self.playlist_advice_disname)
         self.liststore_left.append(
-                [self.playlist_advice_disname, list_name, True])
+                [self.playlist_advice_disname, list_name, True, tooltip])
         self.init_tab(list_name, [])
         advice_item.list_name = list_name
         self.on_menu_item_activated(advice_item)
