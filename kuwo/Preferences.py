@@ -157,6 +157,11 @@ class Preferences(Gtk.Dialog):
         notify_button.connect('toggled', self.on_notify_button_toggled)
         generic_box.pack_start(notify_button, False, False, 0)
 
+        show_pls_button = Gtk.CheckButton(_('Show playlist tab on startup'))
+        show_pls_button.set_active(app.conf['show-pls'])
+        show_pls_button.connect('toggled', self.on_show_pls_button_toggled)
+        generic_box.pack_start(show_pls_button, False, False, 0)
+
         # format tab
         format_box = NoteTab()
         notebook.append_page(format_box, Gtk.Label(_('Format')))
@@ -314,6 +319,9 @@ class Preferences(Gtk.Dialog):
 
     def on_notify_button_toggled(self, button):
         self.app.conf['use-notify'] = button.get_active()
+
+    def on_show_pls_button_toggled(self, button):
+        self.app.conf['show-pls'] = button.get_active()
 
     # format tab signal handlers
     def on_audio_toggled(self, radiobtn):

@@ -82,6 +82,7 @@ _default_conf = {
         'use-mkv': True,
         'use-status-icon': True,
         'use-notify': False,
+        'show-pls': False,
         'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
         'lrc-back-color': 'rgba(237, 221, 221, 0.28)',
         'lrc-text-size': 22,
@@ -123,23 +124,9 @@ def check_first():
         os.mkdir(_default_conf['mv-dir'])
         os.mkdir(LRC_DIR)
 
-def mig_5_6(conf):
-    '''Merge configuration from v3.2.5 to 3.2.6'''
-    if os.path.exists(PLS_JSON):
-        shutil.copy(PLS_JSON, PLS_JSON + '.bak')
-        with open(PLS_JSON) as fh:
-            pls = json.loads(fh.read())
-
-        cached = pls['_names_'][0]
-        if cached[1] == 'Cached':
-            pls['_names_'] = pls['_names_'][1:]
-            with open(PLS_JSON, 'w') as fh:
-                fh.write(json.dumps(pls))
-
-    if 'version' not in conf:
-        conf['version'] = VERSION
-        dump_conf(conf)
-    return conf
+def mig_8_9(conf):
+    if 'show-pls' not in conf:
+        conf['show-pls'] = False
 
 def load_conf():
     if os.path.exists(_conf_file):
@@ -148,8 +135,8 @@ def load_conf():
         for key in _default_conf:
             if key not in conf:
                 conf[key] = _default_conf[key]
-        # will removed in 3.2.8
-        conf = mig_5_6(conf)
+        # will be removed in 3.3.1
+        mig_8_9(conf)
         return conf
     dump_conf(_default_conf)
     return _default_conf
