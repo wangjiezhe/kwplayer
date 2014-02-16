@@ -233,8 +233,7 @@ class App:
         self.status_icon.connect('popup_menu', self.on_status_icon_popup_menu)
 
     def on_status_icon_activate(self, status_icon):
-        is_visible = self.window.is_visible()
-        if is_visible:
+        if self.window.props.visible:
             self.window.hide()
         else:
             self.window.present()
