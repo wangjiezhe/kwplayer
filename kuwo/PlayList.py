@@ -615,7 +615,7 @@ class PlayList(Gtk.Box):
             return
         path = model.get_path(_iter)
         index = path.get_indices()[0]
-        disname, list_name, editable = model[path]
+        disname, list_name, editable, tooltip = model[path]
         liststore = self.tabs[list_name].liststore
 
         dialog = Gtk.Dialog(
