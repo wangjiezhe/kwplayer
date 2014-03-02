@@ -1,3 +1,8 @@
+3.2.9 - 2014.3.2
+* Automatically show playlist tab after startup; reported by @saiatsai
+* Fixed: GtkWidget.is_visible() is unavailable in gtk3.4; reported by @coslyk
+* Fixed: unpack tooltip from left-side panel
+
 3.2.8 - 2014.2.9
 * Fixed: failed to save playlist; reported by @MJsaka
 * Fixed: add a scrolledWindow to wrap playlist treeview; reported by @saiatsai
