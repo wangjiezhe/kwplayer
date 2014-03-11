@@ -84,7 +84,7 @@ def async_call(func, func_done, *args):
             result = func(*args)
         except Exception as e:
             error = e
-        GObject.idle_add(lambda: func_done(result, error))
+        GLib.idle_add(lambda: func_done(result, error))
 
     thread = threading.Thread(target=do_call, args=args)
     thread.start()
