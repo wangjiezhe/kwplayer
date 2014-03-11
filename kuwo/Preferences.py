@@ -20,6 +20,7 @@ MARGIN_LEFT = 15
 MARGIN_TOP = 20
 ShortcutMode = Config.ShortcutMode
 
+DISNAME_COL, NAME_COL, KEY_COL, MOD_COL = list(range(4))
 
 class NoteTab(Gtk.Box):
     def __init__(self):
@@ -268,14 +269,16 @@ class Preferences(Gtk.Dialog):
 
         default_btn = Gtk.RadioButton(_('Use Default MultiMedia Key'))
         default_btn.connect(
-                'toggled', self.on_shortcut_btn_toggled, ShortcutMode.DEFAULT)
+                'toggled', self.on_shortcut_btn_toggled,
+                ShortcutMode.DEFAULT)
         default_btn.join_group(disable_btn)
         default_btn.set_active(curr_mode == ShortcutMode.DEFAULT)
         box.pack_start(default_btn, False, False, 0)
 
         custom_btn = Gtk.RadioButton(_('Use Custom Keyboard Shortcut'))
         custom_btn.connect(
-                'toggled', self.on_shortcut_btn_toggled, ShortcutMode.CUSTOM)
+                'toggled', self.on_shortcut_btn_toggled,
+                ShortcutMode.CUSTOM)
         custom_btn.join_group(default_btn)
         custom_btn.set_active(curr_mode == ShortcutMode.CUSTOM)
         box.pack_start(custom_btn, False, False, 0)
@@ -284,26 +287,27 @@ class Preferences(Gtk.Dialog):
         self.shortcut_win.set_sensitive(curr_mode == ShortcutMode.CUSTOM)
         box.pack_start(self.shortcut_win, True, True, 0)
 
-        # name, shortct key, shortcut modifiers
-        self.shortcut_liststore = Gtk.ListStore(str, int, int)
+        # disname, name, shortct key, shortcut modifiers
+        self.shortcut_liststore = Gtk.ListStore(str, str, int, int)
         tv = Gtk.TreeView(model=self.shortcut_liststore)
         self.shortcut_win.add(tv)
 
         name_cell = Gtk.CellRendererText()
-        name_col = Gtk.TreeViewColumn('Action', name_cell, text=0)
+        name_col = Gtk.TreeViewColumn('Action', name_cell, text=DISNAME_COL)
         tv.append_column(name_col)
 
         key_cell = Gtk.CellRendererAccel(editable=True)
         key_cell.connect('accel-edited', self.on_shortcut_key_cell_edited)
         key_col = Gtk.TreeViewColumn(
-                'Shortcut Key', key_cell, accel_key=1, accel_mods=2)
+                'Shortcut Key', key_cell,
+                accel_key=KEY_COL, accel_mods=MOD_COL)
         tv.append_column(key_col)
         
         for name in self.app.conf['custom-shortcut']:
             key = self.app.conf['custom-shortcut'][name]
             i18n_name = Config.SHORT_CUT_I18N[name]
             k, m = Gtk.accelerator_parse(key)
-            self.shortcut_liststore.append([i18n_name, k, m, ])
+            self.shortcut_liststore.append([i18n_name, name, k, m])
 
     def run(self):
         self.get_content_area().show_all()
@@ -340,7 +344,7 @@ class Preferences(Gtk.Dialog):
     def on_shortcut_key_cell_edited(self, accel, path, key, mod,
                                     hardware_keycode):
         accel_key = Gtk.accelerator_name(key, mod)
-        name = self.shortcut_liststore[path][0]
-        self.shortcut_liststore[path][1] = key
-        self.shortcut_liststore[path][2] = int(mod)
+        name = self.shortcut_liststore[path][NAME_COL]
+        self.shortcut_liststore[path][KEY_COL] = key
+        self.shortcut_liststore[path][MOD_COL] = int(mod)
         self.app.conf['custom-shortcut'][name] = accel_key
