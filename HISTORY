@@ -1,3 +1,8 @@
+3.3.1 - 2014.3.14
+* Add a favorite button to control panel
+* Fixed: i18n KeyError; reported by @MJsaka
+* i18n updated
+
 3.2.9 - 2014.3.2
 * Automatically show playlist tab after startup; reported by @saiatsai
 * Fixed: GtkWidget.is_visible() is unavailable in gtk3.4; reported by @coslyk
