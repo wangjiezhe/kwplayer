@@ -32,6 +32,7 @@ HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
 DESCRIPTION = _('A simple music player on Linux desktop.')
 
+ICON_PATH = os.path.join(PREF, 'kuwo', 'themes', 'default')
 HOME_DIR = os.path.expanduser('~')
 CACHE_DIR = os.path.join(HOME_DIR, '.cache', 'kuwo')
 # used for small logos(100x100)

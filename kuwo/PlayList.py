@@ -365,11 +365,27 @@ class PlayList(Gtk.Box):
 
     def add_song_to_playlist(self, song, list_name='Default'):
         liststore = self.tabs[list_name].liststore
+        if self.check_song_in_playlist(song, list_name):
+            return
+        liststore.append(Widgets.song_dict_to_row(song))
+
+    def remove_song_from_playlist(self, song, list_name):
+        liststore = self.tabs[list_name].liststore
+        rid = song['rid']
+        path = self.get_song_path_in_liststore(liststore, rid)
+        if path == -1:
+            return
+        liststore.remove(liststore[path].iter)
+
+    def check_song_in_playlist(self, song, list_name):
+        '''Check whether this song is in this playlist'''
+        liststore = self.tabs[list_name].liststore
         rid = song['rid']
         path = self.get_song_path_in_liststore(liststore, rid)
         if path > -1:
-            return
-        liststore.append(Widgets.song_dict_to_row(song))
+            return True
+        else:
+            return False
 
     def add_songs_to_playlist(self, songs, list_name='Default'):
         def start():
@@ -388,10 +404,6 @@ class PlayList(Gtk.Box):
         liststore = self.tabs[list_name].liststore
         tree = self.tabs[list_name].treeview
         Net.async_call(start, stop)
-
-    def add_song_to_favorite(self, song):
-        _list_name = 'Favorite'
-        self.add_song_to_playlist(song, list_name=_list_name)
 
     def cache_song(self, song):
         rid = song['rid']
@@ -551,8 +563,8 @@ class PlayList(Gtk.Box):
             self.app.popup_page(self.app_page)
 
     def get_song_path_in_liststore(self, liststore, rid, pos=3):
-        for i, item in enumerate(liststore):
-            if item[pos] == rid:
+        for i, row in enumerate(liststore):
+            if row[pos] == rid:
                 return i
         return -1
 
