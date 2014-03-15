@@ -13,7 +13,7 @@ from gi.repository import GstVideo
 from gi.repository import Gtk
 
 # Or init threads in another place.
-GObject.threads_init()
+GLib.threads_init()
 # init Gst so that play works ok.
 Gst.init(None)
 GST_LOWER_THAN_1 = (Gst.version()[0] < 1)

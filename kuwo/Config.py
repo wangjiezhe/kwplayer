@@ -27,11 +27,12 @@ gettext.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '3.2.9'
+VERSION = '3.3.1'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
 DESCRIPTION = _('A simple music player on Linux desktop.')
 
+ICON_PATH = os.path.join(PREF, 'kuwo', 'themes', 'default')
 HOME_DIR = os.path.expanduser('~')
 CACHE_DIR = os.path.join(HOME_DIR, '.cache', 'kuwo')
 # used for small logos(100x100)
@@ -124,10 +125,6 @@ def check_first():
         os.mkdir(_default_conf['mv-dir'])
         os.mkdir(LRC_DIR)
 
-def mig_8_9(conf):
-    if 'show-pls' not in conf:
-        conf['show-pls'] = False
-
 def load_conf():
     if os.path.exists(_conf_file):
         with open(_conf_file) as fh:
@@ -135,8 +132,6 @@ def load_conf():
         for key in _default_conf:
             if key not in conf:
                 conf[key] = _default_conf[key]
-        # will be removed in 3.3.1
-        mig_8_9(conf)
         return conf
     dump_conf(_default_conf)
     return _default_conf

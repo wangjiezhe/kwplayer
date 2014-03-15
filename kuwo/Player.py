@@ -150,9 +150,17 @@ class Player(Gtk.Box):
         toolbar.insert(self.fullscreen_btn, 8)
         self.app.window.connect('key-press-event', self.on_window_key_pressed)
 
+        self.favorite_btn = Gtk.ToolButton()
+        self.favorite_btn.set_label(_('Favorite'))
+        self.favorite_btn.set_icon_name('no-favorite')
+        self.favorite_btn.set_tooltip_text(_('Add to Favorite playlist'))
+        self.favorite_btn.props.margin_left = 10
+        self.favorite_btn.connect('clicked', self.on_favorite_btn_clicked)
+        toolbar.insert(self.favorite_btn, 9)
+
         # contro menu
         menu_tool_item = Gtk.ToolItem()
-        toolbar.insert(menu_tool_item, 9)
+        toolbar.insert(menu_tool_item, 10)
         toolbar.child_set_property(menu_tool_item, 'expand', True)
         main_menu = Gtk.Menu()
         pref_item = Gtk.MenuItem(label=_('Preferences'))
@@ -184,7 +192,6 @@ class Player(Gtk.Box):
             menu_btn = Gtk.MenuButton()
             menu_btn.set_popup(main_menu)
             menu_btn.set_always_show_image(True)
-        menu_btn.props.halign = Gtk.Align.END
         menu_btn.props.halign = Gtk.Align.END
         menu_btn.set_image(menu_image)
         menu_tool_item.add(menu_btn)
@@ -243,6 +250,7 @@ class Player(Gtk.Box):
     def load(self, song):
         self.play_type = PlayType.SONG
         self.curr_song = song
+        self.update_favorite_button_status()
         self.stop_player()
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
@@ -476,6 +484,7 @@ class Player(Gtk.Box):
         self.stop_player()
         self.curr_radio_item = radio_item
         self.curr_song = song
+        self.update_favorite_button_status()
         self.scale.set_sensitive(False)
         self.async_song = Net.AsyncSong(self.app)
         self.async_song.connect('chunk-received', self.on_chunk_received)
@@ -522,6 +531,7 @@ class Player(Gtk.Box):
     def load_mv(self, song):
         self.play_type = PlayType.MV
         self.curr_song = song
+        self.update_favorite_button_status()
         self.stop_player()
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
@@ -598,6 +608,36 @@ class Player(Gtk.Box):
                 self.fullscreen_sid > 0):
             self.app.notebook.set_show_tabs(False)
             self.hide()
+
+    def on_favorite_btn_clicked(self, button):
+        if not self.curr_song:
+            return
+        self.toggle_favorite_status()
+
+    def update_favorite_button_status(self):
+        if not self.curr_song:
+            return
+        if self.get_favorite_status():
+            self.favorite_btn.set_icon_name('favorite')
+        else:
+            self.favorite_btn.set_icon_name('no-favorite')
+
+    def get_favorite_status(self):
+        return self.app.playlist.check_song_in_playlist(
+                self.curr_song, 'Favorite')
+
+    def toggle_favorite_status(self):
+        if not self.curr_song:
+            return
+        if self.app.playlist.check_song_in_playlist(
+                self.curr_song, 'Favorite'):
+            self.app.playlist.remove_song_from_playlist(
+                    self.curr_song, 'Favorite')
+            self.favorite_btn.set_icon_name('no-favorite')
+        else:
+            self.app.playlist.add_song_to_playlist(
+                    self.curr_song, 'Favorite')
+            self.favorite_btn.set_icon_name('favorite')
 
     # menu button
     def on_main_menu_button_clicked(self, button, main_menu):

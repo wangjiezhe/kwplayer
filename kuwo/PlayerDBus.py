@@ -13,7 +13,7 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gst
 
-GObject.threads_init()
+GLib.threads_init()
 dbus.mainloop.glib.threads_init()
 
 BUS_NAME = 'org.mpris.MediaPlayer2.kwplayer'
