@@ -373,14 +373,13 @@ def get_artist_albums(artistid, page):
         '&pn=',
         str(page),
         ])
-    #print('Net.get_artist_albums(), url:', url)
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
     try:
         albums_wrap = Utils.json_loads_single(req_content.decode())
     except ValueError as e:
-        print('Error:', e)
+        print(e)
         return (None, 0)
     albums = albums_wrap['albumlist']
     pages = math.ceil(int(albums_wrap['total']) / ICON_NUM)

@@ -82,9 +82,10 @@ def decode_lrc_url(url):
     output = xor_bytes(str_bytes)
     return output.decode('gb18030')
 
-def json_loads_single(_str):
+def json_loads_single(s):
     '''Actually this is not a good idea. '''
-    return json.loads(_str.replace('"', '''\\"''').replace("'", '"'))
+    return json.loads(
+            s.replace('"', '''\\"''').replace("'", '"').replace('\t', ''))
 
 def encode_uri(text):
     return parse.quote(text, safe='~@#$&()*!+=:;,.?/\'')
