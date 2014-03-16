@@ -62,14 +62,22 @@ class Artists(Gtk.Box):
     '''Artists tab in notebook.'''
 
     title = _('Artists')
+    first_run = True
 
     def __init__(self, app):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.app = app
 
-        app = self.app
         self.buttonbox = Gtk.Box()
         self.pack_start(self.buttonbox, False, False, 0)
+
+    def first(self):
+        print('Artist.first() --')
+        if not self.first_run:
+            return
+        self.first_run = False
+
+        app = self.app
 
         home_button = Gtk.Button(_('Artists'))
         home_button.connect('clicked', self.on_home_button_clicked)
@@ -367,15 +375,15 @@ class Artists(Gtk.Box):
 
         # load current favorite artists list
         self.load_fav_artists()
-
-    def first(self):
-        pass
-
-    def after_init(self):
+        self.show_all()
         self.buttonbox.hide()
 
+    def after_init(self):
+        pass
+
     def do_destroy(self):
-        self.dump_fav_artists()
+        if not self.first_run:
+            self.dump_fav_artists()
 
     def on_cate_changed(self, *args):
         self.append_artists(init=True)
@@ -431,9 +439,10 @@ class Artists(Gtk.Box):
             self.artists_page += 1
             self.append_artists()
 
-
-    # open API other tabs can use.
+    # open API
     def show_artist(self, artist, artistid):
+        '''Show artist tab'''
+        self.first()
         self.curr_artist_name = artist
         self.curr_artist_id = artistid
         self.notebook.set_current_page(1)
@@ -463,6 +472,7 @@ class Artists(Gtk.Box):
             self.artist_songs_button.set_active(True)
 
     def show_artist_songs(self):
+        '''Show all songs of this artist'''
         self.album_control_box.hide()
         self.artist_mv_control_box.hide()
         self.artist_control_box.show_all()
@@ -586,6 +596,7 @@ class Artists(Gtk.Box):
         self.append_artist_similar(init=True)
 
     def append_artist_similar(self, init=False):
+        self.first()
         def _append_artist_similar(similar_args, error=None):
             artists, self.artist_similar_total = similar_args
             if self.artist_similar_total == 0:
@@ -669,6 +680,8 @@ class Artists(Gtk.Box):
 
     # open API
     def show_album(self, album, albumid, artist, artistid):
+        '''Show album information, including songs'''
+        self.first()
         self.curr_album_name = album
         self.curr_album_id = albumid
         self.curr_artist_name = artist
@@ -730,7 +743,7 @@ class Artists(Gtk.Box):
                 return
 
     def check_artist_favorited(self, artist_id):
-        '''Check if this artist in favorite list.'''
+        '''Check whether this artist is in favorite list.'''
         for row in self.fav_artists_liststore:
             if artist_id == row[2]:
                 return True

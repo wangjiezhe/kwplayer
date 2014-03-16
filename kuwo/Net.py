@@ -98,7 +98,6 @@ def hash_str(_str):
 def urlopen(_url, use_cache=True, retries=MAXTIMES):
     # set host port from 81 to 80, to fix image problem
     url = _url.replace(':81', '')
-    print('Net.urlopen:', url, ', use_cache:', use_cache)
     # hash the url to accelerate string compare speed in db.
     key = hash_byte(url)
     if use_cache and ldb_imported:
