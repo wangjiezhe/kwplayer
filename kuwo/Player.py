@@ -34,6 +34,7 @@ class PlayType:
     SONG = 0
     RADIO = 1
     MV = 2
+    KARAOKE = 3
 
 class RepeatType:
     NONE = 0
@@ -119,7 +120,7 @@ class Player(Gtk.Box):
         self.use_audio_btn.props.margin_left = 10
         self.use_audio_btn.set_active(True)
         self.use_audio_sid = self.use_audio_btn.connect(
-                'toggled', self.on_use_audio_toggled)
+                'toggled', self.on_play_type_toggled, PlayType.SONG)
         toolbar.insert(self.use_audio_btn, 5)
 
         self.use_mtv_btn = Gtk.RadioToolButton()
@@ -128,7 +129,8 @@ class Player(Gtk.Box):
         self.use_mtv_btn.set_icon_name('video-x-generic-symbolic')
         self.use_mtv_btn.set_sensitive(False)
         self.use_mtv_btn.props.group = self.use_audio_btn
-        self.use_mtv_btn.connect('toggled', self.on_use_mtv_toggled)
+        self.use_mtv_sid = self.use_mtv_btn.connect(
+                'toggled', self.on_play_type_toggled, PlayType.MV)
         toolbar.insert(self.use_mtv_btn, 6)
 
         self.use_ok_btn = Gtk.RadioToolButton()
@@ -138,7 +140,8 @@ class Player(Gtk.Box):
         self.use_ok_btn.set_icon_name('audio-input-microphone-symbolic')
         self.use_ok_btn.set_sensitive(False)
         self.use_ok_btn.props.group = self.use_audio_btn
-        self.use_ok_btn.connect('toggled', self.on_use_ok_toggled)
+        self.use_ok_btn.connect(
+                'toggled', self.on_play_type_toggled, PlayType.KARAOKE)
         toolbar.insert(self.use_ok_btn, 7)
 
         self.fullscreen_btn = Gtk.ToolButton()
@@ -253,6 +256,9 @@ class Player(Gtk.Box):
         self.curr_song = song
         self.update_favorite_button_status()
         self.stop_player()
+        self.use_audio_btn.handler_block(self.use_audio_sid)
+        self.use_audio_btn.set_active(True)
+        self.use_audio_btn.handler_unblock(self.use_audio_sid)
         self.create_new_async(song)
 
     def create_new_async(self, *args, **kwds):
@@ -504,48 +510,46 @@ class Player(Gtk.Box):
     def check_audio_streams(self):
         self.use_ok_btn.set_sensitive(self.playbin.get_audios() > 1)
 
-    def on_use_audio_toggled(self, toggle_button):
-        if not toggle_button.get_active():
-            return
-        self.app.lrc.show_music()
-        self.load(self.curr_song)
-
-    def on_use_mtv_toggled(self, toggle_button):
+    def on_play_type_toggled(self, toggle_button, play_type):
         if not toggle_button.get_active():
             return
         if self.play_type == PlayType.NONE:
             return
-        # If current playtype is MV, only switch audio stream
-        if self.play_type == PlayType.MV:
-            self.playbin.set_current_audio(MTV_AUDIO)
-        else:
-            self.app.lrc.show_mv()
-            self.load_mv(self.curr_song)
-            self.app.popup_page(self.app.lrc.app_page)
+        elif play_type == PlayType.SONG or play_type == PlayType.RADIO:
+            self.app.lrc.show_music()
+            self.load(self.curr_song)
+        elif play_type == PlayType.MV:
+            if self.play_type == PlayType.KARAOKE:
+                self.playbin.set_current_audio(MTV_AUDIO)
+                self.play_type = PlayType.MV
+            else:
+                self.app.lrc.show_mv()
+                self.load_mv(self.curr_song)
+                self.app.popup_page(self.app.lrc.app_page)
+        elif play_type == PlayType.KARAOKE:
+            if self.play_type == PlayType.MV:
+                self.playbin.set_current_audio(OK_AUDIO)
+                self.play_type = PlayType.KARAOKE
+            else:
+                self.app.lrc.show_mv()
+                self.load_mv(self.curr_song)
+                self.app.popup_page(self.app.lrc.app_page)
 
-    def on_use_ok_toggled(self, toggle_button):
-        if not toggle_button.get_active():
-            return
-        if self.play_type == PlayType.NONE:
-            return
-        if self.play_type == PlayType.MV:
-            self.playbin.set_current_audio(OK_AUDIO)
-        else:
-            self.app.lrc.show_mv()
-            self.load_mv(self.curr_song)
-            self.app.popup_page(self.app.lrc.app_page)
 
     def load_mv(self, song):
         self.play_type = PlayType.MV
         self.curr_song = song
         self.update_favorite_button_status()
         self.stop_player()
+        self.use_mtv_btn.handler_block(self.use_mtv_sid)
+        self.use_mtv_btn.set_active(True)
+        self.use_mtv_btn.handler_unblock(self.use_mtv_sid)
         self.create_new_async(song, use_mv=True)
 
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
             cached, mv_link, mv_path = mv_args
-            if mv_link:
+            if cached or mv_link:
                 self.use_mtv_btn.set_sensitive(True)
             else:
                 self.use_mtv_btn.set_sensitive(False)
@@ -763,7 +767,6 @@ class Player(Gtk.Box):
         self.play_button.set_icon_name('media-playback-pause-symbolic')
         self.playbin.stop()
         self.scale.set_value(0)
-        #self.scale.set_sensitive(False)
         if self.play_type != PlayType.MV:
             self.use_audio_btn.handler_block(self.use_audio_sid)
             self.use_audio_btn.set_active(True)

@@ -347,12 +347,11 @@ class PlayList(Gtk.Box):
             # curr_playing contains: listname, path
             self.curr_playing = [list_name, path]
             song = Widgets.song_row_to_dict(liststore[path], start=0)
-            self.app.player.load(song)
-            return
-        liststore.append(Widgets.song_dict_to_row(song))
-        self.curr_playing = [list_name, len(liststore)-1, ]
-        self.locate_curr_song(popup_page=False)
-        if use_mv:
+        else:
+            liststore.append(Widgets.song_dict_to_row(song))
+            self.curr_playing = [list_name, len(liststore)-1, ]
+            self.locate_curr_song(popup_page=False)
+        if use_mv is True:
             self.app.player.load_mv(song)
         else:
             self.app.player.load(song)

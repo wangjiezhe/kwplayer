@@ -448,7 +448,6 @@ def get_lrc(song):
     def _parse_lrc():
         url = ('http://newlyric.kuwo.cn/newlyric.lrc?' + 
                 Utils.encode_lrc_url(rid))
-        #print('Net._parse_lrc(), url:', url)
         req_content = urlopen(url, use_cache=False, retries=8)
         if not req_content:
             return None
