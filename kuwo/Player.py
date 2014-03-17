@@ -252,34 +252,43 @@ class Player(Gtk.Box):
         self.curr_song = song
         self.update_favorite_button_status()
         self.stop_player()
+        self.create_new_async(song)
+
+    def create_new_async(self, *args, **kwds):
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
+        if self.async_song:
+            self.async_song.destroy()
         self.async_song = Net.AsyncSong(self.app)
-        self.async_song.connect('chunk-received', self.on_chunk_received)
+        #self.async_song.connect('chunk-received', self.on_chunk_received)
         self.async_song.connect('can-play', self.on_song_can_play)
         self.async_song.connect('downloaded', self.on_song_downloaded)
-        self.async_song.get_song(song)
+        self.async_song.connect('disk-error', self.on_song_disk_error)
+        self.async_song.connect('network-error', self.on_song_network_error)
+        self.async_song.get_song(*args, **kwds)
 
-    def failed_to_download(self, song_path, status):
+#    def on_chunk_received(self, widget, percent):
+#        def _update_fill_level():
+#            self.scale.set_fill_level(percent)
+#        GLib.idle_add(_update_fill_level)
+
+    def on_song_disk_error(self, widget, song_path):
+        '''Disk error: occurs when disk is not available.'''
+        GLib.idle_add(
+                Widgets.filesystem_error, self.app.window, song_path)
         self.stop_player_cb()
-        
-        if status == 'FileNotFoundError':
-            Widgets.filesystem_error(self.app.window, song_path)
-        elif status == 'URLError':
-            if self.play_type == PlayType.MV:
-                msg = _('Failed to download MV')
-            elif self.play_type in (PlayType.SONG, PlayType.RADIO):
-                msg = _('Failed to download song')
-            #Widgets.network_error(self.app.window, msg)
-            print('Error:', msg)
-            self.load_next_cb()
 
-    def on_chunk_received(self, widget, percent):
-        def _update_fill_level():
-            self.scale.set_fill_level(percent)
-        GLib.idle_add(_update_fill_level)
+    def on_song_network_error(self, widget, song_link):
+        '''Failed to get source link, or failed to download song'''
+        self.stop_player_cb()
+        if self.play_type == PlayType.MV:
+            msg = _('Failed to download MV')
+        elif self.play_type in (PlayType.SONG, PlayType.RADIO):
+            msg = _('Failed to download song')
+        GLib.idle_add(Widgets.network_error, self.app.window, msg)
+        self.load_next_cb()
 
-    def on_song_can_play(self, widget, song_path, status):
+    def on_song_can_play(self, widget, song_path):
         def _on_song_can_play():
             uri = 'file://' + song_path
             self.meta_url = uri
@@ -303,11 +312,7 @@ class Player(Gtk.Box):
                 self.playbin.load_video(uri, self.app.lrc.xid, audio_stream)
             self.start_player(load=True)
             self.update_player_info()
-
-        if status == 'OK':
-            GLib.idle_add(_on_song_can_play)
-        else:
-            GLib.idle_add(self.failed_to_download, song_path, status)
+        GLib.idle_add(_on_song_can_play)
 
     def on_song_downloaded(self, widget, song_path):
         def _on_song_download():
@@ -485,13 +490,7 @@ class Player(Gtk.Box):
         self.curr_radio_item = radio_item
         self.curr_song = song
         self.update_favorite_button_status()
-        self.scale.set_sensitive(False)
-        self.async_song = Net.AsyncSong(self.app)
-        self.async_song.connect('chunk-received', self.on_chunk_received)
-        self.async_song.connect('can-play', self.on_song_can_play)
-        self.async_song.connect('downloaded', self.on_song_downloaded)
-        self.async_song.get_song(song)
-
+        self.create_new_async(song)
 
     # MV part
     def check_audio_streams(self):
@@ -533,18 +532,15 @@ class Player(Gtk.Box):
         self.curr_song = song
         self.update_favorite_button_status()
         self.stop_player()
-        self.scale.set_fill_level(0)
-        self.scale.set_show_fill_level(True)
-        self.async_song = Net.AsyncSong(self.app)
-        self.async_song.connect('chunk-received', self.on_chunk_received)
-        self.async_song.connect('can-play', self.on_song_can_play)
-        self.async_song.connect('downloaded', self.on_song_downloaded)
-        self.async_song.get_song(song, use_mv=True)
+        self.create_new_async(song, use_mv=True)
 
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
-            mv_link, mv_path = mv_args
-            self.use_mtv_btn.set_sensitive(mv_link is not False)
+            cached, mv_link, mv_path = mv_args
+            if mv_link:
+                self.use_mtv_btn.set_sensitive(True)
+            else:
+                self.use_mtv_btn.set_sensitive(False)
         Net.async_call(
                 Net.get_song_link, _update_mv_link,
                 self.curr_song, self.app.conf, True)

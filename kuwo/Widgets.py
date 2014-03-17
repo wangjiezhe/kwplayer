@@ -338,7 +338,8 @@ class TreeViewSongs(Gtk.TreeView):
             self.app.playlist.cache_song(song)
 
 def network_error(parent, msg):
-    dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.MODAL,
+    dialog = Gtk.MessageDialog(
+            parent, Gtk.DialogFlags.MODAL,
             Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, msg)
     dialog.format_secondary_text(
             _('Please check network connection and try again'))
@@ -350,14 +351,6 @@ def filesystem_error(parent, path):
     dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.MODAL,
             Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, msg)
     dialog.format_secondary_text(
-            _('Please check {0} exists').format(path))
-    dialog.run()
-    dialog.destroy()
-
-def error(app, msg, msg2=None):
-    dialog = Gtk.MessageDialog(app.window, Gtk.DialogFlags.MODAL,
-            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, msg)
-    if msg2 is not None:
-        dialog.format_secondary_text(msg2)
+            _('Unable to access {0}').format(path))
     dialog.run()
     dialog.destroy()

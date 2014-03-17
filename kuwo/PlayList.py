@@ -435,17 +435,19 @@ class PlayList(Gtk.Box):
                 pass
             Gdk.Window.process_all_updates()
 
-        def _on_can_play(widget, song_path, status, error=None):
-            if status == 'OK':
-                return
-
-            # stop cache service when error occurs
+        def _on_disk_error(widget, song_path, eror=None):
             self.cache_enabled = False
-            if status == 'URLError':
-                Widgets.network_error(
-                        self.app.window, _('Failed to cache song'))
-            elif status == 'FileNotFoundError':
-                Widgets.filesystem_error(self.app.window, song_path)
+            GLib.idle_add(
+                    Widgets.filesystem_error,
+                    self.app.window,
+                    song_path)
+
+        def _on_network_error(widget, song_link, error=None):
+            self.cache_enabled = False
+            GLib.idle_add(
+                    Widgets.network_error,
+                    self.app.window,
+                    _('Failed to cache song'))
 
         def _on_downloaded(widget, song_path, error=None):
             if song_path:
@@ -472,8 +474,9 @@ class PlayList(Gtk.Box):
         song = Widgets.song_row_to_dict(liststore[path], start=0)
         print('will download:', song)
         self.cache_job = Net.AsyncSong(self.app)
-        self.cache_job.connect('can-play', _on_can_play)
         self.cache_job.connect('downloaded', _on_downloaded)
+        self.cache_job.connect('disk-error', _on_disk_error)
+        self.cache_job.connect('network-error', _on_network_error)
         self.cache_job.get_song(song)
 
     # Others
@@ -607,9 +610,9 @@ class PlayList(Gtk.Box):
             export_lrc = with_lrc.get_active()
             for i, item in enumerate(liststore):
                 song = Widgets.song_row_to_dict(item, start=0)
-                song_link, song_path = Net.get_song_link(
+                cached, song_link, song_path = Net.get_song_link(
                         song, self.app.conf)
-                if song_link is not True:
+                if not cached:
                     continue
                 shutil.copy(song_path, export_dir)
 
