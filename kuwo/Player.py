@@ -34,6 +34,7 @@ class PlayType:
     SONG = 0
     RADIO = 1
     MV = 2
+    KARAOKE = 3
 
 class RepeatType:
     NONE = 0
@@ -119,7 +120,7 @@ class Player(Gtk.Box):
         self.use_audio_btn.props.margin_left = 10
         self.use_audio_btn.set_active(True)
         self.use_audio_sid = self.use_audio_btn.connect(
-                'toggled', self.on_use_audio_toggled)
+                'toggled', self.on_play_type_toggled, PlayType.SONG)
         toolbar.insert(self.use_audio_btn, 5)
 
         self.use_mtv_btn = Gtk.RadioToolButton()
@@ -128,7 +129,8 @@ class Player(Gtk.Box):
         self.use_mtv_btn.set_icon_name('video-x-generic-symbolic')
         self.use_mtv_btn.set_sensitive(False)
         self.use_mtv_btn.props.group = self.use_audio_btn
-        self.use_mtv_btn.connect('toggled', self.on_use_mtv_toggled)
+        self.use_mtv_sid = self.use_mtv_btn.connect(
+                'toggled', self.on_play_type_toggled, PlayType.MV)
         toolbar.insert(self.use_mtv_btn, 6)
 
         self.use_ok_btn = Gtk.RadioToolButton()
@@ -138,7 +140,8 @@ class Player(Gtk.Box):
         self.use_ok_btn.set_icon_name('audio-input-microphone-symbolic')
         self.use_ok_btn.set_sensitive(False)
         self.use_ok_btn.props.group = self.use_audio_btn
-        self.use_ok_btn.connect('toggled', self.on_use_ok_toggled)
+        self.use_ok_btn.connect(
+                'toggled', self.on_play_type_toggled, PlayType.KARAOKE)
         toolbar.insert(self.use_ok_btn, 7)
 
         self.fullscreen_btn = Gtk.ToolButton()
@@ -211,6 +214,7 @@ class Player(Gtk.Box):
         self.adjustment = Gtk.Adjustment(0, 0, 100, 1, 10, 0)
         self.adjustment.connect('changed', self.on_adjustment_changed)
         self.scale.set_adjustment(self.adjustment)
+        self.scale.set_show_fill_level(False)
         self.scale.set_restrict_to_fill_level(False)
         self.scale.props.draw_value = False
         self.scale.connect('change-value', self.on_scale_change_value)
@@ -252,40 +256,53 @@ class Player(Gtk.Box):
         self.curr_song = song
         self.update_favorite_button_status()
         self.stop_player()
+        self.use_audio_btn.handler_block(self.use_audio_sid)
+        self.use_audio_btn.set_active(True)
+        self.use_audio_btn.handler_unblock(self.use_audio_sid)
+        self.create_new_async(song)
+
+    def create_new_async(self, *args, **kwds):
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
+        self.scale.set_restrict_to_fill_level(True)
+        self.adjustment.set_lower(0.0)
+        self.adjustment.set_upper(100.0)
+        if self.async_song:
+            self.async_song.destroy()
         self.async_song = Net.AsyncSong(self.app)
         self.async_song.connect('chunk-received', self.on_chunk_received)
         self.async_song.connect('can-play', self.on_song_can_play)
         self.async_song.connect('downloaded', self.on_song_downloaded)
-        self.async_song.get_song(song)
-
-    def failed_to_download(self, song_path, status):
-        self.stop_player_cb()
-        
-        if status == 'FileNotFoundError':
-            Widgets.filesystem_error(self.app.window, song_path)
-        elif status == 'URLError':
-            if self.play_type == PlayType.MV:
-                msg = _('Failed to download MV')
-            elif self.play_type in (PlayType.SONG, PlayType.RADIO):
-                msg = _('Failed to download song')
-            #Widgets.network_error(self.app.window, msg)
-            print('Error:', msg)
-            self.load_next_cb()
+        self.async_song.connect('disk-error', self.on_song_disk_error)
+        self.async_song.connect('network-error', self.on_song_network_error)
+        self.async_song.get_song(*args, **kwds)
 
     def on_chunk_received(self, widget, percent):
         def _update_fill_level():
-            self.scale.set_fill_level(percent)
+            self.scale.set_fill_level(percent * self.adjustment.get_upper())
         GLib.idle_add(_update_fill_level)
 
-    def on_song_can_play(self, widget, song_path, status):
+    def on_song_disk_error(self, widget, song_path):
+        '''Disk error: occurs when disk is not available.'''
+        GLib.idle_add(
+                Widgets.filesystem_error, self.app.window, song_path)
+        self.stop_player_cb()
+
+    def on_song_network_error(self, widget, song_link):
+        '''Failed to get source link, or failed to download song'''
+        self.stop_player_cb()
+        if self.play_type == PlayType.MV:
+            msg = _('Failed to download MV')
+        elif self.play_type in (PlayType.SONG, PlayType.RADIO):
+            msg = _('Failed to download song')
+        GLib.idle_add(Widgets.network_error, self.app.window, msg)
+        self.load_next_cb()
+
+    def on_song_can_play(self, widget, song_path):
         def _on_song_can_play():
             uri = 'file://' + song_path
             self.meta_url = uri
 
-            self.scale.set_fill_level(0)
-            self.scale.set_show_fill_level(False)
             if self.play_type in (PlayType.SONG, PlayType.RADIO):
                 self.app.lrc.show_music()
                 self.playbin.load_audio(uri)
@@ -303,14 +320,15 @@ class Player(Gtk.Box):
                 self.playbin.load_video(uri, self.app.lrc.xid, audio_stream)
             self.start_player(load=True)
             self.update_player_info()
-
-        if status == 'OK':
-            GLib.idle_add(_on_song_can_play)
-        else:
-            GLib.idle_add(self.failed_to_download, song_path, status)
+        GLib.idle_add(_on_song_can_play)
 
     def on_song_downloaded(self, widget, song_path):
         def _on_song_download():
+            self.async_song.destroy()
+            self.async_song = None
+            self.scale.set_fill_level(self.adjustment.get_upper())
+            self.scale.set_show_fill_level(False)
+            self.scale.set_restrict_to_fill_level(False)
             self.init_adjustment()
             if self.play_type in (PlayType.SONG, PlayType.MV):
                 self.app.playlist.on_song_downloaded(play=True)
@@ -325,7 +343,6 @@ class Player(Gtk.Box):
             self.dbus.update_meta()
             self.dbus.enable_seek()
 
-        self.scale.set_sensitive(True)
         GLib.idle_add(_on_song_download)
 
     def cache_next_song(self):
@@ -333,6 +350,8 @@ class Player(Gtk.Box):
             use_mv = True
         elif self.play_type in (PlayType.SONG, PlayType.RADIO):
             use_mv = False
+        if self.async_next_song:
+            self.async_next_song.destroy()
         self.async_next_song = Net.AsyncSong(self.app)
         self.async_next_song.get_song(self.next_song, use_mv=use_mv)
 
@@ -485,66 +504,55 @@ class Player(Gtk.Box):
         self.curr_radio_item = radio_item
         self.curr_song = song
         self.update_favorite_button_status()
-        self.scale.set_sensitive(False)
-        self.async_song = Net.AsyncSong(self.app)
-        self.async_song.connect('chunk-received', self.on_chunk_received)
-        self.async_song.connect('can-play', self.on_song_can_play)
-        self.async_song.connect('downloaded', self.on_song_downloaded)
-        self.async_song.get_song(song)
-
+        self.create_new_async(song)
 
     # MV part
     def check_audio_streams(self):
         self.use_ok_btn.set_sensitive(self.playbin.get_audios() > 1)
 
-    def on_use_audio_toggled(self, toggle_button):
-        if not toggle_button.get_active():
-            return
-        self.app.lrc.show_music()
-        self.load(self.curr_song)
-
-    def on_use_mtv_toggled(self, toggle_button):
+    def on_play_type_toggled(self, toggle_button, play_type):
         if not toggle_button.get_active():
             return
         if self.play_type == PlayType.NONE:
             return
-        # If current playtype is MV, only switch audio stream
-        if self.play_type == PlayType.MV:
-            self.playbin.set_current_audio(MTV_AUDIO)
-        else:
-            self.app.lrc.show_mv()
-            self.load_mv(self.curr_song)
-            self.app.popup_page(self.app.lrc.app_page)
+        elif play_type == PlayType.SONG or play_type == PlayType.RADIO:
+            self.app.lrc.show_music()
+            self.load(self.curr_song)
+        elif play_type == PlayType.MV:
+            if self.play_type == PlayType.KARAOKE:
+                self.playbin.set_current_audio(MTV_AUDIO)
+                self.play_type = PlayType.MV
+            else:
+                self.app.lrc.show_mv()
+                self.load_mv(self.curr_song)
+                self.app.popup_page(self.app.lrc.app_page)
+        elif play_type == PlayType.KARAOKE:
+            if self.play_type == PlayType.MV:
+                self.playbin.set_current_audio(OK_AUDIO)
+                self.play_type = PlayType.KARAOKE
+            else:
+                self.app.lrc.show_mv()
+                self.load_mv(self.curr_song)
+                self.app.popup_page(self.app.lrc.app_page)
 
-    def on_use_ok_toggled(self, toggle_button):
-        if not toggle_button.get_active():
-            return
-        if self.play_type == PlayType.NONE:
-            return
-        if self.play_type == PlayType.MV:
-            self.playbin.set_current_audio(OK_AUDIO)
-        else:
-            self.app.lrc.show_mv()
-            self.load_mv(self.curr_song)
-            self.app.popup_page(self.app.lrc.app_page)
 
     def load_mv(self, song):
         self.play_type = PlayType.MV
         self.curr_song = song
         self.update_favorite_button_status()
         self.stop_player()
-        self.scale.set_fill_level(0)
-        self.scale.set_show_fill_level(True)
-        self.async_song = Net.AsyncSong(self.app)
-        self.async_song.connect('chunk-received', self.on_chunk_received)
-        self.async_song.connect('can-play', self.on_song_can_play)
-        self.async_song.connect('downloaded', self.on_song_downloaded)
-        self.async_song.get_song(song, use_mv=True)
+        self.use_mtv_btn.handler_block(self.use_mtv_sid)
+        self.use_mtv_btn.set_active(True)
+        self.use_mtv_btn.handler_unblock(self.use_mtv_sid)
+        self.create_new_async(song, use_mv=True)
 
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
-            mv_link, mv_path = mv_args
-            self.use_mtv_btn.set_sensitive(mv_link is not False)
+            cached, mv_link, mv_path = mv_args
+            if cached or mv_link:
+                self.use_mtv_btn.set_sensitive(True)
+            else:
+                self.use_mtv_btn.set_sensitive(False)
         Net.async_call(
                 Net.get_song_link, _update_mv_link,
                 self.curr_song, self.app.conf, True)
@@ -759,7 +767,6 @@ class Player(Gtk.Box):
         self.play_button.set_icon_name('media-playback-pause-symbolic')
         self.playbin.stop()
         self.scale.set_value(0)
-        #self.scale.set_sensitive(False)
         if self.play_type != PlayType.MV:
             self.use_audio_btn.handler_block(self.use_audio_sid)
             self.use_audio_btn.set_active(True)

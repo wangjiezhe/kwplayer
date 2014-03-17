@@ -139,6 +139,77 @@ class NormalSongTab(Gtk.ScrolledWindow):
             model.remove(_iter)
 
 
+class ExportDialog(Gtk.Dialog):
+
+    def __init__(self, parent, liststore):
+        super().__init__(
+                _('Export Songs'), parent.app.window, Gtk.DialogFlags.MODAL,
+                (Gtk.STOCK_CLOSE, Gtk.ResponseType.OK,))
+        self.parent = parent
+        self.liststore = liststore
+        self.app = parent.app
+
+        self.set_border_width(15)
+
+        box = self.get_content_area()
+        box.set_size_request(540, 260)
+        box.set_spacing = 5
+
+        folder_label = Widgets.BoldLabel(_('Choose export folder:'))
+        box.pack_start(folder_label, False, True, 2)
+
+        self.folder_chooser = Widgets.FolderChooser(self.app.window)
+        self.folder_chooser.props.margin_left = 20
+        box.pack_start(self.folder_chooser, False, True, 0)
+
+        self.with_lrc = Gtk.CheckButton(_('With lyrics'))
+        self.with_lrc.set_tooltip_text(_('Export lyrics to the same folder'))
+        self.with_lrc.props.margin_top = 20
+        box.pack_start(self.with_lrc, False, False, 0)
+
+        export_box = Gtk.Box(spacing=5)
+        export_box.props.margin_top = 20
+        box.pack_start(export_box, False, True, 0)
+
+        self.export_prog = Gtk.ProgressBar()
+        self.export_prog.props.show_text = True
+        self.export_prog.props.text = ''
+        export_box.pack_start(self.export_prog, True, True, 0)
+
+        export_btn = Gtk.Button(_('Export'))
+        export_btn.connect('clicked', self.do_export)
+        export_box.pack_start(export_btn, False, False, 0)
+
+        infobar = Gtk.InfoBar()
+        infobar.props.margin_top = 20
+        box.pack_start(infobar, False, True, 0)
+        info_content = infobar.get_content_area()
+        info_label = Gtk.Label(_('Only cached songs will be exported'))
+        info_content.pack_start(info_label, False, False, 0)
+        box.show_all()
+
+    def do_export(self, button):
+        num_songs = len(self.liststore)
+        export_dir = self.folder_chooser.get_filename()
+        export_lrc = self.with_lrc.get_active()
+        for i, item in enumerate(self.liststore):
+            song = Widgets.song_row_to_dict(item, start=0)
+            cached, song_link, song_path = Net.get_song_link(
+                    song, self.app.conf)
+            if not cached:
+                continue
+            self.export_prog.set_fraction(i / num_songs)
+            self.export_prog.set_text(song['name'])
+            shutil.copy(song_path, export_dir)
+
+            if export_lrc:
+                lrc_path, lrc_cached = Net.get_lrc_path(song)
+                if lrc_cached:
+                    shutil.copy(lrc_path, export_dir)
+            Gdk.Window.process_all_updates()
+        self.destroy()
+
+
 class PlayList(Gtk.Box):
     '''Playlist tab in notebook.'''
 
@@ -347,12 +418,11 @@ class PlayList(Gtk.Box):
             # curr_playing contains: listname, path
             self.curr_playing = [list_name, path]
             song = Widgets.song_row_to_dict(liststore[path], start=0)
-            self.app.player.load(song)
-            return
-        liststore.append(Widgets.song_dict_to_row(song))
-        self.curr_playing = [list_name, len(liststore)-1, ]
-        self.locate_curr_song(popup_page=False)
-        if use_mv:
+        else:
+            liststore.append(Widgets.song_dict_to_row(song))
+            self.curr_playing = [list_name, len(liststore)-1, ]
+            self.locate_curr_song(popup_page=False)
+        if use_mv is True:
             self.app.player.load_mv(song)
         else:
             self.app.player.load(song)
@@ -435,17 +505,19 @@ class PlayList(Gtk.Box):
                 pass
             Gdk.Window.process_all_updates()
 
-        def _on_can_play(widget, song_path, status, error=None):
-            if status == 'OK':
-                return
-
-            # stop cache service when error occurs
+        def _on_disk_error(widget, song_path, eror=None):
             self.cache_enabled = False
-            if status == 'URLError':
-                Widgets.network_error(
-                        self.app.window, _('Failed to cache song'))
-            elif status == 'FileNotFoundError':
-                Widgets.filesystem_error(self.app.window, song_path)
+            GLib.idle_add(
+                    Widgets.filesystem_error,
+                    self.app.window,
+                    song_path)
+
+        def _on_network_error(widget, song_link, error=None):
+            self.cache_enabled = False
+            GLib.idle_add(
+                    Widgets.network_error,
+                    self.app.window,
+                    _('Failed to cache song'))
 
         def _on_downloaded(widget, song_path, error=None):
             if song_path:
@@ -472,8 +544,9 @@ class PlayList(Gtk.Box):
         song = Widgets.song_row_to_dict(liststore[path], start=0)
         print('will download:', song)
         self.cache_job = Net.AsyncSong(self.app)
-        self.cache_job.connect('can-play', _on_can_play)
         self.cache_job.connect('downloaded', _on_downloaded)
+        self.cache_job.connect('disk-error', _on_disk_error)
+        self.cache_job.connect('network-error', _on_network_error)
         self.cache_job.get_song(song)
 
     # Others
@@ -601,26 +674,6 @@ class PlayList(Gtk.Box):
         model.remove(_iter)
 
     def on_export_playlist_button_clicked(self, button):
-        def do_export(button):
-            num_songs = len(liststore)
-            export_dir = folder_chooser.get_filename()
-            export_lrc = with_lrc.get_active()
-            for i, item in enumerate(liststore):
-                song = Widgets.song_row_to_dict(item, start=0)
-                song_link, song_path = Net.get_song_link(
-                        song, self.app.conf)
-                if song_link is not True:
-                    continue
-                shutil.copy(song_path, export_dir)
-
-                if export_lrc:
-                    (lrc_path, lrc_cached) = Net.get_lrc_path(song)
-                    if lrc_cached:
-                        shutil.copy(lrc_path, export_dir)
-                export_prog.set_fraction(i / num_songs)
-                Gdk.Window.process_all_updates()
-            dialog.destroy()
-
         selection = self.treeview_left.get_selection()
         model, _iter = selection.get_selected()
         if not _iter:
@@ -630,46 +683,9 @@ class PlayList(Gtk.Box):
         disname, list_name, editable, tooltip = model[path]
         liststore = self.tabs[list_name].liststore
 
-        dialog = Gtk.Dialog(
-                _('Export Songs'), self.app.window, Gtk.DialogFlags.MODAL,
-                (Gtk.STOCK_CLOSE, Gtk.ResponseType.OK,))
-        box = dialog.get_content_area()
-        box.set_size_request(600, 320)
-        box.set_border_width(5)
-
-        folder_label = Widgets.BoldLabel(_('Choose export folder'))
-        box.pack_start(folder_label, False, True, 0)
-
-        folder_chooser = Widgets.FolderChooser(self.app.window)
-        folder_chooser.props.margin_left = 20
-        box.pack_start(folder_chooser, False, True, 0)
-
-        with_lrc = Gtk.CheckButton(_('With lyrics'))
-        with_lrc.set_tooltip_text(_('Export lyrics to the same folder'))
-        with_lrc.props.margin_top = 20
-        box.pack_start(with_lrc, False, False, 0)
-
-        export_box = Gtk.Box(spacing=5)
-        export_box.props.margin_top = 20
-        box.pack_start(export_box, False, True, 0)
-
-        export_prog = Gtk.ProgressBar()
-        export_box.pack_start(export_prog, True, True, 0)
-
-        export_btn = Gtk.Button(_('Export'))
-        export_btn.connect('clicked', do_export)
-        export_box.pack_start(export_btn, False, False, 0)
-
-        infobar = Gtk.InfoBar()
-        infobar.props.margin_top = 20
-        box.pack_start(infobar, False, True, 0)
-        info_content = infobar.get_content_area()
-        info_label = Gtk.Label(_('Only cached songs will be exported'))
-        info_content.pack_start(info_label, False, False, 0)
-
-        box.show_all()
-        dialog.run()
-        dialog.destroy()
+        export_dialog = ExportDialog(self, liststore)
+        export_dialog.run()
+        export_dialog.destroy()
 
     def advise_new_playlist_name(self, disname):
         self.playlist_advice_disname = disname
