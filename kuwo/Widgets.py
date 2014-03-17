@@ -124,6 +124,7 @@ class FolderChooser(Gtk.Box):
         self.entry = Gtk.Entry()
         self.entry.set_text(self.filepath)
         self.entry.props.editable = False
+        self.entry.props.can_focus = False
         self.entry.props.width_chars = 30
         self.pack_start(self.entry, True, True, 0)
 
