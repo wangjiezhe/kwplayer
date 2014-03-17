@@ -211,6 +211,7 @@ class Player(Gtk.Box):
         self.adjustment = Gtk.Adjustment(0, 0, 100, 1, 10, 0)
         self.adjustment.connect('changed', self.on_adjustment_changed)
         self.scale.set_adjustment(self.adjustment)
+        self.scale.set_show_fill_level(False)
         self.scale.set_restrict_to_fill_level(False)
         self.scale.props.draw_value = False
         self.scale.connect('change-value', self.on_scale_change_value)
@@ -257,20 +258,23 @@ class Player(Gtk.Box):
     def create_new_async(self, *args, **kwds):
         self.scale.set_fill_level(0)
         self.scale.set_show_fill_level(True)
+        self.scale.set_restrict_to_fill_level(True)
+        self.adjustment.set_lower(0.0)
+        self.adjustment.set_upper(100.0)
         if self.async_song:
             self.async_song.destroy()
         self.async_song = Net.AsyncSong(self.app)
-        #self.async_song.connect('chunk-received', self.on_chunk_received)
+        self.async_song.connect('chunk-received', self.on_chunk_received)
         self.async_song.connect('can-play', self.on_song_can_play)
         self.async_song.connect('downloaded', self.on_song_downloaded)
         self.async_song.connect('disk-error', self.on_song_disk_error)
         self.async_song.connect('network-error', self.on_song_network_error)
         self.async_song.get_song(*args, **kwds)
 
-#    def on_chunk_received(self, widget, percent):
-#        def _update_fill_level():
-#            self.scale.set_fill_level(percent)
-#        GLib.idle_add(_update_fill_level)
+    def on_chunk_received(self, widget, percent):
+        def _update_fill_level():
+            self.scale.set_fill_level(percent * self.adjustment.get_upper())
+        GLib.idle_add(_update_fill_level)
 
     def on_song_disk_error(self, widget, song_path):
         '''Disk error: occurs when disk is not available.'''
@@ -293,8 +297,6 @@ class Player(Gtk.Box):
             uri = 'file://' + song_path
             self.meta_url = uri
 
-            self.scale.set_fill_level(0)
-            self.scale.set_show_fill_level(False)
             if self.play_type in (PlayType.SONG, PlayType.RADIO):
                 self.app.lrc.show_music()
                 self.playbin.load_audio(uri)
@@ -316,6 +318,11 @@ class Player(Gtk.Box):
 
     def on_song_downloaded(self, widget, song_path):
         def _on_song_download():
+            self.async_song.destroy()
+            self.async_song = None
+            self.scale.set_fill_level(self.adjustment.get_upper())
+            self.scale.set_show_fill_level(False)
+            self.scale.set_restrict_to_fill_level(False)
             self.init_adjustment()
             if self.play_type in (PlayType.SONG, PlayType.MV):
                 self.app.playlist.on_song_downloaded(play=True)
@@ -330,7 +337,6 @@ class Player(Gtk.Box):
             self.dbus.update_meta()
             self.dbus.enable_seek()
 
-        self.scale.set_sensitive(True)
         GLib.idle_add(_on_song_download)
 
     def cache_next_song(self):
@@ -338,6 +344,8 @@ class Player(Gtk.Box):
             use_mv = True
         elif self.play_type in (PlayType.SONG, PlayType.RADIO):
             use_mv = False
+        if self.async_next_song:
+            self.async_next_song.destroy()
         self.async_next_song = Net.AsyncSong(self.app)
         self.async_next_song.get_song(self.next_song, use_mv=use_mv)
 

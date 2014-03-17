@@ -794,7 +794,7 @@ class AsyncSong(GObject.GObject):
                 GObject.TYPE_NONE, (str, )),
             'chunk-received': (GObject.SIGNAL_RUN_LAST,
                 # percent
-                GObject.TYPE_NONE, (int, )),
+                GObject.TYPE_NONE, (GObject.TYPE_DOUBLE, )),
             'downloaded': (GObject.SIGNAL_RUN_LAST, 
                 # song_path
                 GObject.TYPE_NONE, (str, )),
@@ -859,7 +859,7 @@ class AsyncSong(GObject.GObject):
                         return
                     chunk = req.read(CHUNK)
                     received_size += len(chunk)
-                    percent = int(received_size/content_length * 100)
+                    percent = received_size / content_length
                     self.emit('chunk-received', percent)
                     # this signal only emit once.
                     if ((received_size > chunk_to_play or percent > 40) and
