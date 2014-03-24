@@ -9,11 +9,9 @@ import dbus
 import dbus.service
 import dbus.mainloop.glib
 from dbus.mainloop.glib import DBusGMainLoop
-from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gst
 
-GLib.threads_init()
 dbus.mainloop.glib.threads_init()
 
 BUS_NAME = 'org.mpris.MediaPlayer2.kwplayer'
