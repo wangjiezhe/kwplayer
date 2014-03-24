@@ -668,7 +668,7 @@ class Player(Gtk.Box):
         dialog.set_logo(self.app.theme['app-logo'])
         dialog.set_version(Config.VERSION)
         dialog.set_comments(Config.DESCRIPTION)
-        dialog.set_copyright('Copyright (c) 2013 LiuLang')
+        dialog.set_copyright(Config.COPYRIGHT)
         dialog.set_website(Config.HOMEPAGE)
         dialog.set_license_type(Gtk.License.GPL_3_0)
         dialog.set_authors(Config.AUTHORS)

@@ -8,7 +8,7 @@ import os
 import sys
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
-from gi.repository import GLib
+from gi.repository import GObject
 from gi.repository import Gtk
 
 from kuwo import Config
@@ -27,7 +27,8 @@ from kuwo.TopCategories import TopCategories
 from kuwo.TopList import TopList
 from kuwo.Shortcut import Shortcut
 
-GLib.threads_init()
+if Gtk.MAJOR_VERSION <= 3 and Gtk.MINOR_VERSION < 10:
+    GObject.threads_init()
 DBUS_APP_NAME = 'org.liulang.kwplayer'
 
 

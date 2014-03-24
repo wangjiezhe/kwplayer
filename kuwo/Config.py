@@ -30,6 +30,7 @@ APPNAME = _('KW Player')
 VERSION = '3.3.1'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
+COPYRIGHT = 'Copyright (c) 2013-2014 LiuLang'
 DESCRIPTION = _('A simple music player on Linux desktop.')
 
 ICON_PATH = os.path.join(PREF, 'kuwo', 'themes', 'default')
