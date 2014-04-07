@@ -286,57 +286,60 @@ class TreeViewSongs(Gtk.TreeView):
         checked.connect('toggled', self.on_song_checked)
         column_check = Gtk.TreeViewColumn('Checked', checked, active=0)
         self.append_column(column_check)
-
         name = Gtk.CellRendererText()
         col_name = TreeViewColumnText('Name', name, text=1)
         self.append_column(col_name)
-
         artist = Gtk.CellRendererText()
         col_artist = TreeViewColumnText('Artist', artist, text=2)
         self.append_column(col_artist)
-
         album = Gtk.CellRendererText()
         col_album = TreeViewColumnText('Album', album, text=3)
         self.append_column(col_album)
-
         play = Gtk.CellRendererPixbuf(pixbuf=app.theme['play'])
         col_play = TreeViewColumnIcon('Play', play)
         self.append_column(col_play)
-
         add = Gtk.CellRendererPixbuf(pixbuf=app.theme['add'])
         col_add = TreeViewColumnIcon('Add', add)
         self.append_column(col_add)
-
         cache = Gtk.CellRendererPixbuf(pixbuf=app.theme['cache'])
         col_cache = TreeViewColumnIcon('Cache', cache)
         self.append_column(col_cache)
 
         self.connect('row_activated', self.on_row_activated)
+        self.connect('button-press-event', self.on_button_pressed)
 
     def on_song_checked(self, widget, path):
         self.liststore[path][0] = not self.liststore[path][0]
 
-    def on_row_activated(self, treeview, path, column):
-        print('on row activated')
-        model = treeview.get_model()
-        index = treeview.get_columns().index(column)
-        song = song_row_to_dict(model[path])
-
-        if index in (1, 4):
+    def on_button_pressed(self, treeview, event):
+        path, column, cell_x, cell_y  = treeview.get_path_at_pos(
+                event.x, event.y)
+        song = song_row_to_dict(self.liststore[path])
+        index = self.get_columns().index(column)
+        if index == 4:
             self.app.playlist.play_song(song)
-        elif index == 2:
-            if len(song['artist']) == 0:
-                print('artist is empty, no searching')
-            self.app.search.search_artist(song['artist'])
-        elif index == 3:
-            if len(song['album']) == 0:
-                print('album is empty, no searching')
-                return
-            self.app.search.search_album(song['album'])
         elif index == 5:
             self.app.playlist.add_song_to_playlist(song)
         elif index == 6:
             self.app.playlist.cache_song(song)
+
+
+    def on_row_activated(self, treeview, path, column):
+        song = song_row_to_dict(self.liststore[path])
+        index = self.get_columns().index(column)
+        if index == 1:
+            self.app.playlist.play_song(song)
+        elif index == 2:
+            if not song['artist']:
+                print('artist is empty, no searching')
+                return
+            self.app.search.search_artist(song['artist'])
+        elif index == 3:
+            if not song['album']:
+                print('album is empty, no searching')
+                return
+            self.app.search.search_album(song['album'])
+
 
 def network_error(parent, msg):
     dialog = Gtk.MessageDialog(

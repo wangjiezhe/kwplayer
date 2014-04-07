@@ -86,17 +86,19 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.delete_col = Widgets.TreeViewColumnIcon(
                 _('Delete'), delete_cell)
         self.treeview.append_column(self.delete_col)
-        self.treeview.connect('key-press-event', self.on_key_pressed)
-        self.treeview.connect('button-press-event', self.on_button_pressed)
+        self.treeview.connect(
+                'key-press-event', self.on_treeview_key_pressed)
+        self.treeview.connect(
+                'button-press-event', self.on_treeview_button_pressed)
         
-    def on_key_pressed(self, widget, event):
+    def on_treeview_key_pressed(self, treeview, event):
         if event.keyval == Gdk.KEY_Delete:
             model, paths = self.selection.get_selected_rows()
             # paths needs to be reversed, or else an IndexError throwed.
             for path in reversed(paths):
                 model.remove(model[path].iter)
 
-    def on_button_pressed(self, treeview, event):
+    def on_treeview_button_pressed(self, treeview, event):
         path, column, cell_x, cell_y  = treeview.get_path_at_pos(
                 event.x, event.y)
         if column != self.delete_col:

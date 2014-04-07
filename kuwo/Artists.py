@@ -72,7 +72,6 @@ class Artists(Gtk.Box):
         self.pack_start(self.buttonbox, False, False, 0)
 
     def first(self):
-        print('Artist.first() --')
         if not self.first_run:
             return
         self.first_run = False
