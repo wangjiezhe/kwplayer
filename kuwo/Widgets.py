@@ -312,8 +312,10 @@ class TreeViewSongs(Gtk.TreeView):
         self.liststore[path][0] = not self.liststore[path][0]
 
     def on_button_pressed(self, treeview, event):
-        path, column, cell_x, cell_y  = treeview.get_path_at_pos(
-                event.x, event.y)
+        path_info = treeview.get_path_at_pos(event.x, event.y)
+        if not path_info:
+            return
+        path, column, cell_x, cell_y = path_info
         song = song_row_to_dict(self.liststore[path])
         index = self.get_columns().index(column)
         if index == 4:

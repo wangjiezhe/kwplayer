@@ -99,8 +99,10 @@ class NormalSongTab(Gtk.ScrolledWindow):
                 model.remove(model[path].iter)
 
     def on_treeview_button_pressed(self, treeview, event):
-        path, column, cell_x, cell_y  = treeview.get_path_at_pos(
-                event.x, event.y)
+        path_info = treeview.get_path_at_pos(event.x, event.y)
+        if not path_info:
+            return
+        path, column, cell_x, cell_y = path_info
         if column != self.delete_col:
             return
         self.liststore.remove(self.liststore[path].iter)
@@ -483,11 +485,15 @@ class PlayList(Gtk.Box):
         tree = self.tabs[list_name].treeview
         Net.async_call(start, stop)
 
+    # Open API
     def cache_song(self, song):
         rid = song['rid']
         liststore = self.tabs['Caching'].liststore
         liststore.append(Widgets.song_dict_to_row(song))
+        if not self.cache_enabled:
+            self.switch_caching_daemon()
 
+    # Open API
     def cache_songs(self, songs):
         for song in songs:
             self.cache_song(song)
@@ -497,7 +503,7 @@ class PlayList(Gtk.Box):
 
     # song cache daemon
     def switch_caching_daemon(self, *args):
-        if self.cache_enabled is False:
+        if not self.cache_enabled:
             self.cache_enabled = True
             self.button_start.set_label(_('Stop Cache Service'))
             self.do_cache_song_pool()
