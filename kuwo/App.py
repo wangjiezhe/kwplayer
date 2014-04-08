@@ -90,7 +90,9 @@ class App:
         self.app.run(argv)
 
     def quit(self):
-        self.window.destroy()
+        gdk_win = self.window.get_window()
+        if gdk_win and not gdk_win.is_destroyed():
+            self.window.destroy()
         self.shortcut.quit()
         self.app.quit()
 

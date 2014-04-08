@@ -127,7 +127,7 @@ Gentoo 中手动安装依赖包
 根据你的发行版, 按照上面的方法安装好依赖包之后, 就可以开始安装kwplayer本身了.
 
 * 安装: `# pip3 install kwplayer`
-* 更新: `# pip3 install upgrade kwplayer`
+* 更新: `# pip3 install --upgrade kwplayer`
 
 
 Tips & Tricks

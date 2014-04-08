@@ -49,7 +49,7 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.liststore = Gtk.ListStore(str, str, str, int, int, int)
 
         self.treeview = Gtk.TreeView(model=self.liststore)
-        #self.treeview.set_headers_visible(False)
+        self.selection = self.treeview.get_selection()
         self.treeview.set_search_column(0)
         self.treeview.props.headers_clickable = True
         self.treeview.props.headers_visible = True
@@ -83,17 +83,29 @@ class NormalSongTab(Gtk.ScrolledWindow):
 
         delete_cell = Gtk.CellRendererPixbuf(
                 icon_name='user-trash-symbolic')
-        delete_col = Widgets.TreeViewColumnIcon(_('Delete'), delete_cell)
-        self.treeview.append_column(delete_col)
-        self.connect('key-press-event', self.on_key_pressed)
+        self.delete_col = Widgets.TreeViewColumnIcon(
+                _('Delete'), delete_cell)
+        self.treeview.append_column(self.delete_col)
+        self.treeview.connect(
+                'key-press-event', self.on_treeview_key_pressed)
+        self.treeview.connect(
+                'button-press-event', self.on_treeview_button_pressed)
         
-    def on_key_pressed(self, widget, event):
+    def on_treeview_key_pressed(self, treeview, event):
         if event.keyval == Gdk.KEY_Delete:
-            selection = self.treeview.get_selection()
-            model, paths = selection.get_selected_rows()
+            model, paths = self.selection.get_selected_rows()
             # paths needs to be reversed, or else an IndexError throwed.
             for path in reversed(paths):
                 model.remove(model[path].iter)
+
+    def on_treeview_button_pressed(self, treeview, event):
+        path_info = treeview.get_path_at_pos(event.x, event.y)
+        if not path_info:
+            return
+        path, column, cell_x, cell_y = path_info
+        if column != self.delete_col:
+            return
+        self.liststore.remove(self.liststore[path].iter)
 
     def on_treeview_row_activated(self, treeview, path, column):
         model = treeview.get_model()
@@ -105,8 +117,6 @@ class NormalSongTab(Gtk.ScrolledWindow):
             self.app.search.search_artist(song['artist'])
         elif index == 2:
             self.app.search.search_album(song['album'])
-        elif index == 3:
-            model.remove(model[path].iter)
 
     def on_drag_data_get(self, treeview, drag_context, sel_data, info, 
                          time):
@@ -475,11 +485,15 @@ class PlayList(Gtk.Box):
         tree = self.tabs[list_name].treeview
         Net.async_call(start, stop)
 
+    # Open API
     def cache_song(self, song):
         rid = song['rid']
         liststore = self.tabs['Caching'].liststore
         liststore.append(Widgets.song_dict_to_row(song))
+        if not self.cache_enabled:
+            self.switch_caching_daemon()
 
+    # Open API
     def cache_songs(self, songs):
         for song in songs:
             self.cache_song(song)
@@ -489,7 +503,7 @@ class PlayList(Gtk.Box):
 
     # song cache daemon
     def switch_caching_daemon(self, *args):
-        if self.cache_enabled is False:
+        if not self.cache_enabled:
             self.cache_enabled = True
             self.button_start.set_label(_('Stop Cache Service'))
             self.do_cache_song_pool()

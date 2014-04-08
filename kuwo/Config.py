@@ -27,7 +27,7 @@ gettext.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '3.3.1'
+VERSION = '3.3.2'
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
 COPYRIGHT = 'Copyright (c) 2013-2014 LiuLang'

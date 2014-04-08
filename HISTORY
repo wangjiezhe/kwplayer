@@ -1,3 +1,12 @@
+3.3.2 - 2014.4.6
+* Support PyGObject 3.11
+* Redesign export dialog
+* Fixed: active MTV button when playing MTV
+* Show scale fill
+* Simplify error message dialog
+* Fixed: Invalid character in json string
+* Lazy loading artist tab
+
 3.3.1 - 2014.3.14
 * Add a favorite button to control panel
 * Fixed: i18n KeyError; reported by @MJsaka
