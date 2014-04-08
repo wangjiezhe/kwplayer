@@ -116,8 +116,7 @@ class Themes(Gtk.Box):
                 self.curr_sub_id, self.nodes_page)
         if not nodes:
             return
-        i = len(self.liststore_sub)
-        for node in nodes:
+        for i, node in enumerate(nodes):
             self.liststore_sub.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape(node['name']),
@@ -128,7 +127,6 @@ class Themes(Gtk.Box):
                 ])
             Net.update_liststore_image(
                     self.liststore_sub, i, 0, node['pic'])
-            i += 1
 
     def on_iconview_sub_item_activated(self, iconview, path):
         model = iconview.get_model()

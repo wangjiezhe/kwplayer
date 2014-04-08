@@ -107,8 +107,7 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
                 return content
         except KeyError:
             pass
-    retried = 0
-    while retried < retries:
+    for i in range(retries):
         try:
             req = request.urlopen(url, timeout=TIMEOUT)
             req_content = req.read()
@@ -117,7 +116,6 @@ def urlopen(_url, use_cache=True, retries=MAXTIMES):
             return req_content
         except URLError as e:
             print('Error: Net.urlopen', e, 'url:', url)
-            retried += 1
     return None
 
 def get_nodes(nid, page):
@@ -252,7 +250,6 @@ def get_artists(catid, page, prefix):
         ])
     if len(prefix) > 0:
         url = url + '&prefix=' + prefix
-    #print('Net.get_artists(), url:', url)
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)

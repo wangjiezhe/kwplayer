@@ -388,6 +388,22 @@ class Artists(Gtk.Box):
         self.append_artists(init=True)
 
     def append_artists(self, init=False):
+        def on_append_artists(info, error=None):
+            artists, self.artists_total = info
+            if error or not self.artists_total or not artists:
+                return
+            for i, artist in enumerate(artists):
+                _info = ' '.join([artist['music_num'], _(' songs'), ])
+                self.artists_liststore.append([
+                    self.app.theme['anonymous'],
+                    Widgets.unescape(artist['name']),
+                    int(artist['id']),
+                    _info,
+                    Widgets.set_tooltip(artist['name'], _info),
+                    ])
+                Net.update_artist_logo(
+                        self.artists_liststore, i, 0, artist['pic'])
+
         if init:
             self.artists_liststore.clear()
             self.artists_page = 0
@@ -400,25 +416,9 @@ class Artists(Gtk.Box):
         pref_index = self.pref_combo.get_active()
         catid = model[_iter][1]
         prefix = self.pref_liststore[pref_index][1]
-        # TODO: use async_call()
-        artists, self.artists_total = Net.get_artists(
-                catid, self.artists_page, prefix)
-        if self.artists_total == 0:
-            return
-
-        i = len(self.artists_liststore)
-        for artist in artists:
-            _info = ' '.join([artist['music_num'], _(' songs'), ])
-            self.artists_liststore.append([
-                self.app.theme['anonymous'],
-                Widgets.unescape(artist['name']),
-                int(artist['id']), 
-                _info,
-                Widgets.set_tooltip(artist['name'], _info),
-                ])
-            Net.update_artist_logo(
-                    self.artists_liststore, i, 0, artist['pic'])
-            i += 1
+        Net.async_call(
+                Net.get_artists, on_append_artists, catid,
+                self.artists_page, prefix)
 
     def on_artists_iconview_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -521,8 +521,7 @@ class Artists(Gtk.Box):
             albums, self.artist_albums_total = albums_args
             if self.artist_albums_total == 0:
                 return
-            i = len(self.artist_albums_liststore)
-            for album in albums:
+            for i, album in enumerate(albums):
                 self.artist_albums_liststore.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(album['name']),
@@ -533,7 +532,6 @@ class Artists(Gtk.Box):
                     ])
                 Net.update_album_covers(
                         self.artist_albums_liststore, i, 0, album['pic'])
-                i += 1
             self.artist_albums_page += 1
             if self.artist_albums_page < self.artist_albums_total - 1:
                 self.append_artist_albums()
@@ -559,8 +557,7 @@ class Artists(Gtk.Box):
             mvs, self.artist_mv_total = mv_args
             if self.artist_mv_total == 0:
                 return
-            i = len(self.artist_mv_liststore)
-            for mv in mvs:
+            for i, mv in enumerate(mvs):
                 self.artist_mv_liststore.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(mv['name']),
@@ -573,7 +570,6 @@ class Artists(Gtk.Box):
                     ])
                 Net.update_mv_image(
                         self.artist_mv_liststore, i, 0, mv['pic'])
-                i += 1
             self.artist_mv_page += 1
             if self.artist_mv_page < self.artist_mv_total - 1:
                 self.append_artist_mv()
@@ -600,8 +596,7 @@ class Artists(Gtk.Box):
             artists, self.artist_similar_total = similar_args
             if self.artist_similar_total == 0:
                 return
-            i = len(self.artist_similar_liststore)
-            for artist in artists:
+            for i, artist in enumerate(artists):
                 _info = ''.join([artist['songnum'], _(' songs'), ])
                 self.artist_similar_liststore.append([
                     self.app.theme['anonymous'],
@@ -612,7 +607,6 @@ class Artists(Gtk.Box):
                     ])
                 Net.update_artist_logo(
                         self.artist_similar_liststore, i, 0, artist['pic'])
-                i += 1
             self.artist_similar_page += 1
             if self.artist_similar_page < self.artist_similar_total - 1:
                 self.append_artist_similar()

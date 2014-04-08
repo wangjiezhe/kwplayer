@@ -92,8 +92,7 @@ class MV(Gtk.Box):
             songs, self.songs_total = songs_args
             if self.songs_total == 0:
                 return
-            i = len(self.liststore_songs)
-            for song in songs:
+            for i, song in enumerate(songs):
                 self.liststore_songs.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(song['name']),
@@ -106,7 +105,6 @@ class MV(Gtk.Box):
                     ])
                 Net.update_mv_image(
                         self.liststore_songs, i, 0, song['mvpic'])
-                i += 1
             self.songs_page += 1
             if self.songs_page < self.songs_total - 1:
                 self.append_songs()

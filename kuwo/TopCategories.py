@@ -128,8 +128,7 @@ class TopCategories(Gtk.Box):
             nodes, self.sub1_total = sub1_args
             if not nodes or self.sub1_total == 0:
                 return
-            i = len(self.liststore_sub1)
-            for node in nodes:
+            for i, node in enumerate(nodes):
                 _id = 'id' if self.use_sub2 else 'sourceid'
                 if 'tips' in node and len(node['tips']) > 5:
                     _tooltip = Widgets.set_tooltip_with_song_tips(
@@ -146,7 +145,6 @@ class TopCategories(Gtk.Box):
                     ])
                 Net.update_liststore_image(
                         self.liststore_sub1, i, 0, node['pic'])
-                i += 1
 
             self.sub1_page += 1
             if self.sub1_page < self.sub1_total - 1:
@@ -186,8 +184,7 @@ class TopCategories(Gtk.Box):
             nodes, self.sub2_total = sub2_args
             if not nodes or self.sub2_total == 0:
                 return
-            i = len(self.liststore_sub2)
-            for node in nodes:
+            for i, node in enumerate(nodes):
                 self.liststore_sub2.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(node['name']),
@@ -198,7 +195,6 @@ class TopCategories(Gtk.Box):
                     ])
                 Net.update_liststore_image(
                         self.liststore_sub2, i, 0, node['pic'])
-                i += 1
 
             self.sub2_page += 1
             if self.sub2_page < self.sub2_total - 1:
