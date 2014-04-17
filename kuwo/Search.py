@@ -169,24 +169,21 @@ class Search(Gtk.Box):
     def show_artists(self, reset_status=False):
         def _append_artists(artists_args, error=None):
             artists, hit, self.artists_total = artists_args
-            if hit == 0:
-                if reset_status:
-                    self.artists_button.set_label(
-                            '{0} (0)'.format(_('Artists')))
+            if (error or not hit) and reset_status:
+                self.artists_button.set_label('{0} (0)'.format(_('Artists')))
                 return
             self.artists_button.set_label(
                     '{0} ({1})'.format(_('Artists'), hit))
-            i = len(self.liststore_artists)
             for artist in artists:
-                self.liststore_artists.append([
+                tree_iter = self.liststore_artists.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(artist['ARTIST']),
                     int(artist['ARTISTID']), 
                     Widgets.unescape(artist['COUNTRY']),
                     ])
                 Net.update_artist_logo(
-                        self.liststore_artists, i, 0, artist['PICPATH'])
-                i += 1
+                        self.liststore_artists,
+                        tree_iter, 0, artist['PICPATH'])
 
         keyword = self.search_entry.get_text()
         if not keyword:
@@ -200,20 +197,15 @@ class Search(Gtk.Box):
     def show_albums(self, reset_status=False):
         def _append_albums(albums_args, error=None):
             albums, hit, self.albums_total = albums_args
-            if hit == 0:
-                if reset_status:
-                    self.albums_button.set_label(
-                            '{0} (0)'.format(_('Albums')))
+            if (error or hit == 0) and reset_status:
+                self.albums_button.set_label(
+                        '{0} (0)'.format(_('Albums')))
                 return
             self.albums_button.set_label(
                     '{0} ({1})'.format(_('Albums'), hit))
-            i = len(self.liststore_albums)
             for album in albums:
-                if 'info' in album and album['info']:
-                    tooltip = Widgets.set_tooltip(album['name'], album['info'])
-                else:
-                    tooltip = Widgets.escape(album['name'])
-                self.liststore_albums.append([
+                tooltip = Widgets.escape(album.get('info', album['name']))
+                tree_iter = self.liststore_albums.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(album['name']),
                     int(album['albumid']), 
@@ -222,8 +214,7 @@ class Search(Gtk.Box):
                     tooltip,
                     ])
                 Net.update_album_covers(
-                        self.liststore_albums, i, 0, album['pic'])
-                i += 1
+                        self.liststore_albums, tree_iter, 0, album['pic'])
 
         keyword = self.search_entry.get_text()
         if not keyword:

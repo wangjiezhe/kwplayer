@@ -67,8 +67,8 @@ class MV(Gtk.Box):
             return
         nodes = nodes_wrap['child']
         self.liststore_nodes.clear()
-        for i, node in enumerate(nodes):
-            self.liststore_nodes.append([
+        for node in nodes:
+            tree_iter = self.liststore_nodes.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape(node['disname']),
                 int(node['sourceid']),
@@ -76,7 +76,7 @@ class MV(Gtk.Box):
                 Widgets.set_tooltip(node['disname'], node['info']),
                 ])
             Net.update_liststore_image(
-                    self.liststore_nodes, i, 0, node['pic'])
+                    self.liststore_nodes, tree_iter, 0, node['pic'])
 
     def on_iconview_nodes_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -90,11 +90,10 @@ class MV(Gtk.Box):
     def append_songs(self, init=False):
         def _append_songs(songs_args, error=None):
             songs, self.songs_total = songs_args
-            if self.songs_total == 0:
+            if error or not self.songs_total:
                 return
-            i = len(self.liststore_songs)
             for song in songs:
-                self.liststore_songs.append([
+                tree_iter = self.liststore_songs.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(song['name']),
                     Widgets.unescape(song['artist']),
@@ -105,8 +104,7 @@ class MV(Gtk.Box):
                     Widgets.set_tooltip(song['name'], song['artist']),
                     ])
                 Net.update_mv_image(
-                        self.liststore_songs, i, 0, song['mvpic'])
-                i += 1
+                        self.liststore_songs, tree_iter, 0, song['mvpic'])
             self.songs_page += 1
             if self.songs_page < self.songs_total - 1:
                 self.append_songs()

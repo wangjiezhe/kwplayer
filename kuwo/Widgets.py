@@ -50,7 +50,6 @@ def set_tooltip_with_song_tips(head, tip):
         try:
             results.append(fmt.format(escape(item[1]), escape(item[3])))
         except IndexError as e:
-            print(e, item)
             continue
     return '<b>{0}</b>\n\n{1}'.format(escape(head), '\n'.join(results))
 
