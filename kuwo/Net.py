@@ -87,6 +87,7 @@ def async_call(func, func_done, *args):
         GLib.idle_add(lambda: func_done(result, error))
 
     thread = threading.Thread(target=do_call, args=args)
+    thread.daemon = True
     thread.start()
 
 def hash_byte(_str):
