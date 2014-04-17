@@ -1,3 +1,12 @@
+3.3.3 - 2014.4.17
+* Fixed: update icons in IconWindow
+* Add timestamp to leveldb data
+* Set background threads as daemon
+* Using async_call to get artist list
+* Automatically start caching daemon when song is added to cache list
+* Single click to operate songs in songlist
+* Fixed: Warning: Source ID xxx was not found when attempting to remove it
+
 3.3.2 - 2014.4.6
 * Support PyGObject 3.11
 * Redesign export dialog
