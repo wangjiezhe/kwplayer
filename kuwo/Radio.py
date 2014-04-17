@@ -234,8 +234,8 @@ class Radio(Gtk.Box):
         radios, total_page = Net.get_nodes(nid, page)
         if total_page == 0:
             return
-        for i, radio in enumerate(radios):
-            self.liststore_radios.append([
+        for radio in radios:
+            tree_iter = self.liststore_radios.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape(radio['disname']), 
                 int(radio['sourceid'].split(',')[0]),
@@ -244,7 +244,7 @@ class Radio(Gtk.Box):
                 Widgets.set_tooltip(radio['disname'], radio['info']),
                 ])
             Net.update_liststore_image(
-                    self.liststore_radios, i, 0, radio['pic']),
+                    self.liststore_radios, tree_iter, 0, radio['pic']),
         for radio in self.playlists:
             radio_item = RadioItem(radio, self.app)
             self.box_myradio.pack_start(radio_item, False, False, 0)

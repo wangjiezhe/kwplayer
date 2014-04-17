@@ -392,9 +392,9 @@ class Artists(Gtk.Box):
             artists, self.artists_total = info
             if error or not self.artists_total or not artists:
                 return
-            for i, artist in enumerate(artists):
+            for artist in artists:
                 _info = ' '.join([artist['music_num'], _(' songs'), ])
-                self.artists_liststore.append([
+                tree_iter = self.artists_liststore.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(artist['name']),
                     int(artist['id']),
@@ -402,17 +402,17 @@ class Artists(Gtk.Box):
                     Widgets.set_tooltip(artist['name'], _info),
                     ])
                 Net.update_artist_logo(
-                        self.artists_liststore, i, 0, artist['pic'])
+                        self.artists_liststore, tree_iter, 0, artist['pic'])
 
         if init:
             self.artists_liststore.clear()
             self.artists_page = 0
             self.artists_win.get_vadjustment().set_value(0)
         selection = self.cate_treeview.get_selection()
-        result = selection.get_selected()
-        if result is None or len(result) != 2:
+        selected = selection.get_selected()
+        if not selected:
             return
-        model, _iter = result
+        model, _iter = selected
         pref_index = self.pref_combo.get_active()
         catid = model[_iter][1]
         prefix = self.pref_liststore[pref_index][1]
@@ -483,7 +483,7 @@ class Artists(Gtk.Box):
     def append_artist_songs(self, init=False):
         def _append_artist_songs(songs_args, error=None):
             songs, self.artist_songs_total = songs_args
-            if self.artist_songs_total == 0:
+            if error or self.artist_songs_total == 0:
                 return
             for song in songs:
                 self.artist_songs_liststore.append([
@@ -519,10 +519,10 @@ class Artists(Gtk.Box):
     def append_artist_albums(self, init=False):
         def _append_artist_albums(albums_args, error=None):
             albums, self.artist_albums_total = albums_args
-            if self.artist_albums_total == 0:
+            if error or self.artist_albums_total == 0:
                 return
-            for i, album in enumerate(albums):
-                self.artist_albums_liststore.append([
+            for album in albums:
+                tree_iter = self.artist_albums_liststore.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(album['name']),
                     int(album['albumid']),
@@ -531,7 +531,8 @@ class Artists(Gtk.Box):
                     Widgets.set_tooltip(album['name'], album['info']),
                     ])
                 Net.update_album_covers(
-                        self.artist_albums_liststore, i, 0, album['pic'])
+                        self.artist_albums_liststore,
+                        tree_iter, 0, album['pic'])
             self.artist_albums_page += 1
             if self.artist_albums_page < self.artist_albums_total - 1:
                 self.append_artist_albums()
@@ -555,10 +556,10 @@ class Artists(Gtk.Box):
     def append_artist_mv(self, init=False):
         def _append_artist_mv(mv_args, error=None):
             mvs, self.artist_mv_total = mv_args
-            if self.artist_mv_total == 0:
+            if error or self.artist_mv_total == 0:
                 return
-            for i, mv in enumerate(mvs):
-                self.artist_mv_liststore.append([
+            for mv in mvs:
+                tree_iter = self.artist_mv_liststore.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(mv['name']),
                     Widgets.unescape(mv['artist']),
@@ -569,7 +570,7 @@ class Artists(Gtk.Box):
                     Widgets.set_tooltip(mv['name'], mv['artist']),
                     ])
                 Net.update_mv_image(
-                        self.artist_mv_liststore, i, 0, mv['pic'])
+                        self.artist_mv_liststore, tree_iter, 0, mv['pic'])
             self.artist_mv_page += 1
             if self.artist_mv_page < self.artist_mv_total - 1:
                 self.append_artist_mv()
@@ -594,11 +595,11 @@ class Artists(Gtk.Box):
         self.first()
         def _append_artist_similar(similar_args, error=None):
             artists, self.artist_similar_total = similar_args
-            if self.artist_similar_total == 0:
+            if error or not self.artist_similar_total:
                 return
-            for i, artist in enumerate(artists):
+            for artist in artists:
                 _info = ''.join([artist['songnum'], _(' songs'), ])
-                self.artist_similar_liststore.append([
+                tree_iter = self.artist_similar_liststore.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(artist['name']),
                     int(artist['id']),
@@ -606,7 +607,8 @@ class Artists(Gtk.Box):
                     Widgets.set_tooltip(artist['name'], _info),
                     ])
                 Net.update_artist_logo(
-                        self.artist_similar_liststore, i, 0, artist['pic'])
+                        self.artist_similar_liststore,
+                        tree_iter, 0, artist['pic'])
             self.artist_similar_page += 1
             if self.artist_similar_page < self.artist_similar_total - 1:
                 self.append_artist_similar()
@@ -629,7 +631,9 @@ class Artists(Gtk.Box):
 
     def append_artist_info(self):
         def _append_artist_info(info, error=None):
-            if info and info['pic'] and len(info['pic']) > 0:
+            if error or not info:
+                return
+            if info.get('pic', None):
                 self.artist_info_pic.set_from_file(info['pic'])
             self.artist_info_name.set(info, 'name')
             self.artist_info_birthday.set(info, 'birthday')
@@ -690,7 +694,7 @@ class Artists(Gtk.Box):
     
     def append_album_songs(self):
         def _append_album_songs(songs, error=None):
-            if not songs:
+            if error or not songs:
                 return
             for song in songs:
                 self.album_songs_liststore.append([
@@ -712,15 +716,14 @@ class Artists(Gtk.Box):
     # Signal handlers for favorite artists tab
     def add_to_fav_artists(self, artist_id, init=False):
         def _append_fav_artist(info, error=None):
-            if info and info['pic'] and len(info['pic']) > 0:
+            if error or not info:
+                return
+            if info.get('pic', None):
                 pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
                         info['pic'], 100, 100)
             else:
                 pix = self.app.theme['anonymous']
-            if 'info' in info:
-                tip = Widgets.escape(info['info'])
-            else:
-                tip = ''
+            tip = Widgets.escape(info.get('info', ''))
             self.fav_artists_liststore.append(
                     [pix, info['name'], artist_id, tip])
 

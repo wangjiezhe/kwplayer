@@ -64,8 +64,8 @@ class TopList(Gtk.Box):
         nodes, total_pages = Net.get_nodes(nid, page)
         if total_pages == 0:
             return
-        for i, node in enumerate(nodes):
-            self.liststore_nodes.append([
+        for node in nodes:
+            tree_iter = self.liststore_nodes.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape(node['name']),
                 int(node['sourceid']),
@@ -74,7 +74,7 @@ class TopList(Gtk.Box):
                     node['name'], node['tips']),
                 ])
             Net.update_toplist_node_logo(
-                    self.liststore_nodes, i, 0, node['pic'])
+                    self.liststore_nodes, tree_iter, 0, node['pic'])
 
     def on_button_home_clicked(self, btn):
         self.scrolled_nodes.show_all()

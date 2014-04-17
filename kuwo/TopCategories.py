@@ -96,8 +96,8 @@ class TopCategories(Gtk.Box):
         if not nodes:
             print('Failed to get nodes, do something!')
             return
-        for i, node in enumerate(nodes):
-            self.liststore_main.append([
+        for node in nodes:
+            tree_iter = self.liststore_main.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape(node['disname']),
                 int(node['id']),
@@ -105,7 +105,7 @@ class TopCategories(Gtk.Box):
                 Widgets.set_tooltip(node['disname'], node['info']),
                 ])
             Net.update_liststore_image(
-                    self.liststore_main, i, 0, node['pic'])
+                    self.liststore_main, tree_iter, 0, node['pic'])
 
     def on_iconview_main_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -126,25 +126,24 @@ class TopCategories(Gtk.Box):
     def show_sub1(self, init=False):
         def _show_sub1(sub1_args, error=None):
             nodes, self.sub1_total = sub1_args
-            if not nodes or self.sub1_total == 0:
+            if error or not nodes or not self.sub1_total:
                 return
-            for i, node in enumerate(nodes):
+            for node in nodes:
                 _id = 'id' if self.use_sub2 else 'sourceid'
                 if 'tips' in node and len(node['tips']) > 5:
-                    _tooltip = Widgets.set_tooltip_with_song_tips(
+                    tooltip = Widgets.set_tooltip_with_song_tips(
                             node['name'], node['tips'])
                 else:
-                    _tooltip = Widgets.set_tooltip(
-                            node['name'], node['info'])
-                self.liststore_sub1.append([
+                    tooltip = Widgets.set_tooltip(node['name'], node['info'])
+                tree_iter = self.liststore_sub1.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(node['name']),
                     int(node[_id]),
                     Widgets.unescape(node['info']),
-                    _tooltip,
+                    tooltip,
                     ])
                 Net.update_liststore_image(
-                        self.liststore_sub1, i, 0, node['pic'])
+                        self.liststore_sub1, tree_iter, 0, node['pic'])
 
             self.sub1_page += 1
             if self.sub1_page < self.sub1_total - 1:
@@ -182,10 +181,10 @@ class TopCategories(Gtk.Box):
     def show_sub2(self, init=False):
         def _show_sub2(sub2_args, error=None):
             nodes, self.sub2_total = sub2_args
-            if not nodes or self.sub2_total == 0:
+            if error or not nodes or not self.sub2_total:
                 return
-            for i, node in enumerate(nodes):
-                self.liststore_sub2.append([
+            for node in nodes:
+                tree_iter = self.liststore_sub2.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(node['name']),
                     int(node['sourceid']),
@@ -194,7 +193,7 @@ class TopCategories(Gtk.Box):
                         node['name'], node['tips']),
                     ])
                 Net.update_liststore_image(
-                        self.liststore_sub2, i, 0, node['pic'])
+                        self.liststore_sub2, tree_iter, 0, node['pic'])
 
             self.sub2_page += 1
             if self.sub2_page < self.sub2_total - 1:
