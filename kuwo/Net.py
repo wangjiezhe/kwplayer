@@ -16,6 +16,7 @@ from urllib import parse
 from urllib import request
 
 from gi.repository import GdkPixbuf
+from gi.repository import Gio
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -145,24 +146,31 @@ def get_nodes(nid, page):
     pages = math.ceil(int(nodes_wrap['total']) / ICON_NUM)
     return (nodes, pages)
 
-def get_image(url):
-    def _get_image(url): 
-        return urlopen(url, use_cache=False)
-    
-    def _dump_image(image, filepath):
-        with open(filepath, 'wb') as fh:
-            fh.write(image)
-
-    filename = os.path.split(url)[1]
-    filepath = os.path.join(Config.IMG_DIR, filename)
+def get_image(url, filepath=None):
+    if not url or len(url) < 10:
+        return None
+    if not filepath:
+        filename = os.path.split(url)[1]
+        filepath = os.path.join(Config.IMG_DIR, filename)
     if os.path.exists(filepath):
         return filepath
 
-    image = _get_image(url)
-    if image is not None:
-        _dump_image(image, filepath)
+    image = urlopen(url, use_cache=False)
+    if not image:
+        return None
+
+    with open(filepath, 'wb') as fh:
+        fh.write(image)
+    # Now, check its mime type
+    file_ = Gio.File.new_for_path(filepath)
+    file_info = file_.query_info(Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+            Gio.FileQueryInfoFlags.NONE)
+    content_type = file_info.get_content_type()
+    if 'image' in content_type:
         return filepath
-    return None
+    else:
+        os.remove(filepath)
+        return None
 
 def get_album(albumid):
     url = ''.join([
@@ -187,10 +195,8 @@ def update_liststore_image(liststore, tree_iter, col, url):
         try:
             pix = GdkPixbuf.Pixbuf.new_from_file_at_size(filepath, 100, 100)
             liststore[liststore.get_path(tree_iter)][col] = pix
-        except GLib.GError as e:
+        except GLib.GError:
             pass
-    if len(url) < 10:
-        return
     async_call(get_image, _update_image, url)
 
 def update_album_covers(liststore, tree_iter, col, _url):
@@ -468,27 +474,11 @@ def get_recommend_lists(artist):
 
 def get_recommend_image(_url):
     '''Get big cover image about this artist, normally 1024x768'''
-    def _get_image(url): 
-        req_content = urlopen(url, use_cache=False)
-        if not req_content:
-            return None
-        return req_content
-
     url = _url.strip()
-    if len(url) == 0:
-        return None
     ext = os.path.splitext(url)[1]
     filename = hash_str(url) + ext
     filepath = os.path.join(Config.IMG_LARGE_DIR, filename)
-    if os.path.exists(filepath):
-        return filepath
-
-    image = _get_image(url)
-    if not image:
-        return None
-    with open(filepath, 'wb') as fh:
-        fh.write(image)
-    return filepath
+    return get_image(url, filepath)
 
 def search_songs(keyword, page):
     url = ''.join([
