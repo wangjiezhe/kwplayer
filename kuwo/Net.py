@@ -41,6 +41,8 @@ SONG_NUM = 100               # num of songs in each request
 ICON_NUM = 50                # num of icons in each request
 CACHE_TIMEOUT = 1209600      # 14 days in seconds
 
+IMG_SIZE = 100               # image size, 100px
+
 # Using weak reference to cache song list in TopList and Radio.
 class Dict(dict):
     pass
@@ -188,38 +190,68 @@ def get_album(albumid):
     songs = songs_wrap['musiclist']
     return songs
 
-def update_liststore_image(liststore, tree_iter, col, url):
-    def _update_image(filepath, error=None):
-        if not filepath or error:
-            return
+def update_liststore_images(liststore,  col, tree_iters, urls,
+                            url_proxy=None, resize=IMG_SIZE):
+    '''Update a banch of thumbnails consequently.
+
+    liststore - the tree model, which has timestmap property
+    col       - column index
+    tree_iters - a list of tree_iters
+    urls      - a list of image urls
+    url_proxy - a function to reconstruct image url, this function run in 
+                background thread. default is None, do nothing.
+    resize    - will resize pixbuf to specific size, default is 100x100
+    '''
+    def update_image(filepath, tree_iter):
         try:
-            pix = GdkPixbuf.Pixbuf.new_from_file_at_size(filepath, 100, 100)
-            liststore[liststore.get_path(tree_iter)][col] = pix
+            pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                    filepath, resize, resize)
+            tree_path = liststore.get_path(tree_iter)
+            if tree_path is not None:
+                liststore[tree_path][col] = pix
         except GLib.GError:
             pass
-    async_call(get_image, _update_image, url)
 
-def update_album_covers(liststore, tree_iter, col, _url):
-    url = _url.strip()
-    if url and len(url) == 0:
-        return None
-    url = ''.join([
-        IMG_CDN,
-        'star/albumcover/',
-        url,
-        ])
-    update_liststore_image(liststore, tree_iter, col, url)
+    def get_images():
+        for tree_iter, url in zip(tree_iters, urls):
+            # First, check timestamp matches
+            if liststore.timestamp != timestamp:
+                break
+            if url_proxy:
+                url = url_proxy(url)
+            filepath = get_image(url)
+            if filepath:
+                GLib.idle_add(update_image, filepath, tree_iter)
 
-def update_mv_image(liststore, tree_iter, col, _url):
-    url = _url.strip()
-    if len(url) == 0:
-        return None
-    url = ''.join([
-        IMG_CDN,
-        'wmvpic/',
-        url,
-        ])
-    update_liststore_image(liststore, tree_iter, col, url)
+    timestamp = liststore.timestamp
+    thread = threading.Thread(target=get_images, args=[])
+    thread.daemon = True
+    thread.start()
+
+def update_album_covers(liststore, col, tree_iters, urls):
+    def url_proxy(url):
+        url = url.strip()
+        if not url:
+            return ''
+        return ''.join([
+            IMG_CDN,
+            'star/albumcover/',
+            url,
+            ])
+    update_liststore_images(liststore, col, tree_iters, urls, url_proxy)
+
+def update_mv_images(liststore, col, tree_iters, urls):
+    def url_proxy(url):
+        url = url.strip()
+        if not url:
+            return ''
+        return ''.join([
+            IMG_CDN,
+            'wmvpic/',
+            url,
+            ])
+    update_liststore_images(liststore, col, tree_iters, urls,
+            url_proxy=url_proxy, resize=120)
 
 def get_toplist_songs(nid):
     # no need to use pn, because toplist contains very few songs
@@ -264,9 +296,6 @@ def get_artists(catid, page, prefix):
     artists = artists_wrap['artistlist']
     return (artists, pages)
 
-def update_toplist_node_logo(liststore, tree_iter, col, url):
-    update_liststore_image(liststore, tree_iter, col, url)
-
 def get_artist_pic_url(pic_path):
     if len(pic_path) < 5:
         return None
@@ -275,11 +304,10 @@ def get_artist_pic_url(pic_path):
     url = ''.join([IMG_CDN, 'star/starheads/', pic_path, ])
     return url
 
-def update_artist_logo(liststore, tree_iter, col, pic_path):
-    url = get_artist_pic_url(pic_path)
-    if not url:
-        return
-    update_liststore_image(liststore, tree_iter, col, url)
+def update_artist_logos(liststore, col, tree_iters, urls):
+    update_liststore_images(
+            liststore, col, tree_iters, urls,
+            url_proxy=get_artist_pic_url)
 
 def get_artist_info(artistid, artist=None):
     '''Get artist info, if cached, just return it.

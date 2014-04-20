@@ -5,6 +5,8 @@
 # in the LICENSE file.
 
 import html
+import time
+
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
@@ -174,6 +176,8 @@ class Search(Gtk.Box):
                 return
             self.artists_button.set_label(
                     '{0} ({1})'.format(_('Artists'), hit))
+            urls = []
+            tree_iters = []
             for artist in artists:
                 tree_iter = self.liststore_artists.append([
                     self.app.theme['anonymous'],
@@ -181,15 +185,18 @@ class Search(Gtk.Box):
                     int(artist['ARTISTID']), 
                     Widgets.unescape(artist['COUNTRY']),
                     ])
-                Net.update_artist_logo(
-                        self.liststore_artists,
-                        tree_iter, 0, artist['PICPATH'])
+                tree_iters.append(tree_iter)
+                urls.append(artist['PICPATH'])
+            Net.update_artist_logos(
+                    self.liststore_artists, 0, tree_iters, urls)
 
         keyword = self.search_entry.get_text()
         if not keyword:
             return
         if reset_status:
             self.liststore_artists.clear()
+        if reset_status or not hasattr(self.liststore_artists, 'timestamp'):
+            self.liststore_artists.timestamp = time.time()
         Net.async_call(
                 Net.search_artists, _append_artists,
                 keyword,self.artists_page)
@@ -203,6 +210,8 @@ class Search(Gtk.Box):
                 return
             self.albums_button.set_label(
                     '{0} ({1})'.format(_('Albums'), hit))
+            urls = []
+            tree_iters = []
             for album in albums:
                 tooltip = Widgets.escape(album.get('info', album['name']))
                 tree_iter = self.liststore_albums.append([
@@ -213,14 +222,18 @@ class Search(Gtk.Box):
                     int(album['artistid']),
                     tooltip,
                     ])
-                Net.update_album_covers(
-                        self.liststore_albums, tree_iter, 0, album['pic'])
+                tree_iters.append(tree_iter)
+                urls.append(album['pic'])
+            Net.update_album_covers(
+                    self.liststore_albums, 0, tree_iters, urls)
 
         keyword = self.search_entry.get_text()
         if not keyword:
             return
         if reset_status:
             self.liststore_albums.clear()
+        if reset_status or not hasattr(self.liststore_albums, 'timestamp'):
+            self.liststore_albums.timestamp = time.time()
         Net.async_call(
                 Net.search_albums, _append_albums,
                 keyword, self.albums_page)

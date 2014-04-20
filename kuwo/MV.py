@@ -4,6 +4,8 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import time
+
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
@@ -67,6 +69,8 @@ class MV(Gtk.Box):
             return
         nodes = nodes_wrap['child']
         self.liststore_nodes.clear()
+        urls = []
+        tree_iters = []
         for node in nodes:
             tree_iter = self.liststore_nodes.append([
                 self.app.theme['anonymous'],
@@ -75,8 +79,11 @@ class MV(Gtk.Box):
                 Widgets.unescape(node['info']),
                 Widgets.set_tooltip(node['disname'], node['info']),
                 ])
-            Net.update_liststore_image(
-                    self.liststore_nodes, tree_iter, 0, node['pic'])
+            tree_iters.append(tree_iter)
+            urls.append(node['pic'])
+        self.liststore_nodes.timestamp = time.time()
+        Net.update_liststore_images(
+                self.liststore_nodes, 0, tree_iters, urls)
 
     def on_iconview_nodes_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -92,6 +99,8 @@ class MV(Gtk.Box):
             songs, self.songs_total = songs_args
             if error or not self.songs_total:
                 return
+            urls = []
+            tree_iters = []
             for song in songs:
                 tree_iter = self.liststore_songs.append([
                     self.app.theme['anonymous'],
@@ -103,8 +112,10 @@ class MV(Gtk.Box):
                     int(song['albumid']),
                     Widgets.set_tooltip(song['name'], song['artist']),
                     ])
-                Net.update_mv_image(
-                        self.liststore_songs, tree_iter, 0, song['mvpic'])
+                tree_iters.append(tree_iter)
+                urls.append(song['mvpic'])
+            Net.update_mv_images(
+                    self.liststore_songs, 0, tree_iters, urls)
             self.songs_page += 1
             if self.songs_page < self.songs_total - 1:
                 self.append_songs()
@@ -113,6 +124,8 @@ class MV(Gtk.Box):
             self.app.playlist.advise_new_playlist_name(self.label.get_text())
             self.songs_page = 0
             self.liststore_songs.clear()
+        if init or not hasattr(self.liststore_songs, 'timestamp'):
+            self.liststore_songs.timestamp = time.time()
         Net.async_call(
                 Net.get_mv_songs, _append_songs, 
                 self.curr_node_id, self.songs_page)

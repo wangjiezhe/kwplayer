@@ -6,6 +6,8 @@
 
 import json
 import os
+import time
+
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
@@ -234,6 +236,8 @@ class Radio(Gtk.Box):
         radios, total_page = Net.get_nodes(nid, page)
         if total_page == 0:
             return
+        urls = []
+        tree_iters = []
         for radio in radios:
             tree_iter = self.liststore_radios.append([
                 self.app.theme['anonymous'],
@@ -243,8 +247,12 @@ class Radio(Gtk.Box):
                 radio['pic'],
                 Widgets.set_tooltip(radio['disname'], radio['info']),
                 ])
-            Net.update_liststore_image(
-                    self.liststore_radios, tree_iter, 0, radio['pic']),
+            tree_iters.append(tree_iter)
+            urls.append(radio['pic'])
+        self.liststore_radios.timestamp = time.time()
+        Net.update_liststore_images(
+                self.liststore_radios, 0, tree_iters, urls)
+
         for radio in self.playlists:
             radio_item = RadioItem(radio, self.app)
             self.box_myradio.pack_start(radio_item, False, False, 0)
