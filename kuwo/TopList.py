@@ -4,6 +4,8 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import time
+
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
@@ -64,6 +66,8 @@ class TopList(Gtk.Box):
         nodes, total_pages = Net.get_nodes(nid, page)
         if total_pages == 0:
             return
+        urls = []
+        tree_iters = []
         for node in nodes:
             tree_iter = self.liststore_nodes.append([
                 self.app.theme['anonymous'],
@@ -73,8 +77,10 @@ class TopList(Gtk.Box):
                 Widgets.set_tooltip_with_song_tips(
                     node['name'], node['tips']),
                 ])
-            Net.update_toplist_node_logo(
-                    self.liststore_nodes, tree_iter, 0, node['pic'])
+            urls.append(node['pic'])
+            tree_iters.append(tree_iter)
+        self.liststore_nodes.timestamp = time.time()
+        Net.update_liststore_images(self.liststore_nodes, 0, tree_iters, urls)
 
     def on_button_home_clicked(self, btn):
         self.scrolled_nodes.show_all()

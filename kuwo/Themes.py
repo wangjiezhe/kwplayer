@@ -4,6 +4,8 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import time
+
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
@@ -83,6 +85,8 @@ class Themes(Gtk.Box):
         if not nodes:
             print('Failed to get nodes, do something!')
             return
+        urls = []
+        tree_iters = []
         for node in nodes:
             tree_iter = self.liststore_main.append([
                 self.app.theme['anonymous'],
@@ -91,8 +95,11 @@ class Themes(Gtk.Box):
                 Widgets.unescape(node['info']),
                 Widgets.set_tooltip(node['name'], node['info']),
                 ])
-            Net.update_liststore_image(
-                    self.liststore_main, tree_iter, 0, node['pic'])
+            urls.append(node['pic'])
+            tree_iters.append(tree_iter)
+        self.liststore_main.timestamp = time.time()
+        Net.update_liststore_images(
+                self.liststore_main, 0, tree_iters, urls)
 
     def on_iconview_main_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -102,6 +109,27 @@ class Themes(Gtk.Box):
         self.show_sub(init=True)
 
     def show_sub(self, init=False):
+        def on_show_sub(info, error=None):
+            if error or not info:
+                return
+            nodes, self.nodes_total = info
+            if not nodes:
+                return
+            urls = []
+            tree_iters = []
+            for node in nodes:
+                tree_iter = self.liststore_sub.append([
+                    self.app.theme['anonymous'],
+                    Widgets.unescape(node['name']),
+                    int(node['sourceid']),
+                    Widgets.unescape(node['info']),
+                    Widgets.set_tooltip_with_song_tips(
+                        node['name'], node['tips']),
+                    ])
+                tree_iters.append(tree_iter)
+                urls.append(node['pic'])
+            Net.update_liststore_images(
+                    self.liststore_sub, 0, tree_iters, urls)
         if init:
             self.scrolled_main.hide()
             self.scrolled_songs.hide()
@@ -112,21 +140,13 @@ class Themes(Gtk.Box):
             self.scrolled_sub.show_all()
             self.nodes_page = 0
             self.liststore_sub.clear()
-        nodes, self.nodes_total = Net.get_nodes(
-                self.curr_sub_id, self.nodes_page)
-        if not nodes:
-            return
-        for node in nodes:
-            tree_iter = self.liststore_sub.append([
-                self.app.theme['anonymous'],
-                Widgets.unescape(node['name']),
-                int(node['sourceid']),
-                Widgets.unescape(node['info']),
-                Widgets.set_tooltip_with_song_tips(
-                    node['name'], node['tips']),
-                ])
-            Net.update_liststore_image(
-                    self.liststore_sub, tree_iter, 0, node['pic'])
+        if init or not hasattr(self.liststore_sub, 'timestamp'):
+            self.liststore_sub.timestamp = time.time()
+        #nodes, self.nodes_total = Net.get_nodes(
+        #        self.curr_sub_id, self.nodes_page)
+        Net.async_call(
+                Net.get_nodes, on_show_sub, self.curr_sub_id,
+                self.nodes_page)
 
     def on_iconview_sub_item_activated(self, iconview, path):
         model = iconview.get_model()

@@ -4,6 +4,8 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import time
+
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
@@ -96,7 +98,12 @@ class TopCategories(Gtk.Box):
         if not nodes:
             print('Failed to get nodes, do something!')
             return
+        urls = []
+        tree_iters = []
         for node in nodes:
+            # skip 'xx专区' categories
+            if node['disname'].endswith('专区'):
+                continue
             tree_iter = self.liststore_main.append([
                 self.app.theme['anonymous'],
                 Widgets.unescape(node['disname']),
@@ -104,8 +111,11 @@ class TopCategories(Gtk.Box):
                 Widgets.unescape(node['info']),
                 Widgets.set_tooltip(node['disname'], node['info']),
                 ])
-            Net.update_liststore_image(
-                    self.liststore_main, tree_iter, 0, node['pic'])
+            tree_iters.append(tree_iter)
+            urls.append(node['pic'])
+        self.liststore_main.timestamp = time.time()
+        Net.update_liststore_images(
+                self.liststore_main, 0, tree_iters, urls)
 
     def on_iconview_main_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -128,6 +138,8 @@ class TopCategories(Gtk.Box):
             nodes, self.sub1_total = sub1_args
             if error or not nodes or not self.sub1_total:
                 return
+            urls = []
+            tree_iters = []
             for node in nodes:
                 _id = 'id' if self.use_sub2 else 'sourceid'
                 if 'tips' in node and len(node['tips']) > 5:
@@ -142,8 +154,10 @@ class TopCategories(Gtk.Box):
                     Widgets.unescape(node['info']),
                     tooltip,
                     ])
-                Net.update_liststore_image(
-                        self.liststore_sub1, tree_iter, 0, node['pic'])
+                urls.append(node['pic'])
+                tree_iters.append(tree_iter)
+            Net.update_liststore_images(
+                    self.liststore_sub1, 0, tree_iters, urls)
 
             self.sub1_page += 1
             if self.sub1_page < self.sub1_total - 1:
@@ -159,8 +173,11 @@ class TopCategories(Gtk.Box):
             self.scrolled_sub1.show_all()
             self.sub1_page = 0
             self.liststore_sub1.clear()
+        if init or not hasattr(self.liststore_sub1, 'timestamp'):
+            self.liststore_sub1.timestamp = time.time()
         Net.async_call(
-                Net.get_nodes, _show_sub1, self.curr_sub1_id, self.sub1_page)
+                Net.get_nodes, _show_sub1, self.curr_sub1_id,
+                self.sub1_page)
 
     def on_iconview_sub1_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -183,6 +200,8 @@ class TopCategories(Gtk.Box):
             nodes, self.sub2_total = sub2_args
             if error or not nodes or not self.sub2_total:
                 return
+            urls = []
+            tree_iters = []
             for node in nodes:
                 tree_iter = self.liststore_sub2.append([
                     self.app.theme['anonymous'],
@@ -192,8 +211,10 @@ class TopCategories(Gtk.Box):
                     Widgets.set_tooltip_with_song_tips(
                         node['name'], node['tips']),
                     ])
-                Net.update_liststore_image(
-                        self.liststore_sub2, tree_iter, 0, node['pic'])
+                urls.append(node['pic'])
+                tree_iters.append(tree_iter)
+            Net.update_liststore_images(
+                    self.liststore_sub2, 0, tree_iter, urls)
 
             self.sub2_page += 1
             if self.sub2_page < self.sub2_total - 1:
@@ -206,8 +227,11 @@ class TopCategories(Gtk.Box):
             self.scrolled_sub2.show_all()
             self.sub2_page = 0
             self.liststore_sub2.clear()
+        if init or not hasattr(self.liststore_sub2, 'timestamp'):
+            self.liststore_sub2.timestamp = time.time()
         Net.async_call(
-                Net.get_nodes, _show_sub2, self.curr_sub2_id, self.sub2_page)
+                Net.get_nodes, _show_sub2, self.curr_sub2_id,
+                self.sub2_page)
 
     def on_iconview_sub2_item_activated(self, iconview, path):
         model = iconview.get_model()

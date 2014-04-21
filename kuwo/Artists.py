@@ -7,6 +7,7 @@
 import json
 import os
 import time
+
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
@@ -392,6 +393,8 @@ class Artists(Gtk.Box):
             artists, self.artists_total = info
             if error or not self.artists_total or not artists:
                 return
+            urls = []
+            tree_iters = []
             for artist in artists:
                 _info = ' '.join([artist['music_num'], _(' songs'), ])
                 tree_iter = self.artists_liststore.append([
@@ -401,13 +404,17 @@ class Artists(Gtk.Box):
                     _info,
                     Widgets.set_tooltip(artist['name'], _info),
                     ])
-                Net.update_artist_logo(
-                        self.artists_liststore, tree_iter, 0, artist['pic'])
+                urls.append(artist['pic'])
+                tree_iters.append(tree_iter)
+            Net.update_artist_logos(
+                    self.artists_liststore, 0, tree_iters, urls)
 
         if init:
             self.artists_liststore.clear()
             self.artists_page = 0
             self.artists_win.get_vadjustment().set_value(0)
+        if init or not hasattr(self.artists_liststore, 'timestamp'):
+            self.artists_liststore.timestamp = time.time()
         selection = self.cate_treeview.get_selection()
         selected = selection.get_selected()
         if not selected:
@@ -521,6 +528,8 @@ class Artists(Gtk.Box):
             albums, self.artist_albums_total = albums_args
             if error or self.artist_albums_total == 0:
                 return
+            urls = []
+            tree_iters = []
             for album in albums:
                 tree_iter = self.artist_albums_liststore.append([
                     self.app.theme['anonymous'],
@@ -530,9 +539,10 @@ class Artists(Gtk.Box):
                     int(album['artistid']),
                     Widgets.set_tooltip(album['name'], album['info']),
                     ])
-                Net.update_album_covers(
-                        self.artist_albums_liststore,
-                        tree_iter, 0, album['pic'])
+                urls.append(album['pic'])
+                tree_iters.append(tree_iter)
+            Net.update_album_covers(
+                    self.artist_albums_liststore, 0, tree_iters, urls)
             self.artist_albums_page += 1
             if self.artist_albums_page < self.artist_albums_total - 1:
                 self.append_artist_albums()
@@ -540,6 +550,8 @@ class Artists(Gtk.Box):
         if init:
             self.artist_albums_liststore.clear()
             self.artist_albums_page = 0
+        if init or not hasattr(self.artist_albums, 'timestamp'):
+            self.artist_albums_liststore.timestamp = time.time()
         Net.async_call(
                 Net.get_artist_albums, _append_artist_albums,
                 self.curr_artist_id, self.artist_albums_page)
@@ -558,6 +570,8 @@ class Artists(Gtk.Box):
             mvs, self.artist_mv_total = mv_args
             if error or self.artist_mv_total == 0:
                 return
+            urls = []
+            tree_iters = []
             for mv in mvs:
                 tree_iter = self.artist_mv_liststore.append([
                     self.app.theme['anonymous'],
@@ -569,8 +583,10 @@ class Artists(Gtk.Box):
                     0,
                     Widgets.set_tooltip(mv['name'], mv['artist']),
                     ])
-                Net.update_mv_image(
-                        self.artist_mv_liststore, tree_iter, 0, mv['pic'])
+                tree_iters.append(tree_iter)
+                urls.append(mv['pic'])
+            Net.update_mv_images(
+                    self.artist_mv_liststore, 0, tree_iters, urls)
             self.artist_mv_page += 1
             if self.artist_mv_page < self.artist_mv_total - 1:
                 self.append_artist_mv()
@@ -578,6 +594,8 @@ class Artists(Gtk.Box):
         if init:
             self.artist_mv_liststore.clear()
             self.artist_mv_page = 0
+        if init or not hasattr(self.artist_mv_liststore, 'timestamp'):
+            self.artist_mv_liststore.timestamp = time.time()
         Net.async_call(
                 Net.get_artist_mv, _append_artist_mv,
                 self.curr_artist_id, self.artist_mv_page)
@@ -597,6 +615,8 @@ class Artists(Gtk.Box):
             artists, self.artist_similar_total = similar_args
             if error or not self.artist_similar_total:
                 return
+            urls = []
+            tree_iters = []
             for artist in artists:
                 _info = ''.join([artist['songnum'], _(' songs'), ])
                 tree_iter = self.artist_similar_liststore.append([
@@ -606,9 +626,10 @@ class Artists(Gtk.Box):
                     _info,
                     Widgets.set_tooltip(artist['name'], _info),
                     ])
-                Net.update_artist_logo(
-                        self.artist_similar_liststore,
-                        tree_iter, 0, artist['pic'])
+                urls.append(artist['pic'])
+                tree_iters.append(tree_iter)
+            Net.update_artist_logos(
+                    self.artist_similar_liststore, 0, tree_iters, urls)
             self.artist_similar_page += 1
             if self.artist_similar_page < self.artist_similar_total - 1:
                 self.append_artist_similar()
@@ -616,6 +637,8 @@ class Artists(Gtk.Box):
         if init:
             self.artist_similar_liststore.clear()
             self.artist_similar_page = 0
+        if init or not hasattr(self.artist_similar_liststore, 'timestamp'):
+            self.artist_similar_liststore.timestamp = time.time()
         Net.async_call(
                 Net.get_artist_similar, _append_artist_similar,
                 self.curr_artist_id, self.artist_similar_page)
