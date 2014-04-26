@@ -225,6 +225,10 @@ class App:
 
         self.apply_css(self.window, css, overall=True)
 
+        settings = Gtk.Settings.get_default()
+        settings.props.gtk_application_prefer_dark_theme = \
+                self.conf.get('use-dark-theme', False)
+
     def init_status_icon(self):
         # set status_icon as class property, to keep its life
         # after function exited
