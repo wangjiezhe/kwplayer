@@ -163,6 +163,12 @@ class Preferences(Gtk.Dialog):
         show_pls_button.connect('toggled', self.on_show_pls_button_toggled)
         generic_box.pack_start(show_pls_button, False, False, 0)
 
+        dark_theme_button = Gtk.CheckButton(_('Use dark theme'))
+        dark_theme_button.set_active(app.conf['use-dark-theme'])
+        dark_theme_button.connect(
+                'toggled', self.on_dark_theme_button_toggled)
+        generic_box.pack_start(dark_theme_button, False, False, 0)
+
         # format tab
         format_box = NoteTab()
         notebook.append_page(format_box, Gtk.Label(_('Format')))
@@ -326,6 +332,9 @@ class Preferences(Gtk.Dialog):
 
     def on_show_pls_button_toggled(self, button):
         self.app.conf['show-pls'] = button.get_active()
+
+    def on_dark_theme_button_toggled(self, button):
+        self.app.conf['use-dark-theme'] = button.get_active()
 
     # format tab signal handlers
     def on_audio_toggled(self, radiobtn):
