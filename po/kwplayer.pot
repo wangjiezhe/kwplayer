@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-14 16:44+0800\n"
+"POT-Creation-Date: 2014-05-01 07:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,159 +17,159 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../kuwo/App.py:244
+#: ../kuwo/App.py:251
 msgid "Show App"
 msgstr ""
 
-#: ../kuwo/App.py:248
+#: ../kuwo/App.py:255
 msgid "Pause/Resume"
 msgstr ""
 
-#: ../kuwo/App.py:252
+#: ../kuwo/App.py:259
 msgid "Next Song"
 msgstr ""
 
-#: ../kuwo/App.py:259 ../kuwo/Player.py:176
+#: ../kuwo/App.py:266 ../kuwo/Player.py:179
 msgid "Quit"
 msgstr ""
 
-#: ../kuwo/Artists.py:64 ../kuwo/Artists.py:74 ../kuwo/Artists.py:115
-#: ../kuwo/Artists.py:319 ../kuwo/Search.py:48 ../kuwo/Search.py:80
-#: ../kuwo/Search.py:175 ../kuwo/Search.py:178 ../kuwo/Search.py:243
+#: ../kuwo/Artists.py:65 ../kuwo/Artists.py:82 ../kuwo/Artists.py:123
+#: ../kuwo/Artists.py:327 ../kuwo/Search.py:50 ../kuwo/Search.py:82
+#: ../kuwo/Search.py:175 ../kuwo/Search.py:178 ../kuwo/Search.py:247
 msgid "Artists"
 msgstr ""
 
-#: ../kuwo/Artists.py:144 ../kuwo/Artists.py:316 ../kuwo/PlayList.py:266
-#: ../kuwo/Player.py:154 ../kuwo/Radio.py:69
+#: ../kuwo/Artists.py:152 ../kuwo/Artists.py:324 ../kuwo/PlayList.py:347
+#: ../kuwo/Player.py:157 ../kuwo/Radio.py:71
 msgid "Favorite"
 msgstr ""
 
-#: ../kuwo/Artists.py:169
+#: ../kuwo/Artists.py:177
 msgid "Artist"
 msgstr ""
 
-#: ../kuwo/Artists.py:178 ../kuwo/Artists.py:210 ../kuwo/Search.py:43
-#: ../kuwo/Search.py:73 ../kuwo/Search.py:146 ../kuwo/Search.py:148
-#: ../kuwo/Search.py:242
+#: ../kuwo/Artists.py:186 ../kuwo/Artists.py:218 ../kuwo/Search.py:45
+#: ../kuwo/Search.py:75 ../kuwo/Search.py:148 ../kuwo/Search.py:150
+#: ../kuwo/Search.py:246
 msgid "Songs"
 msgstr ""
 
-#: ../kuwo/Artists.py:180 ../kuwo/Artists.py:219 ../kuwo/Search.py:53
-#: ../kuwo/Search.py:93 ../kuwo/Search.py:206 ../kuwo/Search.py:209
-#: ../kuwo/Search.py:244
+#: ../kuwo/Artists.py:188 ../kuwo/Artists.py:227 ../kuwo/Search.py:55
+#: ../kuwo/Search.py:95 ../kuwo/Search.py:209 ../kuwo/Search.py:212
+#: ../kuwo/Search.py:248
 msgid "Albums"
 msgstr ""
 
-#: ../kuwo/Artists.py:182 ../kuwo/Artists.py:233 ../kuwo/MV.py:19
-#: ../kuwo/MV.py:29
+#: ../kuwo/Artists.py:190 ../kuwo/Artists.py:241 ../kuwo/MV.py:21
+#: ../kuwo/MV.py:31
 msgid "MV"
 msgstr ""
 
-#: ../kuwo/Artists.py:184 ../kuwo/Artists.py:243
+#: ../kuwo/Artists.py:192 ../kuwo/Artists.py:251
 msgid "Similar"
 msgstr ""
 
-#: ../kuwo/Artists.py:186 ../kuwo/Artists.py:261
+#: ../kuwo/Artists.py:194 ../kuwo/Artists.py:269
 msgid "Info"
 msgstr ""
 
-#: ../kuwo/Artists.py:196
+#: ../kuwo/Artists.py:204
 msgid "Add to favorite artists list"
 msgstr ""
 
-#: ../kuwo/Artists.py:280
+#: ../kuwo/Artists.py:288
 msgid "Name"
 msgstr ""
 
-#: ../kuwo/Artists.py:282
+#: ../kuwo/Artists.py:290
 msgid "Birthday"
 msgstr ""
 
-#: ../kuwo/Artists.py:284
+#: ../kuwo/Artists.py:292
 msgid "Birthplace"
 msgstr ""
 
-#: ../kuwo/Artists.py:286
+#: ../kuwo/Artists.py:294
 msgid "Height"
 msgstr ""
 
-#: ../kuwo/Artists.py:288
+#: ../kuwo/Artists.py:296
 msgid "Weight"
 msgstr ""
 
-#: ../kuwo/Artists.py:290
+#: ../kuwo/Artists.py:298
 msgid "Country"
 msgstr ""
 
-#: ../kuwo/Artists.py:292
+#: ../kuwo/Artists.py:300
 msgid "Language"
 msgstr ""
 
-#: ../kuwo/Artists.py:294
+#: ../kuwo/Artists.py:302
 msgid "Gender"
 msgstr ""
 
-#: ../kuwo/Artists.py:296
+#: ../kuwo/Artists.py:304
 msgid "Constellation"
 msgstr ""
 
-#: ../kuwo/Artists.py:309 ../kuwo/PlayList.py:81
+#: ../kuwo/Artists.py:317 ../kuwo/PlayList.py:81
 msgid "Album"
 msgstr ""
 
-#: ../kuwo/Artists.py:322
+#: ../kuwo/Artists.py:330
 msgid "Favorite Artists"
 msgstr ""
 
-#: ../kuwo/Artists.py:335
+#: ../kuwo/Artists.py:343
 msgid "All"
 msgstr ""
 
-#: ../kuwo/Artists.py:349
+#: ../kuwo/Artists.py:357
 msgid "Hot Artists"
 msgstr ""
 
-#: ../kuwo/Artists.py:350
+#: ../kuwo/Artists.py:358
 msgid "Chinese Male"
 msgstr ""
 
-#: ../kuwo/Artists.py:351
+#: ../kuwo/Artists.py:359
 msgid "Chinese Female"
 msgstr ""
 
-#: ../kuwo/Artists.py:352
+#: ../kuwo/Artists.py:360
 msgid "Chinese Band"
 msgstr ""
 
-#: ../kuwo/Artists.py:353
+#: ../kuwo/Artists.py:361
 msgid "Japanese Male"
 msgstr ""
 
-#: ../kuwo/Artists.py:354
+#: ../kuwo/Artists.py:362
 msgid "Japanese Female"
 msgstr ""
 
-#: ../kuwo/Artists.py:355
+#: ../kuwo/Artists.py:363
 msgid "Japanese Band"
 msgstr ""
 
-#: ../kuwo/Artists.py:356
+#: ../kuwo/Artists.py:364
 msgid "European Male"
 msgstr ""
 
-#: ../kuwo/Artists.py:357
+#: ../kuwo/Artists.py:365
 msgid "European Female"
 msgstr ""
 
-#: ../kuwo/Artists.py:358
+#: ../kuwo/Artists.py:366
 msgid "European Band"
 msgstr ""
 
-#: ../kuwo/Artists.py:359
+#: ../kuwo/Artists.py:367
 msgid "Others"
 msgstr ""
 
-#: ../kuwo/Artists.py:404 ../kuwo/Artists.py:595
+#: ../kuwo/Artists.py:399 ../kuwo/Artists.py:621
 msgid " songs"
 msgstr ""
 
@@ -177,50 +177,50 @@ msgstr ""
 msgid "KW Player"
 msgstr ""
 
-#: ../kuwo/Config.py:33
+#: ../kuwo/Config.py:34
 msgid "A simple music player on Linux desktop."
 msgstr ""
 
-#: ../kuwo/Config.py:66
+#: ../kuwo/Config.py:67
 msgid "VolumeUp"
 msgstr ""
 
-#: ../kuwo/Config.py:67
+#: ../kuwo/Config.py:68
 msgid "VolumeDown"
 msgstr ""
 
-#: ../kuwo/Config.py:68
+#: ../kuwo/Config.py:69
 msgid "Mute"
 msgstr ""
 
-#: ../kuwo/Config.py:69 ../kuwo/Player.py:86 ../kuwo/PlayerNotify.py:57
+#: ../kuwo/Config.py:70 ../kuwo/Player.py:87 ../kuwo/PlayerNotify.py:57
 #: ../kuwo/PlayerNotify.py:81
 msgid "Previous"
 msgstr ""
 
-#: ../kuwo/Config.py:70 ../kuwo/Player.py:98 ../kuwo/PlayerNotify.py:74
+#: ../kuwo/Config.py:71 ../kuwo/Player.py:99 ../kuwo/PlayerNotify.py:74
 #: ../kuwo/PlayerNotify.py:101
 msgid "Next"
 msgstr ""
 
-#: ../kuwo/Config.py:71 ../kuwo/PlayerNotify.py:63 ../kuwo/PlayerNotify.py:88
+#: ../kuwo/Config.py:72 ../kuwo/PlayerNotify.py:63 ../kuwo/PlayerNotify.py:88
 msgid "Pause"
 msgstr ""
 
-#: ../kuwo/Config.py:72 ../kuwo/Player.py:92 ../kuwo/PlayerNotify.py:69
-#: ../kuwo/PlayerNotify.py:95 ../kuwo/Radio.py:63 ../kuwo/Widgets.py:190
+#: ../kuwo/Config.py:73 ../kuwo/Player.py:93 ../kuwo/PlayerNotify.py:69
+#: ../kuwo/PlayerNotify.py:95 ../kuwo/Radio.py:65 ../kuwo/Widgets.py:190
 msgid "Play"
 msgstr ""
 
-#: ../kuwo/Config.py:73
+#: ../kuwo/Config.py:74
 msgid "Stop"
 msgstr ""
 
-#: ../kuwo/Config.py:74
+#: ../kuwo/Config.py:75
 msgid "Launch"
 msgstr ""
 
-#: ../kuwo/Lrc.py:52 ../kuwo/Preferences.py:201
+#: ../kuwo/Lrc.py:52 ../kuwo/Preferences.py:207
 msgid "Lyrics"
 msgstr ""
 
@@ -236,138 +236,138 @@ msgstr ""
 msgid "Aritst"
 msgstr ""
 
-#: ../kuwo/PlayList.py:86 ../kuwo/Radio.py:75
+#: ../kuwo/PlayList.py:87 ../kuwo/Radio.py:77
 msgid "Delete"
 msgstr ""
 
-#: ../kuwo/PlayList.py:145
-msgid "PlayList"
-msgstr ""
-
-#: ../kuwo/PlayList.py:201
-msgid "Add a new playlist"
-msgstr ""
-
-#: ../kuwo/PlayList.py:207
-msgid "Remove selected playlist"
-msgstr ""
-
-#: ../kuwo/PlayList.py:214
-msgid "Export songs in selected playlist"
-msgstr ""
-
-#: ../kuwo/PlayList.py:264 ../kuwo/PlayList.py:304
-msgid "Caching"
-msgstr ""
-
-#: ../kuwo/PlayList.py:265
-msgid "Default"
-msgstr ""
-
-#: ../kuwo/PlayList.py:295 ../kuwo/PlayList.py:428
-msgid "Start Cache Service"
-msgstr ""
-
-#: ../kuwo/PlayList.py:299
-msgid "Open Cache Folder"
-msgstr ""
-
-#: ../kuwo/PlayList.py:424
-msgid "Stop Cache Service"
-msgstr ""
-
-#: ../kuwo/PlayList.py:446
-msgid "Failed to cache song"
-msgstr ""
-
-#: ../kuwo/PlayList.py:468
-msgid "All songs in caching list have been downloaded."
-msgstr ""
-
-#: ../kuwo/PlayList.py:581
-msgid "Playlist"
-msgstr ""
-
-#: ../kuwo/PlayList.py:634
+#: ../kuwo/PlayList.py:156
 msgid "Export Songs"
 msgstr ""
 
-#: ../kuwo/PlayList.py:640
-msgid "Choose export folder"
+#: ../kuwo/PlayList.py:168
+msgid "Choose export folder:"
 msgstr ""
 
-#: ../kuwo/PlayList.py:647
+#: ../kuwo/PlayList.py:175
 msgid "With lyrics"
 msgstr ""
 
-#: ../kuwo/PlayList.py:648
+#: ../kuwo/PlayList.py:176
 msgid "Export lyrics to the same folder"
 msgstr ""
 
-#: ../kuwo/PlayList.py:659
+#: ../kuwo/PlayList.py:189
 msgid "Export"
 msgstr ""
 
-#: ../kuwo/PlayList.py:667
+#: ../kuwo/PlayList.py:197
 msgid "Only cached songs will be exported"
 msgstr ""
 
-#: ../kuwo/PlayList.py:711
+#: ../kuwo/PlayList.py:226
+msgid "PlayList"
+msgstr ""
+
+#: ../kuwo/PlayList.py:282
+msgid "Add a new playlist"
+msgstr ""
+
+#: ../kuwo/PlayList.py:288
+msgid "Remove selected playlist"
+msgstr ""
+
+#: ../kuwo/PlayList.py:295
+msgid "Export songs in selected playlist"
+msgstr ""
+
+#: ../kuwo/PlayList.py:345 ../kuwo/PlayList.py:385
+msgid "Caching"
+msgstr ""
+
+#: ../kuwo/PlayList.py:346
+msgid "Default"
+msgstr ""
+
+#: ../kuwo/PlayList.py:376 ../kuwo/PlayList.py:512
+msgid "Start Cache Service"
+msgstr ""
+
+#: ../kuwo/PlayList.py:380
+msgid "Open Cache Folder"
+msgstr ""
+
+#: ../kuwo/PlayList.py:508
+msgid "Stop Cache Service"
+msgstr ""
+
+#: ../kuwo/PlayList.py:534
+msgid "Failed to cache song"
+msgstr ""
+
+#: ../kuwo/PlayList.py:554
+msgid "All songs in caching list have been downloaded."
+msgstr ""
+
+#: ../kuwo/PlayList.py:668
+msgid "Playlist"
+msgstr ""
+
+#: ../kuwo/PlayList.py:741
 msgid "Create this playlist and add songs into it"
 msgstr ""
 
-#: ../kuwo/Player.py:104
+#: ../kuwo/Player.py:105
 msgid "Shuffle"
 msgstr ""
 
-#: ../kuwo/Player.py:111
+#: ../kuwo/Player.py:112
 msgid "Repeat"
 msgstr ""
 
-#: ../kuwo/Player.py:117
+#: ../kuwo/Player.py:118
 msgid "Play audio"
 msgstr ""
 
-#: ../kuwo/Player.py:126 ../kuwo/Player.py:127
+#: ../kuwo/Player.py:127 ../kuwo/Player.py:128
 msgid "Play MTV"
 msgstr ""
 
-#: ../kuwo/Player.py:135
+#: ../kuwo/Player.py:137
 msgid "Play Karaoke"
 msgstr ""
 
-#: ../kuwo/Player.py:137
+#: ../kuwo/Player.py:139
 msgid ""
 "Play Karaoke\n"
 "Please use mkv format"
 msgstr ""
 
-#: ../kuwo/Player.py:145
+#: ../kuwo/Player.py:148
 msgid "Fullscreen"
 msgstr ""
 
-#: ../kuwo/Player.py:156
+#: ../kuwo/Player.py:159
 msgid "Add to Favorite playlist"
 msgstr ""
 
-#: ../kuwo/Player.py:166 ../kuwo/Preferences.py:132
+#: ../kuwo/Player.py:169 ../kuwo/Preferences.py:132
 msgid "Preferences"
 msgstr ""
 
-#: ../kuwo/Player.py:172
+#: ../kuwo/Player.py:175
 msgid "About"
 msgstr ""
 
-#: ../kuwo/Player.py:200 ../kuwo/Player.py:441 ../kuwo/Player.py:445
+#: ../kuwo/Player.py:203 ../kuwo/Player.py:460 ../kuwo/Player.py:464
 #: ../kuwo/PlayerNotify.py:39 ../kuwo/PlayerNotify.py:43
 msgid "Unknown"
 msgstr ""
 
-#: ../kuwo/Player.py:270
+#: ../kuwo/Player.py:295
 msgid "Failed to download MV"
 msgstr ""
 
-#: ../kuwo/Player.py:272
+#: ../kuwo/Player.py:297
 msgid "Failed to download song"
 msgstr ""
 
@@ -399,127 +399,131 @@ msgstr ""
 msgid "Show playlist tab on startup"
 msgstr ""
 
-#: ../kuwo/Preferences.py:168
+#: ../kuwo/Preferences.py:166
+msgid "Use dark theme"
+msgstr ""
+
+#: ../kuwo/Preferences.py:174
 msgid "Format"
 msgstr ""
 
-#: ../kuwo/Preferences.py:170
+#: ../kuwo/Preferences.py:176
 msgid "Prefered Audio Format"
 msgstr ""
 
-#: ../kuwo/Preferences.py:172
+#: ../kuwo/Preferences.py:178
 msgid "MP3 (faster)"
 msgstr ""
 
-#: ../kuwo/Preferences.py:176
+#: ../kuwo/Preferences.py:182
 msgid "APE (better)"
 msgstr ""
 
-#: ../kuwo/Preferences.py:183
+#: ../kuwo/Preferences.py:189
 msgid "Prefered Video Format"
 msgstr ""
 
-#: ../kuwo/Preferences.py:186
+#: ../kuwo/Preferences.py:192
 msgid "MP4 (faster)"
 msgstr ""
 
-#: ../kuwo/Preferences.py:190
+#: ../kuwo/Preferences.py:196
 msgid "MKV (better)"
 msgstr ""
 
-#: ../kuwo/Preferences.py:196
+#: ../kuwo/Preferences.py:202
 msgid "Please use this format when using Karaoke"
 msgstr ""
 
-#: ../kuwo/Preferences.py:203
+#: ../kuwo/Preferences.py:209
 msgid "Normal Text"
 msgstr ""
 
-#: ../kuwo/Preferences.py:207 ../kuwo/Preferences.py:220
+#: ../kuwo/Preferences.py:213 ../kuwo/Preferences.py:226
 msgid "text size"
 msgstr ""
 
-#: ../kuwo/Preferences.py:211 ../kuwo/Preferences.py:225
+#: ../kuwo/Preferences.py:217 ../kuwo/Preferences.py:231
 msgid "text color"
 msgstr ""
 
-#: ../kuwo/Preferences.py:216
+#: ../kuwo/Preferences.py:222
 msgid "Highlighted Text"
 msgstr ""
 
-#: ../kuwo/Preferences.py:231
+#: ../kuwo/Preferences.py:237
 msgid "Lyrics Text Background color"
 msgstr ""
 
-#: ../kuwo/Preferences.py:236
+#: ../kuwo/Preferences.py:242
 msgid "Folders"
 msgstr ""
 
-#: ../kuwo/Preferences.py:238
+#: ../kuwo/Preferences.py:244
 msgid "Place to store sogns"
 msgstr ""
 
-#: ../kuwo/Preferences.py:241
+#: ../kuwo/Preferences.py:247
 msgid "Moving cached songs to new folder"
 msgstr ""
 
-#: ../kuwo/Preferences.py:244
+#: ../kuwo/Preferences.py:250
 msgid "Place to store MVs"
 msgstr ""
 
-#: ../kuwo/Preferences.py:248
+#: ../kuwo/Preferences.py:254
 msgid "Moving cached MVs to new folder"
 msgstr ""
 
-#: ../kuwo/Preferences.py:260
+#: ../kuwo/Preferences.py:266
 msgid "Shortcut"
 msgstr ""
 
-#: ../kuwo/Preferences.py:264
+#: ../kuwo/Preferences.py:270
 msgid "Disable Keyboard Shortcut"
 msgstr ""
 
-#: ../kuwo/Preferences.py:270
+#: ../kuwo/Preferences.py:276
 msgid "Use Default MultiMedia Key"
 msgstr ""
 
-#: ../kuwo/Preferences.py:278
+#: ../kuwo/Preferences.py:284
 msgid "Use Custom Keyboard Shortcut"
 msgstr ""
 
-#: ../kuwo/Radio.py:52
+#: ../kuwo/Radio.py:54
 msgid "song name"
 msgstr ""
 
-#: ../kuwo/Radio.py:197
+#: ../kuwo/Radio.py:199
 msgid "Radio"
 msgstr ""
 
-#: ../kuwo/Search.py:21
+#: ../kuwo/Search.py:23
 msgid "Search"
 msgstr ""
 
-#: ../kuwo/Search.py:38
+#: ../kuwo/Search.py:40
 msgid "Search Songs, Artists.."
 msgstr ""
 
-#: ../kuwo/Themes.py:19 ../kuwo/Themes.py:31
+#: ../kuwo/Themes.py:21 ../kuwo/Themes.py:33
 msgid "Themes"
 msgstr ""
 
-#: ../kuwo/TopCategories.py:19
+#: ../kuwo/TopCategories.py:21
 msgid "Categories"
 msgstr ""
 
-#: ../kuwo/TopCategories.py:31
+#: ../kuwo/TopCategories.py:33
 msgid "Top Categories"
 msgstr ""
 
-#: ../kuwo/TopList.py:19
+#: ../kuwo/TopList.py:21
 msgid "Top List"
 msgstr ""
 
-#: ../kuwo/TopList.py:31
+#: ../kuwo/TopList.py:33
 msgid "TopList"
 msgstr ""
 
@@ -535,15 +539,15 @@ msgstr ""
 msgid "Cache"
 msgstr ""
 
-#: ../kuwo/Widgets.py:344
+#: ../kuwo/Widgets.py:350
 msgid "Please check network connection and try again"
 msgstr ""
 
-#: ../kuwo/Widgets.py:349
+#: ../kuwo/Widgets.py:355
 msgid "Failed to open file or direcotry"
 msgstr ""
 
-#: ../kuwo/Widgets.py:353
+#: ../kuwo/Widgets.py:359
 #, python-brace-format
-msgid "Please check {0} exists"
+msgid "Unable to access {0}"
 msgstr ""
