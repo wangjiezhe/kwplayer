@@ -89,7 +89,7 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.treeview.connect(
                 'key-press-event', self.on_treeview_key_pressed)
         self.treeview.connect(
-                'button-press-event', self.on_treeview_button_pressed)
+                'button-release-event', self.on_treeview_button_released)
         
     def on_treeview_key_pressed(self, treeview, event):
         if event.keyval == Gdk.KEY_Delete:
@@ -98,14 +98,14 @@ class NormalSongTab(Gtk.ScrolledWindow):
             for path in reversed(paths):
                 model.remove(model[path].iter)
 
-    def on_treeview_button_pressed(self, treeview, event):
+    def on_treeview_button_released(self, treeview, event):
         path_info = treeview.get_path_at_pos(event.x, event.y)
         if not path_info:
             return
         path, column, cell_x, cell_y = path_info
         if column != self.delete_col:
             return
-        self.liststore.remove(self.liststore[path].iter)
+        self.liststore.remove(self.liststore.get_iter(path))
 
     def on_treeview_row_activated(self, treeview, path, column):
         model = treeview.get_model()
