@@ -13,8 +13,9 @@ from gi.repository import GdkX11
 from gi.repository import Gtk
 
 from kuwo import Config
-
 _ = Config._
+
+LRC_WINDOW, MV_WINDOW = 0, 1
 
 def list_to_time(time_tags):
     mm, ss, ml = time_tags
@@ -46,13 +47,14 @@ def lrc_parser(lrc_txt):
         lrc_obj.append((i, '', ))
     return sorted(lrc_obj)
 
-class Lrc(Gtk.Box):
+class Lrc(Gtk.Notebook):
     '''Lyrics tab in notebook.'''
 
     title = _('Lyrics')
 
     def __init__(self, app):
-        super().__init__(orientation=Gtk.Orientation.VERTICAL)
+        super().__init__()
+        self.set_show_tabs(False)
         self.app = app
         self.lrc_obj = None
         self.lrc_default_background = os.path.join(
@@ -63,7 +65,7 @@ class Lrc(Gtk.Box):
         # lyrics window
         self.lrc_window = Gtk.ScrolledWindow()
         self.lrc_window.get_style_context().add_class('lrc_window')
-        self.pack_start(self.lrc_window, True, True, 0)
+        self.append_page(self.lrc_window, Gtk.Label.new('Lrc'))
 
         self.lrc_buf = Gtk.TextBuffer()
         self.lrc_buf.set_text('')
@@ -89,14 +91,16 @@ class Lrc(Gtk.Box):
         self.lrc_window.add(self.lrc_tv)
 
         # mv window
+        mv_win_wrap = Gtk.ScrolledWindow()
+        self.append_page(mv_win_wrap, Gtk.Label.new('MV'))
         self.mv_window = Gtk.DrawingArea()
         self.mv_window.connect('draw', self.on_mv_window_redraw)
-        self.pack_start(self.mv_window, True, True, 0)
+        mv_win_wrap.add(self.mv_window)
 
         self.update_background(self.lrc_default_background)
 
     def after_init(self):
-        self.mv_window.hide()
+        pass
 
     def first(self):
         pass
@@ -159,15 +163,13 @@ class Lrc(Gtk.Box):
         self.old_timestamp = timestamp
 
     def show_mv(self):
-        self.lrc_window.hide()
-        self.mv_window.show_all()
+        self.set_current_page(MV_WINDOW)
         Gdk.Window.process_all_updates()
         self.mv_window.realize()
         self.xid = self.mv_window.get_property('window').get_xid()
 
     def show_music(self):
-        self.mv_window.hide()
-        self.lrc_window.show_all()
+        self.set_current_page(LRC_WINDOW)
 
     # styles
     def update_background(self, filepath):
