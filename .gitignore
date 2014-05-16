@@ -4,3 +4,4 @@ build/
 kuwo/__pycache__/
 *~
 *.swp
+tags
