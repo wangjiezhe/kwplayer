@@ -140,11 +140,17 @@ class PlayerBin(GObject.GObject):
 
     def set_mute(self, mute):
         self.playbin.handler_block(self.mute_sid)
-        self.playbin.set_property('mute', mute)
+        try:
+            self.playbin.set_property('mute', mute)
+        except TypeError:
+            pass
         self.playbin.handler_unblock(self.mute_sid)
 
     def get_mute(self):
-        return self.playbin.get_property('mute')
+        try:
+            return self.playbin.get_property('mute')
+        except TypeError:
+            return False
 
     def set_current_audio(self, audio_stream):
         print('set_current_audio:', audio_stream)
