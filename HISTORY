@@ -1,3 +1,9 @@
+3.3.5 - 2014.6.18
+* Put export worker to background thread
+* Fixed: GstPlaybin(0.10) has no property `mute`
+* Fixed: lrc text blinks on top of MV window
+* Fixed: two songs might be deleted at a time by mistake when delete_button is clicked
+
 3.3.4 - 2014.5.1
 * Support dark theme
 * Get thumbnails one by one
