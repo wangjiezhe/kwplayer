@@ -8,7 +8,9 @@ import json
 import os
 import random
 import shutil
+import threading
 import time
+
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gio
@@ -151,6 +153,8 @@ class NormalSongTab(Gtk.ScrolledWindow):
 
 class ExportDialog(Gtk.Dialog):
 
+    export_worker = None
+
     def __init__(self, parent, liststore):
         super().__init__(
                 _('Export Songs'), parent.app.window, Gtk.DialogFlags.MODAL,
@@ -172,10 +176,10 @@ class ExportDialog(Gtk.Dialog):
         self.folder_chooser.props.margin_left = 20
         box.pack_start(self.folder_chooser, False, True, 0)
 
-        self.with_lrc = Gtk.CheckButton(_('With lyrics'))
-        self.with_lrc.set_tooltip_text(_('Export lyrics to the same folder'))
-        self.with_lrc.props.margin_top = 20
-        box.pack_start(self.with_lrc, False, False, 0)
+        self.including_lrc = Gtk.CheckButton(_('Including lyrics'))
+        self.including_lrc.set_tooltip_text(_('Export lyrics to the same folder'))
+        self.including_lrc.props.margin_top = 20
+        box.pack_start(self.including_lrc, False, False, 0)
 
         export_box = Gtk.Box(spacing=5)
         export_box.props.margin_top = 20
@@ -186,9 +190,9 @@ class ExportDialog(Gtk.Dialog):
         self.export_prog.props.text = ''
         export_box.pack_start(self.export_prog, True, True, 0)
 
-        export_btn = Gtk.Button(_('Export'))
-        export_btn.connect('clicked', self.do_export)
-        export_box.pack_start(export_btn, False, False, 0)
+        self.export_btn = Gtk.Button(_('Export'))
+        self.export_btn.connect('clicked', self.do_export)
+        export_box.pack_start(self.export_btn, False, False, 0)
 
         infobar = Gtk.InfoBar()
         infobar.props.margin_top = 20
@@ -199,25 +203,74 @@ class ExportDialog(Gtk.Dialog):
         box.show_all()
 
     def do_export(self, button):
-        num_songs = len(self.liststore)
-        export_dir = self.folder_chooser.get_filename()
-        export_lrc = self.with_lrc.get_active()
+        def on_song_copied(worker, name, num):
+            GLib.idle_add(do_on_song_copied, name, num)
+
+        def do_on_song_copied(name, num):
+            self.export_prog.set_fraction(num / len(self.liststore))
+            self.export_prog.set_text(name)
+
+        def on_worker_finished(worker, file_nums):
+            GLib.idle_add(do_on_worker_finished)
+
+        def do_on_worker_finished():
+            self.export_worker = None
+            self.destroy()
+
+        self.export_btn.set_sensitive(False)
+        self.export_worker = ExportWorker(self.app.conf, self.liststore,
+                self.folder_chooser.get_filename(),
+                self.including_lrc.get_active())
+
+        self.export_worker.connect('copied', on_song_copied)
+        self.export_worker.connect('finished', on_worker_finished)
+        self.export_worker.start()
+
+    def do_destroy(self):
+        if self.export_worker:
+            self.export_worker.destroy()
+
+
+class ExportWorker(threading.Thread, GObject.GObject):
+
+    stop_flag = False
+
+    __gsignals__ = {
+            'copied': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
+                       (str, GObject.TYPE_INT64)),  # song_name, number
+            'finished': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
+                         (GObject.TYPE_INT64, )),  # number of songs
+            }
+
+    def __init__(self, conf, liststore, export_dir, including_lrc):
+        threading.Thread.__init__(self)
+        GObject.GObject.__init__(self)
+        self.daemon = True
+
+        self.conf = conf
+        self.liststore = liststore
+        self.export_dir = export_dir
+        self.including_lrc = including_lrc
+
+    def run(self):
+        file_nums = len(self.liststore)
         for i, item in enumerate(self.liststore):
+            if self.stop_flag:
+                return
             song = Widgets.song_row_to_dict(item, start=0)
-            cached, song_link, song_path = Net.get_song_link(
-                    song, self.app.conf)
+            cached, song_link, song_path = Net.get_song_link(song, self.conf)
             if not cached:
                 continue
-            self.export_prog.set_fraction(i / num_songs)
-            self.export_prog.set_text(song['name'])
-            shutil.copy(song_path, export_dir)
-
-            if export_lrc:
+            shutil.copy(song_path, self.export_dir)
+            if self.including_lrc:
                 lrc_path, lrc_cached = Net.get_lrc_path(song)
                 if lrc_cached:
-                    shutil.copy(lrc_path, export_dir)
-            Gdk.Window.process_all_updates()
-        self.destroy()
+                    shutil.copy(lrc_path, self.export_dir)
+            self.emit('copied', song['name'], i)
+        self.emit('finished', file_nums)
+
+    def destroy(self):
+        self.stop_flag = True
 
 
 class PlayList(Gtk.Box):

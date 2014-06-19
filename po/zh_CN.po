@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kwplayer 3.1.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-05-01 07:24+0800\n"
+"POT-Creation-Date: 2014-06-18 23:01+0800\n"
 "PO-Revision-Date: 2013-10-23 07:38+0800\n"
 "Last-Translator: LiuLang <gsushzhsosgsu@gmail.com>\n"
 "Language-Team: \n"
@@ -38,7 +38,7 @@ msgstr "退出"
 msgid "Artists"
 msgstr "歌手"
 
-#: ../kuwo/Artists.py:152 ../kuwo/Artists.py:324 ../kuwo/PlayList.py:347
+#: ../kuwo/Artists.py:152 ../kuwo/Artists.py:324 ../kuwo/PlayList.py:400
 #: ../kuwo/Player.py:157 ../kuwo/Radio.py:71
 msgid "Favorite"
 msgstr "喜爱"
@@ -112,7 +112,7 @@ msgstr "性别"
 msgid "Constellation"
 msgstr "星座"
 
-#: ../kuwo/Artists.py:317 ../kuwo/PlayList.py:81
+#: ../kuwo/Artists.py:317 ../kuwo/PlayList.py:83
 msgid "Album"
 msgstr "专辑"
 
@@ -219,99 +219,99 @@ msgstr "停止"
 msgid "Launch"
 msgstr "启动"
 
-#: ../kuwo/Lrc.py:52 ../kuwo/Preferences.py:207
+#: ../kuwo/Lrc.py:53 ../kuwo/Preferences.py:207
 msgid "Lyrics"
 msgstr "歌词"
 
-#: ../kuwo/Lrc.py:115
+#: ../kuwo/Lrc.py:119
 msgid "No lrc available"
 msgstr "没有找到歌词"
 
-#: ../kuwo/PlayList.py:73
+#: ../kuwo/PlayList.py:75
 msgid "Title"
 msgstr "标题"
 
-#: ../kuwo/PlayList.py:77
+#: ../kuwo/PlayList.py:79
 msgid "Aritst"
 msgstr "歌手"
 
-#: ../kuwo/PlayList.py:87 ../kuwo/Radio.py:77
+#: ../kuwo/PlayList.py:89 ../kuwo/Radio.py:77
 msgid "Delete"
 msgstr "删除"
 
-#: ../kuwo/PlayList.py:156
+#: ../kuwo/PlayList.py:160
 msgid "Export Songs"
 msgstr "导出音乐"
 
-#: ../kuwo/PlayList.py:168
+#: ../kuwo/PlayList.py:172
 msgid "Choose export folder:"
 msgstr "选择目录:"
 
-#: ../kuwo/PlayList.py:175
-msgid "With lyrics"
+#: ../kuwo/PlayList.py:179
+msgid "Including lyrics"
 msgstr "包括歌词"
 
-#: ../kuwo/PlayList.py:176
+#: ../kuwo/PlayList.py:180
 msgid "Export lyrics to the same folder"
 msgstr "导出歌词到同一个文件夹"
 
-#: ../kuwo/PlayList.py:189
+#: ../kuwo/PlayList.py:193
 msgid "Export"
 msgstr "导出"
 
-#: ../kuwo/PlayList.py:197
+#: ../kuwo/PlayList.py:201
 msgid "Only cached songs will be exported"
 msgstr "只导出已缓存好的歌曲."
 
-#: ../kuwo/PlayList.py:226
+#: ../kuwo/PlayList.py:279
 msgid "PlayList"
 msgstr "播放列表"
 
-#: ../kuwo/PlayList.py:282
+#: ../kuwo/PlayList.py:335
 msgid "Add a new playlist"
 msgstr "新建播放列表"
 
-#: ../kuwo/PlayList.py:288
+#: ../kuwo/PlayList.py:341
 msgid "Remove selected playlist"
 msgstr "删除选中的播放列表"
 
-#: ../kuwo/PlayList.py:295
+#: ../kuwo/PlayList.py:348
 msgid "Export songs in selected playlist"
 msgstr "导出播放列表中的歌曲"
 
-#: ../kuwo/PlayList.py:345 ../kuwo/PlayList.py:385
+#: ../kuwo/PlayList.py:398 ../kuwo/PlayList.py:438
 msgid "Caching"
 msgstr "正在缓存"
 
-#: ../kuwo/PlayList.py:346
+#: ../kuwo/PlayList.py:399
 msgid "Default"
 msgstr "默认"
 
-#: ../kuwo/PlayList.py:376 ../kuwo/PlayList.py:512
+#: ../kuwo/PlayList.py:429 ../kuwo/PlayList.py:565
 msgid "Start Cache Service"
 msgstr "开启缓存服务"
 
-#: ../kuwo/PlayList.py:380
+#: ../kuwo/PlayList.py:433
 msgid "Open Cache Folder"
 msgstr "打开缓存目录"
 
-#: ../kuwo/PlayList.py:508
+#: ../kuwo/PlayList.py:561
 msgid "Stop Cache Service"
 msgstr "停止缓存服务"
 
-#: ../kuwo/PlayList.py:534
+#: ../kuwo/PlayList.py:587
 msgid "Failed to cache song"
 msgstr "缓存歌曲失败"
 
-#: ../kuwo/PlayList.py:554
+#: ../kuwo/PlayList.py:607
 msgid "All songs in caching list have been downloaded."
 msgstr "缓存任务已完成."
 
-#: ../kuwo/PlayList.py:668
+#: ../kuwo/PlayList.py:721
 msgid "Playlist"
 msgstr "播放列表"
 
-#: ../kuwo/PlayList.py:741
+#: ../kuwo/PlayList.py:794
 msgid "Create this playlist and add songs into it"
 msgstr "新建这个播放列表, 并将选中的歌曲加进去"
 
