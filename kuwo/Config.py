@@ -13,6 +13,7 @@ from gi.repository import GdkPixbuf
 from gi.repository import GLib
 from gi.repository import Gtk
 
+import kuwo
 
 if __file__.startswith('/usr/local/'):
     PREF = '/usr/local/share'
@@ -27,7 +28,7 @@ gettext.textdomain('kwplayer')
 _ = gettext.gettext
 
 APPNAME = _('KW Player')
-VERSION = '3.3.5'
+VERSION = kuwo.__version__
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
 COPYRIGHT = 'Copyright (c) 2013-2014 LiuLang'

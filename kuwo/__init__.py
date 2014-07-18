@@ -5,3 +5,8 @@
 # in the LICENSE file.
 
 # kuwo python lib placeholder
+
+__version__ = '3.3.5'
+__doc__ = '''KW music player is used to get music resources from Internet.
+It can also play MV, show lyrics and show photo albums of artists.
+'''

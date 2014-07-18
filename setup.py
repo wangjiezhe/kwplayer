@@ -13,7 +13,7 @@ import glob
 import os
 import shutil
 
-from kuwo import Config
+import kuwo
 
 def build_data_files():
     data_files = []
@@ -31,9 +31,9 @@ if __name__ == '__main__':
     setup(
         name = 'kwplayer',
         description = 'An elegant music player which can get songs from kuwo.cn',
-        version = Config.VERSION,
+        version = kuwo.__version__,
         license = 'GPLv3',
-        url = Config.HOMEPAGE,
+        url = 'https://github.com/LiuLang/kwplayer',
 
         author = 'LiuLang',
         author_email = 'gsushzhsosgsu@gmail.com',
@@ -41,8 +41,21 @@ if __name__ == '__main__':
         packages = ['kuwo', ],
         scripts = scripts,
         data_files = build_data_files(),
-        long_description = '''\
-KW music player is used to get music resources from Internet.
-It can also play MV, show lyrics and show photo albums of artists.
-''',
+        long_description = kuwo.__doc__,
+
+        platforms = 'any',
+        classifiers=[
+            'Development Status :: 5 - Production/Stable',
+            'Environment :: X11 Applications :: GTK',
+            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+            'Natural Language :: Chinese (Simplified)',
+            'Natural Language :: Chinese (Traditional)',
+            'Natural Language :: English',
+            'Operating System :: POSIX :: Linux',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.2',
+            'Programming Language :: Python :: 3.3',
+            'Programming Language :: Python :: 3.4',
+            'Topic :: Multimedia :: Sound/Audio :: Players',
+            ],
         )
