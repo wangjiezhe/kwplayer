@@ -550,11 +550,14 @@ class Player(Gtk.Box):
 
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
-            cached, mv_link, mv_path = mv_args
-            if cached or mv_link:
-                self.use_mtv_btn.set_sensitive(True)
-            else:
+            if error or not mv_args:
                 self.use_mtv_btn.set_sensitive(False)
+            else:
+                cached, mv_link, mv_path = mv_args
+                if cached or mv_link:
+                    self.use_mtv_btn.set_sensitive(True)
+                else:
+                    self.use_mtv_btn.set_sensitive(False)
         Net.async_call(
                 Net.get_song_link, _update_mv_link,
                 self.curr_song, self.app.conf, True)
