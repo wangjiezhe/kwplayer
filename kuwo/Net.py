@@ -838,9 +838,9 @@ class AsyncSong(GObject.GObject):
 
                 while True:
                     if self.force_quit:
-                        del req
                         fh.close()
-                        os.remove(song_path)
+                        if os.path.exists(song_path):
+                            os.remove(song_path)
                         return
                     chunk = req.read(CHUNK)
                     received_size += len(chunk)
@@ -860,9 +860,11 @@ class AsyncSong(GObject.GObject):
                 return
 
             except URLError as e:
-                pass
+                print('URLError:', e)
             except FileNotFoundError as e:
                 self.emit('disk-error', song_path)
+                if os.path.exists(song_path):
+                    os.remove(song_path)
                 return
         if os.path.exists(song_path):
             os.remove(song_path)
