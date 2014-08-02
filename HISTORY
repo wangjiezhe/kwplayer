@@ -1,3 +1,8 @@
+3.3.6 - 2014.8.2
+* add classifiers
+* Fixed: NoneType object is not iterable
+* Press Shift+Delete keys to delete mp3 files from disk
+
 3.3.5 - 2014.6.18
 * Put export worker to background thread
 * Fixed: GstPlaybin(0.10) has no property `mute`
