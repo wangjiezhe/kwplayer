@@ -33,6 +33,16 @@ DRAG_TARGETS = [
         ]
 DRAG_ACTIONS = Gdk.DragAction.MOVE
 
+def get_song_path(artist, name, conf):
+    song_name = (''.join([
+        artist,
+        '-',
+        name,
+        '.',
+        'mp3',
+        ])).replace('/', '+')
+    return os.path.join(conf['song-dir'], song_name)
+
 class TreeViewColumnText(Widgets.TreeViewColumnText):
     def __init__(self, *args, **kwds):
         super().__init__(*args, **kwds)
@@ -46,6 +56,7 @@ class NormalSongTab(Gtk.ScrolledWindow):
         super().__init__()
         self.app = app
         self.list_name = list_name
+        self.shift_pressed = False
 
         # name, artist, album, rid, artistid, albumid
         self.liststore = Gtk.ListStore(str, str, str, int, int, int)
@@ -91,6 +102,8 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.treeview.connect(
                 'key-press-event', self.on_treeview_key_pressed)
         self.treeview.connect(
+                'key-release-event', self.on_treeview_key_released)
+        self.treeview.connect(
                 'button-release-event', self.on_treeview_button_released)
         
     def on_treeview_key_pressed(self, treeview, event):
@@ -98,7 +111,21 @@ class NormalSongTab(Gtk.ScrolledWindow):
             model, paths = self.selection.get_selected_rows()
             # paths needs to be reversed, or else an IndexError throwed.
             for path in reversed(paths):
+                # delete this mp3 file if Shift-Key is pressed
+                if self.shift_pressed:
+                    filepath = get_song_path(
+                        model[path][1], model[path][0], self.app.conf)
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
                 model.remove(model[path].iter)
+        elif (event.keyval == Gdk.KEY_Shift_L or
+              event.keyval == Gdk.KEY_Shift_R):
+            self.shift_pressed = True
+
+    def on_treeview_key_released(self, treeview, event):
+        if (event.keyval == Gdk.KEY_Shift_L or
+            event.keyval == Gdk.KEY_Shift_R):
+            self.shift_pressed = False
 
     def on_treeview_button_released(self, treeview, event):
         path_info = treeview.get_path_at_pos(event.x, event.y)
@@ -107,6 +134,12 @@ class NormalSongTab(Gtk.ScrolledWindow):
         path, column, cell_x, cell_y = path_info
         if column != self.delete_col:
             return
+        if self.shift_pressed:
+            filepath = get_song_path(
+                self.liststore[path][1], self.liststore[path][0],
+                self.app.conf)
+            if os.path.exists(filepath):
+                os.remove(filepath)
         self.liststore.remove(self.liststore.get_iter(path))
 
     def on_treeview_row_activated(self, treeview, path, column):
