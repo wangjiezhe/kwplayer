@@ -810,6 +810,8 @@ class AsyncSong(GObject.GObject):
     def _download_song(self, song, use_mv):
         cached, song_link, song_path = get_song_link(
                 song, self.app.conf, use_mv=use_mv)
+        # temp file to store data
+        tmp_song_path = song_path + '.part'
 
         # check song already cached 
         if cached:
@@ -834,7 +836,7 @@ class AsyncSong(GObject.GObject):
                 received_size = 0
                 can_play_emited = False
                 content_length = int(req.headers.get('Content-Length'))
-                fh = open(song_path, 'wb')
+                fh = open(tmp_song_path, 'wb')
 
                 while True:
                     if self.force_quit:
@@ -850,24 +852,32 @@ class AsyncSong(GObject.GObject):
                     if ((received_size > chunk_to_play or percent > 40) and
                             not can_play_emited):
                         can_play_emited = True
-                        self.emit('can-play', song_path)
+                        self.emit('can-play', tmp_song_path)
                     if not chunk:
                         break
                     fh.write(chunk)
+
                 fh.close()
-                self.emit('downloaded', song_path)
-                Utils.iconvtag(song_path, song)
-                return
+                # download successfully
+                if received_size == content_length:
+                    os.rename(tmp_song_path, song_path)
+                    self.emit('downloaded', song_path)
+                    Utils.iconvtag(song_path, song)
+                    return
+                # remove temp file
+                elif os.path.exists(tmp_song_path):
+                    os.remove(tmp_song_path)
 
             except URLError as e:
                 print('URLError:', e)
             except FileNotFoundError as e:
                 self.emit('disk-error', song_path)
-                if os.path.exists(song_path):
-                    os.remove(song_path)
+                if os.path.exists(tmp_song_path):
+                    os.remove(tmp_song_path)
                 return
-        if os.path.exists(song_path):
-            os.remove(song_path)
+
+        if os.path.exists(tmp_song_path):
+            os.remove(tmp_song_path)
         self.emit('network-error', song_link)
 
 GObject.type_register(AsyncSong)
