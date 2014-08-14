@@ -318,7 +318,7 @@ class PlayList(Gtk.Box):
         self.tabs = {}
         # self.lists_name contains playlists name
         self.lists_name = []
-        # use curr_playing to locate song in treeview
+        # use curr_playing to locate song in treeview, [model, iter]
         self.curr_playing = [None, None]
 
         # control cache job
@@ -512,12 +512,13 @@ class PlayList(Gtk.Box):
         path = self.get_song_path_in_liststore(liststore, rid)
         if path > -1:
             # curr_playing contains: listname, path
-            self.curr_playing = [list_name, path]
+            self.curr_playing = [list_name, liststore.get_iter(path)]
             song = Widgets.song_row_to_dict(liststore[path], start=0)
         else:
             liststore.append(Widgets.song_dict_to_row(song))
-            self.curr_playing = [list_name, len(liststore)-1, ]
-            self.locate_curr_song(popup_page=False)
+            self.curr_playing = [
+                    list_name, liststore.get_iter(len(liststore)-1)]
+            #self.locate_curr_song(popup_page=False)
         if use_mv is True:
             self.app.player.load_mv(song)
         else:
@@ -653,7 +654,8 @@ class PlayList(Gtk.Box):
     def on_song_downloaded(self, play=False):
         list_name = self.curr_playing[0]
         liststore = self.tabs[list_name].liststore
-        path = self.curr_playing[1]
+        iter_ = self.curr_playing[1]
+        path = liststore.get_path(iter_)
         song = Widgets.song_row_to_dict(liststore[path], start=0)
         Gdk.Window.process_all_updates()
 
@@ -662,38 +664,44 @@ class PlayList(Gtk.Box):
         if not list_name:
             return None
         liststore = self.tabs[list_name].liststore
-        path = self.curr_playing[1]
         song_nums = len(liststore)
         if song_nums == 0:
             return None
-        if path == 0:
+
+        iter_ = self.curr_playing[1]
+        path = liststore.get_path(iter_)
+        pos = int(str(path))
+        if pos == 0:
             if repeat:
-                path = song_nums - 1
+                pos = song_nums - 1
             else:
-                path = 0
+                pos = 0
         else:
-            path = path - 1
-        self.prev_playing = path
-        return Widgets.song_row_to_dict(liststore[path], start=0)
+            pos = pos - 1
+        self.prev_playing = liststore.get_iter(Gtk.TreePath(pos))
+        return Widgets.song_row_to_dict(liststore[pos], start=0)
 
     def get_next_song(self, repeat, shuffle):
         list_name = self.curr_playing[0]
         liststore = self.tabs[list_name].liststore
-        path = self.curr_playing[1]
         song_nums = len(liststore)
         if song_nums == 0:
             return None
+
+        iter_ = self.curr_playing[1]
+        path = liststore.get_path(iter_)
+        pos = int(str(path))
         if shuffle:
-            path = random.randint(0, song_nums-1)
-        elif path == song_nums - 1:
+            pos = random.randint(0, song_nums-1)
+        elif pos == song_nums - 1:
             if not repeat:
                 return None
-            path = 0
+            pos = 0
         else:
-            path = path + 1
+            pos = pos + 1
 
-        self.next_playing = path
-        return Widgets.song_row_to_dict(liststore[path], start=0)
+        self.next_playing = liststore.get_iter(Gtk.TreePath(pos))
+        return Widgets.song_row_to_dict(liststore[pos], start=0)
 
     def play_prev_song(self, repeat, use_mv=False):
         prev_song = self.get_prev_song(repeat)
@@ -724,7 +732,11 @@ class PlayList(Gtk.Box):
             return
         treeview = self.tabs[list_name].treeview
         liststore = treeview.get_model()
-        path = self.curr_playing[1]
+        if len(liststore) == 0:
+            return None
+
+        iter_ = self.curr_playing[1]
+        path = liststore.get_path(iter_)
         treeview.set_cursor(path)
 
         for left_path, item in enumerate(self.liststore_left):
