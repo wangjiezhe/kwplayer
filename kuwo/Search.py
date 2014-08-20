@@ -29,6 +29,10 @@ class Search(Gtk.Box):
         self.songs_tab_inited = False
         self.artists_tab_inited = False
         self.albums_tab_inited = False
+        #Initialize the counter
+        self.songs_page = 0
+        self.artists_page = 0
+        self.albums_page = 0
 
         box_top = Gtk.Box(spacing=5)
         self.pack_start(box_top, False, False, 0)
