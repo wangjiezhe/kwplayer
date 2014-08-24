@@ -26,9 +26,16 @@ class Search(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.app = app
 
-        self.songs_tab_inited = False
-        self.artists_tab_inited = False
-        self.albums_tab_inited = False
+        self.search_count = 0
+        self.keyword = ''
+
+        #Initialize page counter
+        self.songs_page = 0
+        self.songs_total = 0
+        self.artists_page = 0
+        self.artists_total = 0
+        self.albums_page = 0
+        self.albums_total = 0
 
         box_top = Gtk.Box(spacing=5)
         self.pack_start(box_top, False, False, 0)
@@ -44,19 +51,20 @@ class Search(Gtk.Box):
 
         self.songs_button = Widgets.ListRadioButton(_('Songs'))
         self.songs_button.connect('toggled', self.switch_notebook_page, 0)
+        self.songs_button.search_count = 0
         box_top.pack_start(self.songs_button, False, False, 0)
 
         self.artists_button = Widgets.ListRadioButton(
                 _('Artists'), self.songs_button)
         self.artists_button.connect('toggled', self.switch_notebook_page, 1)
+        self.artists_button.search_count = 0
         box_top.pack_start(self.artists_button, False, False, 0)
 
         self.albums_button = Widgets.ListRadioButton(
                 _('Albums'), self.songs_button)
         self.albums_button.connect('toggled', self.switch_notebook_page, 2)
+        self.albums_button.search_count = 0
         box_top.pack_start(self.albums_button, False, False, 0)
-
-        # TODO: add MV and lyrics search.
 
         # checked, name, artist, album, rid, artistid, albumid
         self.liststore_songs = Gtk.ListStore(
@@ -93,6 +101,7 @@ class Search(Gtk.Box):
         albums_tab.get_vadjustment().connect(
                 'value-changed', self.on_albums_tab_scrolled)
         self.notebook.append_page(albums_tab, Gtk.Label(_('Albums')))
+        albums_tab.search_count = 0
 
         # logo, album, albumid, artist, artistid, info
         self.liststore_albums = Gtk.ListStore(
@@ -113,136 +122,112 @@ class Search(Gtk.Box):
         if not state:
             return
         self.notebook.set_current_page(page)
-        if page == 0 and self.songs_tab_inited:
-            self.control_box.show_all()
-        else:
-            self.control_box.hide()
-
-        if ((page == 0 and not self.songs_tab_inited) or
-           (page == 1 and not self.artists_tab_inited) or
-           (page == 2 and not self.artists_tab_inited)):
-            self.on_search_entry_activate(None, False)
-
-    def on_search_entry_activate(self, search_entry, reset_status=True):
-        if not self.search_entry.get_text():
-            return
-        if reset_status:
-            self.reset_search_status()
-        page = self.notebook.get_current_page()
         if page == 0:
             self.control_box.show_all()
-            self.songs_tab_inited = True
-            self.show_songs(reset_status)
         elif page == 1:
-            self.artists_tab_inited = True
-            self.show_artists(reset_status)
+            self.control_box.hide()
         elif page == 2:
-            self.albums_tab_inited = True
-            self.show_albums(reset_status)
+            self.control_box.hide()
+        if self.keyword and radiobtn.search_count != self.search_count:
+            radiobtn.search_count = self.search_count
+            self.reload_current_page()
 
-    def show_songs(self, reset_status=False):
+    def on_search_entry_activate(self, search_entry):
+        '''Start a new search action'''
+        keyword = self.search_entry.get_text()
+        if not keyword:
+            return
+        self.search_count += 1
+        self.keyword = keyword
+        self.reset_search_status()
+        self.reload_current_page()
+
+    def reload_current_page(self):
+        page = self.notebook.get_current_page()
+        if page == 0:
+            self.show_songs()
+        elif page == 1:
+            self.show_artists()
+        elif page == 2:
+            self.show_albums()
+
+    def show_songs(self):
         def _append_songs(songs_args, error=None):
             songs, hit, self.songs_total = songs_args
-            if not songs or hit == 0:
-                if reset_status:
-                    self.songs_button.set_label('{0} (0)'.format(_('Songs')))
-                return
-            self.songs_button.set_label('{0} ({1})'.format(_('Songs'), hit))
-            for song in songs:
-                self.liststore_songs.append([
-                    False,
-                    Widgets.unescape(song['SONGNAME']),
-                    Widgets.unescape(song['ARTIST']),
-                    Widgets.unescape(song['ALBUM']),
-                    int(song['MUSICRID'][6:]),
-                    int(song['ARTISTID']),
-                    int(song['ALBUMID']),
-                    ])
+            if not error and songs and hit:
+                for song in songs:
+                    self.liststore_songs.append([
+                        False,
+                        Widgets.unescape(song['SONGNAME']),
+                        Widgets.unescape(song['ARTIST']),
+                        Widgets.unescape(song['ALBUM']),
+                        int(song['MUSICRID'][6:]),
+                        int(song['ARTISTID']),
+                        int(song['ALBUMID']),
+                        ])
+            self.songs_button.set_label('{0} ({1})'.format(
+                _('Songs'), len(self.liststore_songs)))
 
-        keyword = self.search_entry.get_text()
-        self.app.playlist.advise_new_playlist_name(keyword)
-        if not keyword:
-            return
-        if reset_status:
-            self.liststore_songs.clear()
-        Net.async_call(
-                Net.search_songs, _append_songs, keyword, self.songs_page)
+        self.app.playlist.advise_new_playlist_name(self.keyword)
+        Net.async_call(Net.search_songs, _append_songs,
+                       self.keyword, self.songs_page)
 
-    def show_artists(self, reset_status=False):
+    def show_artists(self):
         def _append_artists(artists_args, error=None):
             artists, hit, self.artists_total = artists_args
-            if (error or not hit) and reset_status:
-                self.artists_button.set_label('{0} (0)'.format(_('Artists')))
-                return
-            self.artists_button.set_label(
-                    '{0} ({1})'.format(_('Artists'), hit))
-            urls = []
-            tree_iters = []
-            for artist in artists:
-                tree_iter = self.liststore_artists.append([
-                    self.app.theme['anonymous'],
-                    Widgets.unescape(artist['ARTIST']),
-                    int(artist['ARTISTID']), 
-                    Widgets.unescape(artist['COUNTRY']),
-                    ])
-                tree_iters.append(tree_iter)
-                urls.append(artist['PICPATH'])
-            Net.update_artist_logos(
-                    self.liststore_artists, 0, tree_iters, urls)
+            if not error and artists and hit:
+                urls, tree_iters = [], []
+                for artist in artists:
+                    tree_iter = self.liststore_artists.append([
+                        self.app.theme['anonymous'],
+                        Widgets.unescape(artist['ARTIST']),
+                        int(artist['ARTISTID']),
+                        Widgets.unescape(artist['COUNTRY']),
+                        ])
+                    tree_iters.append(tree_iter)
+                    urls.append(artist['PICPATH'])
+                Net.update_artist_logos(self.liststore_artists, 0,
+                                        tree_iters, urls)
 
-        keyword = self.search_entry.get_text()
-        if not keyword:
-            return
-        if reset_status:
-            self.liststore_artists.clear()
-        if reset_status or not hasattr(self.liststore_artists, 'timestamp'):
+            self.artists_button.set_label('{0} ({1})'.format(
+                    _('Artists'), len(self.liststore_artists)))
+
+        # timestamp is used to mark Liststore ID
+        if self.artists_page == 0:
             self.liststore_artists.timestamp = time.time()
-        Net.async_call(
-                Net.search_artists, _append_artists,
-                keyword,self.artists_page)
+        Net.async_call(Net.search_artists, _append_artists,
+                       self.keyword, self.artists_page)
 
-    def show_albums(self, reset_status=False):
+    def show_albums(self):
         def _append_albums(albums_args, error=None):
             albums, hit, self.albums_total = albums_args
-            if (error or hit == 0) and reset_status:
-                self.albums_button.set_label(
-                        '{0} (0)'.format(_('Albums')))
-                return
-            self.albums_button.set_label(
-                    '{0} ({1})'.format(_('Albums'), hit))
-            urls = []
-            tree_iters = []
-            for album in albums:
-                tooltip = Widgets.escape(album.get('info', album['name']))
-                tree_iter = self.liststore_albums.append([
-                    self.app.theme['anonymous'],
-                    Widgets.unescape(album['name']),
-                    int(album['albumid']), 
-                    Widgets.unescape(album['artist']),
-                    int(album['artistid']),
-                    tooltip,
-                    ])
-                tree_iters.append(tree_iter)
-                urls.append(album['pic'])
-            Net.update_album_covers(
-                    self.liststore_albums, 0, tree_iters, urls)
+            if not error and albums and hit:
+                urls,tree_iters = [], []
+                for album in albums:
+                    tooltip = Widgets.escape(album.get('info',
+                                             album['name']))
+                    tree_iter = self.liststore_albums.append([
+                        self.app.theme['anonymous'],
+                        Widgets.unescape(album['name']),
+                        int(album['albumid']),
+                        Widgets.unescape(album['artist']),
+                        int(album['artistid']),
+                        tooltip,
+                        ])
+                    tree_iters.append(tree_iter)
+                    urls.append(album['pic'])
+                Net.update_album_covers(self.liststore_albums, 0,
+                                        tree_iters, urls)
 
-        keyword = self.search_entry.get_text()
-        if not keyword:
-            return
-        if reset_status:
-            self.liststore_albums.clear()
-        if reset_status or not hasattr(self.liststore_albums, 'timestamp'):
+            self.albums_button.set_label('{0} ({1})'.format(
+                    _('Albums'), len(self.liststore_albums)))
+
+        if self.albums_page == 0:
             self.liststore_albums.timestamp = time.time()
-        Net.async_call(
-                Net.search_albums, _append_albums,
-                keyword, self.albums_page)
+        Net.async_call(Net.search_albums, _append_albums,
+                       self.keyword, self.albums_page)
 
     def reset_search_status(self):
-        self.songs_tab_inited = False
-        self.artists_tab_inited = False
-        self.albums_tab_inited = False
-
         self.songs_button.set_label(_('Songs'))
         self.artists_button.set_label(_('Artists'))
         self.albums_button.set_label(_('Albums'))
@@ -250,42 +235,35 @@ class Search(Gtk.Box):
         self.liststore_songs.clear()
         self.liststore_artists.clear()
         self.liststore_albums.clear()
+        for page in range(0, self.notebook.get_n_pages()):
+            scrolled_window = self.notebook.get_nth_page(page)
+            adj = scrolled_window.get_vadjustment()
+            adj.set_value(0)
+            adj.set_lower(0)
+            adj.set_upper(0)
 
         self.songs_page = 0
+        self.songs_total = 0
         self.artists_page = 0
+        self.artists_total = 0
         self.albums_page = 0
-
-    def search_artist(self, artist):
-        self.reset_search_status()
-        self.app.popup_page(self.app_page)
-        self.artists_tab_inited = False
-        self.search_entry.set_text(artist)
-        self.artists_button.set_active(True)
-        self.artists_button.toggled()
-
-    def search_album(self, album):
-        self.reset_search_status()
-        self.app.popup_page(self.app_page)
-        self.albums_tab_inited = False
-        self.search_entry.set_text(album)
-        self.albums_button.set_active(True)
-        self.albums_button.toggled()
+        self.albums_total = 0
 
     def on_songs_tab_scrolled(self, adj):
         if (Widgets.reach_scrolled_bottom(adj) and
-            self.songs_page < self.songs_total - 1):
+                self.songs_page < self.songs_total - 1):
             self.songs_page += 1
             self.show_songs()
 
     def on_artists_tab_scrolled(self, adj):
         if (Widgets.reach_scrolled_bottom(adj) and 
-            self.artists_page < self.artists_total - 1):
+                self.artists_page < self.artists_total - 1):
             self.artists_page += 1
             self.show_artists()
 
     def on_albums_tab_scrolled(self, adj):
         if (Widgets.reach_scrolled_bottom(adj) and
-            self.albums_page < self.albums_total - 1):
+                self.albums_page < self.albums_total - 1):
             self.albums_page += 1
             self.show_albums()
 
@@ -304,3 +282,26 @@ class Search(Gtk.Box):
         artistid = model[path][4]
         self.app.popup_page(self.app.artists.app_page)
         self.app.artists.show_album(album, albumid, artist, artistid)
+
+    # Open APIs
+    def search_artist(self, artist):
+        self.app.popup_page(self.app_page)
+        if not artist:
+            return
+        self.search_entry.set_text(artist)
+        self.search_count += 1
+        self.keyword = artist
+        self.reset_search_status()
+        self.artists_button.set_active(True)
+        self.artists_button.toggled()
+
+    def search_album(self, album):
+        self.app.popup_page(self.app_page)
+        if not album:
+            return
+        self.search_entry.set_text(album)
+        self.search_count += 1
+        self.keyword = album
+        self.reset_search_status()
+        self.albums_button.set_active(True)
+        self.albums_button.toggled()
