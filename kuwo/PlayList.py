@@ -33,15 +33,13 @@ DRAG_TARGETS = [
         ]
 DRAG_ACTIONS = Gdk.DragAction.MOVE
 
-def get_song_path(artist, name, conf):
-    song_name = (''.join([
-        artist,
-        '-',
-        name,
-        '.',
-        'mp3',
-        ])).replace('/', '+')
-    return os.path.join(conf['song-dir'], song_name)
+def get_song_paths(artist, name, conf):
+    song_name = (artist + '-' + name).replace('/', '+')
+    return (os.path.join(conf['song-dir'], song_name) + '.mp3',
+            os.path.join(conf['song-dir'], song_name) + '.ape',
+            os.path.join(conf['mv-dir'], song_name) + '.mp4',
+            os.path.join(conf['mv-dir'], song_name) + '.mkv',)
+
 
 class TreeViewColumnText(Widgets.TreeViewColumnText):
     def __init__(self, *args, **kwds):
@@ -56,7 +54,6 @@ class NormalSongTab(Gtk.ScrolledWindow):
         super().__init__()
         self.app = app
         self.list_name = list_name
-        self.shift_pressed = False
 
         # name, artist, album, rid, artistid, albumid
         self.liststore = Gtk.ListStore(str, str, str, int, int, int)
@@ -102,30 +99,53 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.treeview.connect(
                 'key-press-event', self.on_treeview_key_pressed)
         self.treeview.connect(
-                'key-release-event', self.on_treeview_key_released)
+                'button-press-event', self.on_treeview_button_pressed)
         self.treeview.connect(
                 'button-release-event', self.on_treeview_button_released)
+
+        self.popup_menu = Gtk.Menu()
+        save_as_menu = Gtk.MenuItem(_('Save As..'))
+        save_as_menu.connect('activate', self.on_save_as_menu_activated)
+        self.popup_menu.append(save_as_menu)
+        sep = Gtk.SeparatorMenuItem()
+        self.popup_menu.append(sep)
+        delete_song_menu = Gtk.MenuItem(_('Delete from Playlist'))
+        delete_song_menu.connect('activate',
+                self.on_delete_song_menu_activated)
+        self.popup_menu.append(delete_song_menu)
+        delete_cache_menu = Gtk.MenuItem(_('Delete Local Cache'))
+        delete_cache_menu.connect('activate',
+                self.on_delete_cache_menu_activated)
+        self.popup_menu.append(delete_cache_menu)
         
     def on_treeview_key_pressed(self, treeview, event):
         if event.keyval == Gdk.KEY_Delete:
             model, paths = self.selection.get_selected_rows()
             # paths needs to be reversed, or else an IndexError throwed.
             for path in reversed(paths):
-                # delete this mp3 file if Shift-Key is pressed
-                if self.shift_pressed:
-                    filepath = get_song_path(
-                        model[path][1], model[path][0], self.app.conf)
-                    if os.path.exists(filepath):
-                        os.remove(filepath)
                 model.remove(model[path].iter)
-        elif (event.keyval == Gdk.KEY_Shift_L or
-              event.keyval == Gdk.KEY_Shift_R):
-            self.shift_pressed = True
 
-    def on_treeview_key_released(self, treeview, event):
-        if (event.keyval == Gdk.KEY_Shift_L or
-            event.keyval == Gdk.KEY_Shift_R):
-            self.shift_pressed = False
+    def on_treeview_button_pressed(self, treeview, event):
+        if event.type != Gdk.EventType.BUTTON_PRESS:
+            return False
+        path = treeview.get_path_at_pos(event.x, event.y)
+        selection = treeview.get_selection()
+        if path is None:
+            selection.unselect_all()
+            return True
+
+        if event.button == Gdk.BUTTON_PRIMARY:
+            print('left click')
+            return False
+        elif event.button == Gdk.BUTTON_SECONDARY:
+            liststore, selected_paths = selection.get_selected_rows()
+            print(selected_paths)
+            print('popup context menu')
+            self.popup_menu.show_all()
+            self.popup_menu.popup(None, None, None, None,
+                    event.button, event.time)
+            return True
+        return False
 
     def on_treeview_button_released(self, treeview, event):
         path_info = treeview.get_path_at_pos(event.x, event.y)
@@ -134,12 +154,6 @@ class NormalSongTab(Gtk.ScrolledWindow):
         path, column, cell_x, cell_y = path_info
         if column != self.delete_col:
             return
-        if self.shift_pressed:
-            filepath = get_song_path(
-                self.liststore[path][1], self.liststore[path][0],
-                self.app.conf)
-            if os.path.exists(filepath):
-                os.remove(filepath)
         self.liststore.remove(self.liststore.get_iter(path))
 
     def on_treeview_row_activated(self, treeview, path, column):
@@ -183,17 +197,39 @@ class NormalSongTab(Gtk.ScrolledWindow):
         for _iter in self.drag_data_old_iters:
             model.remove(_iter)
 
+    def on_save_as_menu_activated(self, menu_item):
+        export_dialog = ExportDialog(self, self.treeview, export_all=False)
+        export_dialog.run()
+        export_dialog.destroy()
+
+    def on_delete_song_menu_activated(self, menu_item):
+        selection = self.treeview.get_selection()
+        liststore, paths = selection.get_selected_rows()
+        for path in paths:
+            liststore.remove(liststore.get_iter(path))
+
+    def on_delete_cache_menu_activated(self, menu_item):
+        selection = self.treeview.get_selection()
+        liststore, paths = selection.get_selected_rows()
+        for path in paths:
+            filepaths = get_song_paths(self.liststore[path][1],
+                    self.liststore[path][0], self.app.conf)
+            for filepath in filepaths:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+
 
 class ExportDialog(Gtk.Dialog):
 
     export_worker = None
 
-    def __init__(self, parent, liststore):
+    def __init__(self, parent, treeview, export_all=True):
         super().__init__(
                 _('Export Songs'), parent.app.window, Gtk.DialogFlags.MODAL,
                 (Gtk.STOCK_CLOSE, Gtk.ResponseType.OK,))
         self.parent = parent
-        self.liststore = liststore
+        self.treeview = treeview
+        self.export_all = export_all
         self.app = parent.app
 
         self.set_border_width(15)
@@ -236,11 +272,11 @@ class ExportDialog(Gtk.Dialog):
         box.show_all()
 
     def do_export(self, button):
-        def on_song_copied(worker, name, num):
-            GLib.idle_add(do_on_song_copied, name, num)
+        def on_song_copied(worker, name, percent):
+            GLib.idle_add(do_on_song_copied, name, percent)
 
-        def do_on_song_copied(name, num):
-            self.export_prog.set_fraction(num / len(self.liststore))
+        def do_on_song_copied(name, percent):
+            self.export_prog.set_fraction(percent)
             self.export_prog.set_text(name)
 
         def on_worker_finished(worker, file_nums):
@@ -251,9 +287,9 @@ class ExportDialog(Gtk.Dialog):
             self.destroy()
 
         self.export_btn.set_sensitive(False)
-        self.export_worker = ExportWorker(self.app.conf, self.liststore,
+        self.export_worker = ExportWorker(self.app.conf, self.treeview,
                 self.folder_chooser.get_filename(),
-                self.including_lrc.get_active())
+                self.including_lrc.get_active(), self.export_all)
 
         self.export_worker.connect('copied', on_song_copied)
         self.export_worker.connect('finished', on_worker_finished)
@@ -275,19 +311,28 @@ class ExportWorker(threading.Thread, GObject.GObject):
                          (GObject.TYPE_INT64, )),  # number of songs
             }
 
-    def __init__(self, conf, liststore, export_dir, including_lrc):
+    def __init__(self, conf, treeview, export_dir, including_lrc, export_all):
         threading.Thread.__init__(self)
         GObject.GObject.__init__(self)
         self.daemon = True
 
         self.conf = conf
-        self.liststore = liststore
+        self.treeview = treeview
         self.export_dir = export_dir
         self.including_lrc = including_lrc
+        self.export_all = export_all
 
     def run(self):
-        file_nums = len(self.liststore)
-        for i, item in enumerate(self.liststore):
+        selection = self.treeview.get_selection()
+        liststore, selected_paths = selection.get_selected_rows()
+        if self.export_all:
+            file_nums = len(liststore)
+            song_rows = liststore
+        else:
+            file_nums = len(selected_paths)
+            song_rows = (liststore[path] for path in selected_paths)
+
+        for i, item in enumerate(song_rows):
             if self.stop_flag:
                 return
             song = Widgets.song_row_to_dict(item, start=0)
@@ -299,7 +344,7 @@ class ExportWorker(threading.Thread, GObject.GObject):
                 lrc_path, lrc_cached = Net.get_lrc_path(song)
                 if lrc_cached:
                     shutil.copy(lrc_path, self.export_dir)
-            self.emit('copied', song['name'], i)
+            self.emit('copied', song['name'], i /file_nums)
         self.emit('finished', file_nums)
 
     def destroy(self):
@@ -790,12 +835,10 @@ class PlayList(Gtk.Box):
         model, _iter = selection.get_selected()
         if not _iter:
             return
-        path = model.get_path(_iter)
-        index = path.get_indices()[0]
-        disname, list_name, editable, tooltip = model[path]
-        liststore = self.tabs[list_name].liststore
+        song_tab = self.notebook.get_nth_page(self.notebook.get_current_page())
+        treeview = song_tab.treeview
 
-        export_dialog = ExportDialog(self, liststore)
+        export_dialog = ExportDialog(self, treeview)
         export_dialog.run()
         export_dialog.destroy()
 
