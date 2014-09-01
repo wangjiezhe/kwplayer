@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-18 23:01+0800\n"
+"POT-Creation-Date: 2014-09-01 19:55+0800\n"
 "PO-Revision-Date: 2013-10-23 07:51+0800\n"
 "Last-Translator: LiuLang <gsushzhsosgsu@gmail.com>\n"
 "Language-Team: Chinese (traditional)\n"
@@ -33,12 +33,12 @@ msgid "Quit"
 msgstr "退出"
 
 #: ../kuwo/Artists.py:65 ../kuwo/Artists.py:82 ../kuwo/Artists.py:123
-#: ../kuwo/Artists.py:327 ../kuwo/Search.py:50 ../kuwo/Search.py:82
-#: ../kuwo/Search.py:175 ../kuwo/Search.py:178 ../kuwo/Search.py:247
+#: ../kuwo/Artists.py:327 ../kuwo/Search.py:58 ../kuwo/Search.py:90
+#: ../kuwo/Search.py:193 ../kuwo/Search.py:232
 msgid "Artists"
 msgstr "歌手"
 
-#: ../kuwo/Artists.py:152 ../kuwo/Artists.py:324 ../kuwo/PlayList.py:400
+#: ../kuwo/Artists.py:152 ../kuwo/Artists.py:324 ../kuwo/PlayList.py:478
 #: ../kuwo/Player.py:157 ../kuwo/Radio.py:71
 msgid "Favorite"
 msgstr "喜愛"
@@ -47,15 +47,13 @@ msgstr "喜愛"
 msgid "Artist"
 msgstr "歌手"
 
-#: ../kuwo/Artists.py:186 ../kuwo/Artists.py:218 ../kuwo/Search.py:45
-#: ../kuwo/Search.py:75 ../kuwo/Search.py:148 ../kuwo/Search.py:150
-#: ../kuwo/Search.py:246
+#: ../kuwo/Artists.py:186 ../kuwo/Artists.py:218 ../kuwo/Search.py:52
+#: ../kuwo/Search.py:83 ../kuwo/Search.py:169 ../kuwo/Search.py:231
 msgid "Songs"
 msgstr "歌曲"
 
-#: ../kuwo/Artists.py:188 ../kuwo/Artists.py:227 ../kuwo/Search.py:55
-#: ../kuwo/Search.py:95 ../kuwo/Search.py:209 ../kuwo/Search.py:212
-#: ../kuwo/Search.py:248
+#: ../kuwo/Artists.py:188 ../kuwo/Artists.py:227 ../kuwo/Search.py:64
+#: ../kuwo/Search.py:103 ../kuwo/Search.py:223 ../kuwo/Search.py:233
 msgid "Albums"
 msgstr "專輯"
 
@@ -112,7 +110,7 @@ msgstr "性別"
 msgid "Constellation"
 msgstr "星座"
 
-#: ../kuwo/Artists.py:317 ../kuwo/PlayList.py:83
+#: ../kuwo/Artists.py:317 ../kuwo/PlayList.py:91
 msgid "Album"
 msgstr "專輯"
 
@@ -172,50 +170,50 @@ msgstr "其他"
 msgid " songs"
 msgstr " 首歌曲"
 
-#: ../kuwo/Config.py:29
+#: ../kuwo/Config.py:30
 msgid "KW Player"
 msgstr "KW Player"
 
-#: ../kuwo/Config.py:34
+#: ../kuwo/Config.py:35
 msgid "A simple music player on Linux desktop."
 msgstr "Linux 桌面上的非常簡潔的音樂播放器"
 
-#: ../kuwo/Config.py:67
+#: ../kuwo/Config.py:68
 msgid "VolumeUp"
 msgstr "增大音量"
 
-#: ../kuwo/Config.py:68
+#: ../kuwo/Config.py:69
 msgid "VolumeDown"
 msgstr "減小音量"
 
-#: ../kuwo/Config.py:69
+#: ../kuwo/Config.py:70
 msgid "Mute"
 msgstr "靜音"
 
-#: ../kuwo/Config.py:70 ../kuwo/Player.py:87 ../kuwo/PlayerNotify.py:57
+#: ../kuwo/Config.py:71 ../kuwo/Player.py:87 ../kuwo/PlayerNotify.py:57
 #: ../kuwo/PlayerNotify.py:81
 msgid "Previous"
 msgstr "上一首"
 
-#: ../kuwo/Config.py:71 ../kuwo/Player.py:99 ../kuwo/PlayerNotify.py:74
+#: ../kuwo/Config.py:72 ../kuwo/Player.py:99 ../kuwo/PlayerNotify.py:74
 #: ../kuwo/PlayerNotify.py:101
 msgid "Next"
 msgstr "下一首"
 
-#: ../kuwo/Config.py:72 ../kuwo/PlayerNotify.py:63 ../kuwo/PlayerNotify.py:88
+#: ../kuwo/Config.py:73 ../kuwo/PlayerNotify.py:63 ../kuwo/PlayerNotify.py:88
 msgid "Pause"
 msgstr "暫停"
 
-#: ../kuwo/Config.py:73 ../kuwo/Player.py:93 ../kuwo/PlayerNotify.py:69
+#: ../kuwo/Config.py:74 ../kuwo/Player.py:93 ../kuwo/PlayerNotify.py:69
 #: ../kuwo/PlayerNotify.py:95 ../kuwo/Radio.py:65 ../kuwo/Widgets.py:190
 msgid "Play"
 msgstr "播放"
 
-#: ../kuwo/Config.py:74
+#: ../kuwo/Config.py:75
 msgid "Stop"
 msgstr "停止"
 
-#: ../kuwo/Config.py:75
+#: ../kuwo/Config.py:76
 msgid "Launch"
 msgstr "啓動"
 
@@ -227,91 +225,103 @@ msgstr "歌詞"
 msgid "No lrc available"
 msgstr "沒有找到歌詞"
 
-#: ../kuwo/PlayList.py:75
+#: ../kuwo/PlayList.py:83
 msgid "Title"
 msgstr "標題"
 
-#: ../kuwo/PlayList.py:79
+#: ../kuwo/PlayList.py:87
 msgid "Aritst"
 msgstr "歌手"
 
-#: ../kuwo/PlayList.py:89 ../kuwo/Radio.py:77
+#: ../kuwo/PlayList.py:97 ../kuwo/Radio.py:77
 msgid "Delete"
 msgstr "刪除"
 
-#: ../kuwo/PlayList.py:160
+#: ../kuwo/PlayList.py:107
+msgid "Save As.."
+msgstr "另存爲.."
+
+#: ../kuwo/PlayList.py:112
+msgid "Delete from Playlist"
+msgstr "從播放列表中刪除"
+
+#: ../kuwo/PlayList.py:116
+msgid "Delete Local Cache"
+msgstr "刪除本地緩存"
+
+#: ../kuwo/PlayList.py:228
 msgid "Export Songs"
 msgstr "導出音樂"
 
-#: ../kuwo/PlayList.py:172
+#: ../kuwo/PlayList.py:241
 msgid "Choose export folder:"
 msgstr "選擇目錄:"
 
-#: ../kuwo/PlayList.py:179
+#: ../kuwo/PlayList.py:248
 msgid "Including lyrics"
 msgstr "包括歌詞"
 
-#: ../kuwo/PlayList.py:180
+#: ../kuwo/PlayList.py:249
 msgid "Export lyrics to the same folder"
 msgstr "導出歌詞到同一個文件夾"
 
-#: ../kuwo/PlayList.py:193
+#: ../kuwo/PlayList.py:262
 msgid "Export"
 msgstr "導出"
 
-#: ../kuwo/PlayList.py:201
+#: ../kuwo/PlayList.py:270
 msgid "Only cached songs will be exported"
 msgstr "只導出已緩存好的歌曲."
 
-#: ../kuwo/PlayList.py:279
+#: ../kuwo/PlayList.py:357
 msgid "PlayList"
 msgstr "播放列表"
 
-#: ../kuwo/PlayList.py:335
+#: ../kuwo/PlayList.py:413
 msgid "Add a new playlist"
 msgstr "新建播放列表"
 
-#: ../kuwo/PlayList.py:341
+#: ../kuwo/PlayList.py:419
 msgid "Remove selected playlist"
 msgstr "刪除選中的播放列表"
 
-#: ../kuwo/PlayList.py:348
+#: ../kuwo/PlayList.py:426
 msgid "Export songs in selected playlist"
 msgstr "導出播放列表中的歌曲"
 
-#: ../kuwo/PlayList.py:398 ../kuwo/PlayList.py:438
+#: ../kuwo/PlayList.py:476 ../kuwo/PlayList.py:516
 msgid "Caching"
 msgstr "正在緩存"
 
-#: ../kuwo/PlayList.py:399
+#: ../kuwo/PlayList.py:477
 msgid "Default"
 msgstr "默認"
 
-#: ../kuwo/PlayList.py:429 ../kuwo/PlayList.py:565
+#: ../kuwo/PlayList.py:507 ../kuwo/PlayList.py:644
 msgid "Start Cache Service"
 msgstr "開啓緩存服務"
 
-#: ../kuwo/PlayList.py:433
+#: ../kuwo/PlayList.py:511
 msgid "Open Cache Folder"
 msgstr "打開緩存目錄"
 
-#: ../kuwo/PlayList.py:561
+#: ../kuwo/PlayList.py:640
 msgid "Stop Cache Service"
 msgstr "停止緩存服務"
 
-#: ../kuwo/PlayList.py:587
+#: ../kuwo/PlayList.py:666
 msgid "Failed to cache song"
 msgstr "緩存歌曲失敗"
 
-#: ../kuwo/PlayList.py:607
+#: ../kuwo/PlayList.py:686
 msgid "All songs in caching list have been downloaded."
 msgstr "緩存任務已完成."
 
-#: ../kuwo/PlayList.py:721
+#: ../kuwo/PlayList.py:811
 msgid "Playlist"
 msgstr "播放列表"
 
-#: ../kuwo/PlayList.py:794
+#: ../kuwo/PlayList.py:882
 msgid "Create this playlist and add songs into it"
 msgstr "新建這個播放列表, 並將選中的歌曲加進去"
 
@@ -504,7 +514,7 @@ msgstr "電臺"
 msgid "Search"
 msgstr "搜索"
 
-#: ../kuwo/Search.py:40
+#: ../kuwo/Search.py:47
 msgid "Search Songs, Artists.."
 msgstr "搜索歌曲, 歌手, 專輯.."
 
