@@ -16,14 +16,14 @@ import zlib
 mutagenx_imported = False
 if sys.version_info.major >= 3 and sys.version_info.minor >= 3:
     try:
-        from mutagenx.mp3 import MP3
-        from mutagenx.easyid3 import EasyID3
-        from mutagenx.apev2 import APEv2File
+        from mutagen.mp3 import MP3
+        from mutagen.easyid3 import EasyID3
+        from mutagen.apev2 import APEv2File
         mutagenx_imported = True
     except ImportError as e:
-        print('Warning: mutagenx was not found')
+        print('Warning: module `mutagen` was not found')
 else:
-    print('Warning: Python3 < 3.3, mutagenx is not supported')
+    print('Warning: Python3 < 3.3, `mutagen` is not supported')
 
 
 def decode_lrc_content(lrc, is_lrcx=False):

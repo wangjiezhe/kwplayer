@@ -135,12 +135,9 @@ class NormalSongTab(Gtk.ScrolledWindow):
             return True
 
         if event.button == Gdk.BUTTON_PRIMARY:
-            print('left click')
             return False
         elif event.button == Gdk.BUTTON_SECONDARY:
             liststore, selected_paths = selection.get_selected_rows()
-            print(selected_paths)
-            print('popup context menu')
             self.popup_menu.show_all()
             self.popup_menu.popup(None, None, None, None,
                     event.button, event.time)
