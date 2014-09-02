@@ -6,8 +6,11 @@
 
 import os
 import sys
+import time
+
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
+from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
 
@@ -54,6 +57,8 @@ class App:
 
         self.accel_group = Gtk.AccelGroup()
         self.window.add_accel_group(self.accel_group)
+        self.fullscreen_sid = 0
+        self.fullscreen_timestamp = 0
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.window.add(box)
@@ -65,7 +70,6 @@ class App:
         self.notebook.props.tab_pos = Gtk.PositionType.BOTTOM
         self.notebook.get_style_context().add_class('main_tab')
         box.pack_start(self.notebook, True, True, 0)
-
         self.init_notebook()
         self.notebook.connect('switch-page', self.on_notebook_switch_page)
         self.init_status_icon()
@@ -135,11 +139,6 @@ class App:
         self.themes = Themes(self)
         self.append_page(self.themes)
 
-    def on_notebook_switch_page(self, notebook, page, page_num):
-        if page not in self.tab_first_show:
-            page.first()
-            self.tab_first_show.append(page)
-
     def append_page(self, widget):
         '''Append a new widget to notebook.'''
         label = Gtk.Label(widget.title)
@@ -202,6 +201,9 @@ class App:
                 'GtkScrolledWindow.lrc_window {',
                     'transition-property: background-image;',
                     'transition-duration: 1s;',
+                    #'background-repeat: no-repeat;',
+                    #'background-repeat: repeat;',
+                    #'background-position: center;',
                     '}',
                 'GtkScale {',
                     'outline-color: transparent;',
@@ -283,3 +285,45 @@ class App:
 
     def on_status_icon_quit_activate(self, menuitem):
         self.quit()
+
+    def on_notebook_switch_page(self, notebook, page, page_num):
+        if page not in self.tab_first_show:
+            page.first()
+            self.tab_first_show.append(page)
+
+        if page_num == 0:
+            # fullscreen
+            self.player.hide()
+            self.notebook.set_show_tabs(False)
+            self.fullscreen_sid = self.window.connect(
+                    'motion-notify-event', self.on_window_motion_notified)
+        else:
+            # unfullscreen
+            self.player.show()
+            self.notebook.set_show_tabs(True)
+            self.fullscreen_sid = 0
+
+    def on_window_motion_notified(self, window, event):
+        if self.notebook.get_current_page() != 0:
+            return
+        lower = 70
+        upper = self.window.get_size()[1] - 40
+        if lower < event.y < upper:
+            return
+        if event.y < lower:
+            self.player.show_all()
+        elif event.y > upper:
+            self.notebook.set_show_tabs(True)
+        # delay 2 seconds and hide them
+        self.fullscreen_timestamp = time.time()
+        GLib.timeout_add(100, self.player.playbin.expose)
+        GLib.timeout_add(
+                2000, self.hide_control_panel_and_label, 
+                self.fullscreen_timestamp)
+
+    def hide_control_panel_and_label(self, timestamp):
+        if (timestamp == self.fullscreen_timestamp and 
+                self.fullscreen_sid > 0):
+            self.notebook.set_show_tabs(False)
+            self.player.hide()
+            GLib.timeout_add(100, self.player.playbin.expose)

@@ -5,7 +5,6 @@
 # in the LICENSE file.
 
 import sys
-import time
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
@@ -56,11 +55,11 @@ class Player(Gtk.Box):
         super().__init__()
         self.app = app
 
-        self.fullscreen_sid = 0
         self.play_type = PlayType.NONE
         self.adj_timeout = 0
         self.recommend_imgs = None
         self.curr_song = None
+        self._is_playing = False
 
         # use this to keep Net.AsyncSong object
         self.async_song = None
@@ -144,12 +143,12 @@ class Player(Gtk.Box):
                 'toggled', self.on_play_type_toggled, PlayType.KARAOKE)
         toolbar.insert(self.use_ok_btn, 7)
 
-        self.fullscreen_btn = Gtk.ToolButton()
+        self.fullscreen_btn = Gtk.ToggleToolButton()
         self.fullscreen_btn.set_label(_('Fullscreen'))
         self.fullscreen_btn.set_icon_name('view-fullscreen-symbolic')
         self.fullscreen_btn.props.margin_left = 10
         self.fullscreen_btn.connect(
-                'clicked', self.on_fullscreen_button_clicked)
+                'toggled', self.on_fullscreen_button_toggled)
         toolbar.insert(self.fullscreen_btn, 8)
         self.app.window.connect('key-press-event', self.on_window_key_pressed)
 
@@ -563,64 +562,34 @@ class Player(Gtk.Box):
                 self.curr_song, self.app.conf, True)
 
     # Fullscreen
-    def get_fullscreen(self):
-        '''Check if player is in fullscreen mode.'''
-        return self.fullscreen_sid > 0
-
     def toggle_fullscreen(self):
         '''Switch between fullscreen and unfullscreen mode.'''
-        self.fullscreen_btn.emit('clicked')
+        window = self.app.window
+        button = self.fullscreen_btn
+        if not button.get_active():
+        # unfullscreen
+            button.set_icon_name('view-fullscreen-symbolic')
+            window.realize()
+            window.unfullscreen()
+            #self.playbin.expose()
+        else:
+        # fullscreen
+            button.set_icon_name('view-restore-symbolic')
+            self.app.popup_page(self.app.lrc.app_page)
+            window.realize()
+            window.fullscreen()
+            #self.playbin.expose_fullscreen()
 
     def on_window_key_pressed(self, widget, event):
         # press Esc to exit fullscreen mode
-        if event.keyval == Gdk.KEY_Escape and self.get_fullscreen():
-            self.toggle_fullscreen()
+        if event.keyval == Gdk.KEY_Escape and self.fullscreen_btn.get_active():
+            self.fullscreen_btn.set_active(False)
         # press F11 to toggle fullscreen mode
         elif event.keyval == Gdk.KEY_F11:
-            self.toggle_fullscreen()
+            self.fullscreen_btn.set_active(not self.fullscreen_btn.get_active())
 
-    def on_fullscreen_button_clicked(self, button):
-        window = self.app.window
-        if self.fullscreen_sid > 0:
-        # unfullscreen
-            self.app.notebook.set_show_tabs(True)
-            button.set_icon_name('view-fullscreen-symbolic')
-            self.show()
-            window.realize()
-            window.unfullscreen()
-            window.disconnect(self.fullscreen_sid)
-            self.fullscreen_sid = 0
-        else:
-        # fullscreen
-            self.app.notebook.set_show_tabs(False)
-            button.set_icon_name('view-restore-symbolic')
-            self.app.popup_page(self.app.lrc.app_page)
-            self.hide()
-            window.realize()
-            window.fullscreen()
-            self.fullscreen_sid = window.connect(
-                    'motion-notify-event', self.on_window_motion_notified)
-            self.playbin.expose_fullscreen()
-
-    def on_window_motion_notified(self, widget, event):
-        # if mouse_point.y is not in [0, 50], ignore it
-        if event.y > 50:
-            return
-
-        # show control_panel and notebook labels
-        self.show_all()
-        # delay 3 seconds and hide them
-        self.fullscreen_timestamp = time.time()
-        GLib.timeout_add(
-                3000, self.hide_control_panel_and_label, 
-                self.fullscreen_timestamp)
-        self.playbin.expose_fullscreen()
-
-    def hide_control_panel_and_label(self, timestamp):
-        if (timestamp == self.fullscreen_timestamp and 
-                self.fullscreen_sid > 0):
-            self.app.notebook.set_show_tabs(False)
-            self.hide()
+    def on_fullscreen_button_toggled(self, button):
+        self.toggle_fullscreen()
 
     def on_favorite_btn_clicked(self, button):
         if not self.curr_song:

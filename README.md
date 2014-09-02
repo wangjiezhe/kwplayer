@@ -44,7 +44,7 @@ Debian 中手动安装依赖包
 ---------------------
 手动安装的话, 需要手动安装一些依赖包, 以Debian sid中安装为例, 它们是:
 
-* python3 - 推荐python3.3以上的版本, 不然mutagenx模块无法使用(用于消除mp3/ape乱码的).
+* python3 - 推荐python3.3以上的版本, 不然mutagen模块无法使用(用于消除mp3/ape乱码的).
 * python3-dbus
 * python3-gi  -  gkt3的python3绑定(Fedora中叫做python3-gobject);
 * gstreamer1.0-plugins-base
@@ -60,10 +60,10 @@ Debian 中手动安装依赖包
 * python3-leveldb  -  leveldb的python3绑定(Fedora中是python3-plyvel);
 Ubuntu 12.04中缺少了这个包, 请使用`# pip3 install plyvel` 来安装, 安装时需要
 优先安装python3-dev, libleveldb-dev这两个头文件.
-* python3-mutagenx - 这个需要手动安装. 可以在这里下载:
+* mutagen - 这个需要手动安装. 可以在这里下载:
 <https://github.com/LordSputnik/mutagen>, 如果你没有python3.3 比如Debian
 Wheezy, Ubuntu 12.04, 就不需要安装这个模块了, 因为它不支持python3.2以下的
-版本. `# pip3 install mutagenx`
+版本. `# pip3 install mutagen`
 * python3-xlib - X的底层接口, 这个是从python-xlib迁移过来的, 刚刚完成.
 可以在这里找到<https://github.com/LiuLang/python3-xlib>,
 `# pip3 install python3-xlib`
