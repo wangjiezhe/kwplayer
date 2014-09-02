@@ -196,7 +196,7 @@ class Lrc(Gtk.Notebook):
         self.highlighted_tag.props.foreground_rgba = fore_rgba
 
     def on_mv_window_redraw(self, *args):
-        if self.app.player.get_fullscreen():
+        if self.app.player.fullscreen_btn.get_active():
             self.app.player.playbin.expose_fullscreen()
         else:
             self.app.player.playbin.expose()
