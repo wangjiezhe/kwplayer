@@ -222,7 +222,7 @@ class PlayerDBus(dbus.service.Object):
 
     def get_Position(self):
         pos = self.player.playbin.get_position()[1] // 1000
-        return pos
+        return dbus.Int64(pos)
 
     def get_CanGoPrevious(self):
         return self.player.can_go_previous()
@@ -255,7 +255,7 @@ class PlayerDBus(dbus.service.Object):
     def get_Length(self):
         length = self.player.adjustment.get_upper()
         mod_len = int(divmod(length, 10**9)[0])
-        return mod_len*10**6
+        return dbus.Int64(mod_len*10**6)
 
     def update_meta(self):
         meta = self.get_Metadata()
