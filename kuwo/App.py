@@ -36,6 +36,7 @@ DBUS_APP_NAME = 'org.liulang.kwplayer'
 
 
 class App:
+
     def __init__(self):
         self.app = Gtk.Application.new(DBUS_APP_NAME, 0)
         self.app.connect('startup', self.on_app_startup)

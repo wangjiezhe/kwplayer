@@ -63,6 +63,7 @@ class TopList(Gtk.Box):
 
         nid = 2
         page = 0
+        # TODO: use async call
         nodes, total_pages = Net.get_nodes(nid, page)
         if total_pages == 0:
             return

@@ -800,7 +800,6 @@ class PlayList(Gtk.Box):
     def on_list_disname_edited(self, cell, path, new_name):
         if not new_name:
             return
-        old_name = self.liststore_left[path][0]
         self.liststore_left[path][0] = new_name
 
     def on_add_playlist_button_clicked(self, button):
