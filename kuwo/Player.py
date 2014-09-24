@@ -295,7 +295,7 @@ class Player(Gtk.Box):
         elif self.play_type in (PlayType.SONG, PlayType.RADIO):
             msg = _('Failed to download song')
         GLib.idle_add(Widgets.network_error, self.app.window, msg)
-        self.load_next_cb()
+        self.stop_player_cb()
 
     def on_song_can_play(self, widget, song_path):
         def _on_song_can_play():
