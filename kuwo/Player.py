@@ -160,7 +160,7 @@ class Player(Gtk.Box):
         self.favorite_btn.connect('clicked', self.on_favorite_btn_clicked)
         toolbar.insert(self.favorite_btn, 9)
 
-        # contro menu
+        # control menu
         menu_tool_item = Gtk.ToolItem()
         toolbar.insert(menu_tool_item, 10)
         toolbar.child_set_property(menu_tool_item, 'expand', True)

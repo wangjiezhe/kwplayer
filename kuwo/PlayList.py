@@ -591,10 +591,7 @@ class PlayList(Gtk.Box):
         liststore = self.tabs[list_name].liststore
         rid = song['rid']
         path = self.get_song_path_in_liststore(liststore, rid)
-        if path > -1:
-            return True
-        else:
-            return False
+        return path > -1
 
     def add_songs_to_playlist(self, songs, list_name='Default'):
         def start():
@@ -656,6 +653,7 @@ class PlayList(Gtk.Box):
                     song_path)
 
         def _on_network_error(widget, song_link, error=None):
+            # FIXME: change button text
             self.cache_enabled = False
             GLib.idle_add(
                     Widgets.network_error,
@@ -677,6 +675,7 @@ class PlayList(Gtk.Box):
         if len(liststore) == 0:
             print('Caching playlist is empty, please add some songs')
             self.switch_caching_daemon()
+            # FIXME: check Notify class available
             Notify.init('kwplayer-cache')
             notify = Notify.Notification.new(
                     'Kwplayer',

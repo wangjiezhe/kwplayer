@@ -832,7 +832,7 @@ class AsyncSong(GObject.GObject):
 
         for retried in range(MAXTIMES):
             try:
-                req = request.urlopen(song_link)
+                req = request.urlopen(song_link, timeout=TIMEOUT)
                 received_size = 0
                 can_play_emited = False
                 content_length = int(req.headers.get('Content-Length'))
