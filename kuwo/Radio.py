@@ -67,17 +67,11 @@ class RadioItem(Gtk.EventBox):
         button_play.connect('clicked', self.on_button_play_clicked)
         self.toolbar.insert(button_play, 0)
 
-        button_favorite = Gtk.ToolButton()
-        button_favorite.set_label(_('Favorite'))
-        button_favorite.set_icon_name('emblem-favorite-symbolic')
-        button_favorite.connect('clicked', self.on_button_favorite_clicked)
-        self.toolbar.insert(button_favorite, 1)
-
         button_delete = Gtk.ToolButton()
         button_delete.set_label(_('Delete'))
         button_delete.set_icon_name('user-trash-symbolic')
         button_delete.connect('clicked', self.on_button_delete_clicked)
-        self.toolbar.insert(button_delete, 2)
+        self.toolbar.insert(button_delete, 1)
 
         self.show_all()
         self.label.hide()
@@ -89,7 +83,6 @@ class RadioItem(Gtk.EventBox):
         def _update_songs(songs, error=None):
             if not songs:
                 return
-            index = self.get_index()
             self.playlists[index]['songs'] = songs
             self.playlists[index]['curr_song'] = 0
             self.update_label()
@@ -103,7 +96,6 @@ class RadioItem(Gtk.EventBox):
         def _on_more_songs_loaded(songs, error=None):
             if songs:
                 # merge next list of songs to current list
-                index = self.get_index()
                 self.playlists[index]['songs'] += songs
         index = self.get_index()
         offset = self.playlists[index]['offset'] + 1
@@ -144,6 +136,7 @@ class RadioItem(Gtk.EventBox):
         for i, radio in enumerate(self.playlists):
             if radio['radio_id'] == self.radio_info['radio_id']:
                 return i
+        raise IndexError('Radio not exists in playlist')
 
     def play_song(self):
         index = self.get_index()
@@ -152,6 +145,7 @@ class RadioItem(Gtk.EventBox):
             radio['curr_song'] = 0
             radio['songs'] = radio['songs'][20:]
         song = radio['songs'][radio['curr_song']]
+        song['rid'] = int(song['rid'])
         self.update_label()
         self.app.player.load_radio(song, self)
 
@@ -180,13 +174,6 @@ class RadioItem(Gtk.EventBox):
     # toolbar
     def on_button_play_clicked(self, btn):
         self.play_song()
-
-    def on_button_favorite_clicked(self, btn):
-        # TODO: change button image
-        index = self.get_index()
-        radio = self.playlists[index]
-        song = radio['songs'][radio['curr_song']]
-        self.app.playlist.add_song_to_favorite(song)
 
     def on_button_delete_clicked(self, btn):
         self.playlists.pop(self.get_index())
