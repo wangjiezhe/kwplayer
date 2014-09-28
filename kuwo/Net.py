@@ -768,7 +768,6 @@ def get_song_link(song, conf, use_mv=False):
         song_path = os.path.join(conf['song-dir'], song_name)
     if os.path.exists(song_path):
         return (True, '', song_path)
-    print('url2:', url)
     req_content = urlopen(url)
     if not req_content:
         return (False, '', song_path)

@@ -4,6 +4,7 @@ setup.py
 kuwo/App.py
 kuwo/Artists.py
 kuwo/Config.py
+kuwo/DES.py
 kuwo/Lrc.py
 kuwo/MV.py
 kuwo/Net.py

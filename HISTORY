@@ -1,3 +1,14 @@
+3.4.1 - 2014.9.28
+* KARAOKE mode removed
+* Support 320k mp3 and flac format
+* Support KuwoDES
+* Set http connection timeout to 30s
+* Fixed: stop player when network error occurs
+* Fixed: PlayList has no attribute `add_song_to_favorite`
+* Rename `mutagenx` with `mutagen`
+* Automatically hide toolbar and notebook on lrc tab
+* i18n updated
+
 3.3.7 - 2014.9.1
 * add popup menu to playlist
 * rebuilt search-page
