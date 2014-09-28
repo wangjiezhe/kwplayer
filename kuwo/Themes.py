@@ -42,8 +42,8 @@ class Themes(Gtk.Box):
         self.buttonbox.pack_start(self.label, False, False, 0)
 
         # checked, name, artist, album, rid, artistid, albumid
-        self.liststore_songs = Gtk.ListStore(
-                bool, str, str, str, int, int, int)
+        treeview_songs = Widgets.TreeViewSongs(app)
+        self.liststore_songs = treeview_songs.liststore
         self.control_box = Widgets.ControlBox(self.liststore_songs, app)
         self.buttonbox.pack_end(self.control_box, False, False, 0)
 
@@ -73,7 +73,6 @@ class Themes(Gtk.Box):
         self.scrolled_songs.get_vadjustment().connect(
                 'value-changed', self.on_scrolled_songs_scrolled)
         self.pack_start(self.scrolled_songs, True, True, 0)
-        treeview_songs = Widgets.TreeViewSongs(self.liststore_songs, app)
         self.scrolled_songs.add(treeview_songs)
 
         self.show_all()
@@ -83,7 +82,7 @@ class Themes(Gtk.Box):
 
         nodes = Net.get_themes_main()
         if not nodes:
-            print('Failed to get nodes, do something!')
+            print('Failed to get nodes!')
             return
         urls = []
         tree_iters = []
@@ -181,7 +180,8 @@ class Themes(Gtk.Box):
                 int(song['id']),
                 int(song['artistid']), 
                 int(song['albumid']),
-                ])
+                song['formats'],
+            ])
     
     # buttonbox buttons
     def on_button_main_clicked(self, btn):

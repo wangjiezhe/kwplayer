@@ -55,22 +55,31 @@ def set_tooltip_with_song_tips(head, tip):
 
 def song_row_to_dict(song_row, start=1):
     song = {
-            'name': song_row[start],
-            'artist': song_row[start+1],
-            'album': song_row[start+2],
-            'rid': song_row[start+3],
-            'artistid': song_row[start+4],
-            'albumid': song_row[start+5],
-            }
+        'name': song_row[start],
+        'artist': song_row[start+1],
+        'album': song_row[start+2],
+        'rid': song_row[start+3],
+        'artistid': song_row[start+4],
+        'albumid': song_row[start+5],
+        'formats': song_row[start+6],
+    }
     return song
 
 def song_dict_to_row(song):
     # with filepath
-    song_row = [song['name'], song['artist'], song['album'], 
-            int(song['rid']), int(song['artistid']), int(song['albumid']),]
+    song_row = [
+        song['name'],
+        song['artist'],
+        song['album'],
+        int(song['rid']),
+        int(song['artistid']),
+        int(song['albumid']),
+        song['formats'],
+    ]
     return song_row
 
 def tree_append_items(tree, items):
+
     '''A faster way to append many items to GtkTreeModel at a time.
 
     When appending many items to a model , app will lose response, which
@@ -99,6 +108,7 @@ def tree_append_items(tree, items):
 
 
 class ListRadioButton(Gtk.RadioButton):
+
     def __init__(self, label, last_button=None):
         super().__init__(label)
         self.props.draw_indicator = False
@@ -106,7 +116,9 @@ class ListRadioButton(Gtk.RadioButton):
             self.join_group(last_button)
         # it might need a class name.
 
+
 class BoldLabel(Gtk.Label):
+
     def __init__(self, label):
         super().__init__('<b>{0}</b>'.format(label))
         self.set_use_markup(True)
@@ -114,7 +126,9 @@ class BoldLabel(Gtk.Label):
         self.props.xalign = 0
         #self.props.margin_bottom = 10
 
+
 class FolderChooser(Gtk.Box):
+
     def __init__(self, parent):
         super().__init__(spacing=5)
         self.parent = parent
@@ -157,6 +171,7 @@ class FolderChooser(Gtk.Box):
         dialog.destroy()
 
 class TreeViewColumnText(Gtk.TreeViewColumn):
+
     def __init__(self, *args, **keys):
         super().__init__(*args, **keys)
         # This is the best option, but Gtk raises some Exceptions like:
@@ -169,6 +184,7 @@ class TreeViewColumnText(Gtk.TreeViewColumn):
 
 
 class TreeViewColumnIcon(Gtk.TreeViewColumn):
+
     def __init__(self, *args, **keys):
         super().__init__(*args, **keys)
         self.props.sizing = Gtk.TreeViewColumnSizing.FIXED
@@ -176,6 +192,8 @@ class TreeViewColumnIcon(Gtk.TreeViewColumn):
 
 
 class ControlBox(Gtk.Box):
+    '''用于控制liststore的显示方式, 比如`全选`'''
+
     def __init__(self, liststore, app, select_all=True):
         super().__init__(spacing=5)
         self.liststore = liststore
@@ -225,7 +243,9 @@ class ControlBox(Gtk.Box):
         songs = [song_row_to_dict(s) for s in self.liststore if s[0]]
         self.app.playlist.cache_songs(songs)
 
+
 class MVControlBox(Gtk.Box):
+
     def __init__(self, liststore, app):
         super().__init__()
         self.liststore = liststore
@@ -241,6 +261,7 @@ class MVControlBox(Gtk.Box):
 
 
 class IconView(Gtk.IconView):
+
     def __init__(self, liststore, info_pos=3, tooltip=None):
         super().__init__(model=liststore)
 
@@ -268,31 +289,42 @@ class IconView(Gtk.IconView):
             cell_info.props.foreground_rgba = fore_color
             cell_info.props.size_points = 9
             cell_info.props.max_width_chars = 18
-            #cell_info.props.width_chars = 18
             cell_info.set_alignment(0.5, 0.5)
             self.pack_start(cell_info, True)
             self.add_attribute(cell_info, 'text', info_pos)
 
 
 class TreeViewSongs(Gtk.TreeView):
-    def __init__(self, liststore, app):
-        super().__init__(model=liststore)
+
+    # liststore info
+    CHECKED, NAME, ARTIST, ALBUM, RID, ARTISTID, ALBUMID, FORMATS = list(
+            range(8))
+    # treeview info
+    (COL_CHECKED, COL_NAME, COL_ARTIST, COL_ALBUM, COL_PLAY, COL_ADD,
+            COL_CACHE) = list(range(7))
+
+    def __init__(self, app):
+        # checked, name, artist, album, rid, artistid, albumid, formats
+        self.liststore = Gtk.ListStore(bool, str, str, str, int, int, int, str)
+        super().__init__(model=self.liststore)
         self.set_headers_visible(False)
-        self.liststore = liststore
+
         self.app = app
 
+        # checked, name, artist, album, play, add, cache
         checked = Gtk.CellRendererToggle()
         checked.connect('toggled', self.on_song_checked)
-        column_check = Gtk.TreeViewColumn('Checked', checked, active=0)
+        column_check = Gtk.TreeViewColumn('Checked', checked,
+                                          active=self.COL_CHECKED)
         self.append_column(column_check)
         name = Gtk.CellRendererText()
-        col_name = TreeViewColumnText('Name', name, text=1)
+        col_name = TreeViewColumnText('Name', name, text=self.COL_NAME)
         self.append_column(col_name)
         artist = Gtk.CellRendererText()
-        col_artist = TreeViewColumnText('Artist', artist, text=2)
+        col_artist = TreeViewColumnText('Artist', artist, text=self.COL_ARTIST)
         self.append_column(col_artist)
         album = Gtk.CellRendererText()
-        col_album = TreeViewColumnText('Album', album, text=3)
+        col_album = TreeViewColumnText('Album', album, text=self.COL_ALBUM)
         self.append_column(col_album)
         play = Gtk.CellRendererPixbuf(pixbuf=app.theme['play'])
         col_play = TreeViewColumnIcon('Play', play)
@@ -308,7 +340,8 @@ class TreeViewSongs(Gtk.TreeView):
         self.connect('button-press-event', self.on_button_pressed)
 
     def on_song_checked(self, widget, path):
-        self.liststore[path][0] = not self.liststore[path][0]
+        self.liststore[path][self.CHECKED] = not \
+                self.liststore[path][self.CHECKED]
 
     def on_button_pressed(self, treeview, event):
         path_info = treeview.get_path_at_pos(event.x, event.y)
@@ -317,25 +350,24 @@ class TreeViewSongs(Gtk.TreeView):
         path, column, cell_x, cell_y = path_info
         song = song_row_to_dict(self.liststore[path])
         index = self.get_columns().index(column)
-        if index == 4:
+        if index == self.COL_PLAY:
             self.app.playlist.play_song(song)
-        elif index == 5:
+        elif index == self.COL_ADD:
             self.app.playlist.add_song_to_playlist(song)
-        elif index == 6:
+        elif index == self.COL_CACHE:
             self.app.playlist.cache_song(song)
-
 
     def on_row_activated(self, treeview, path, column):
         song = song_row_to_dict(self.liststore[path])
         index = self.get_columns().index(column)
-        if index == 1:
+        if index == self.COL_NAME:
             self.app.playlist.play_song(song)
-        elif index == 2:
+        elif index == self.COL_ARTIST:
             if not song['artist']:
                 print('artist is empty, no searching')
                 return
             self.app.search.search_artist(song['artist'])
-        elif index == 3:
+        elif index == self.COL_ALBUM:
             if not song['album']:
                 print('album is empty, no searching')
                 return

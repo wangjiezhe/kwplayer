@@ -37,8 +37,8 @@ class TopList(Gtk.Box):
         self.buttonbox.pack_start(self.label, False, False, 0)
 
         # checked, name, artist, album, rid, artistid, albumid
-        self.liststore_songs = Gtk.ListStore(
-                bool, str, str, str, int, int, int)
+        treeview_songs = Widgets.TreeViewSongs(app)
+        self.liststore_songs = treeview_songs.liststore
         control_box = Widgets.ControlBox(self.liststore_songs, app)
         self.buttonbox.pack_end(control_box, False, False, 0)
 
@@ -54,7 +54,6 @@ class TopList(Gtk.Box):
 
         self.scrolled_songs = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_songs, True, True, 0)
-        treeview_songs = Widgets.TreeViewSongs(self.liststore_songs, app)
         self.scrolled_songs.add(treeview_songs)
 
         self.show_all()
@@ -113,4 +112,5 @@ class TopList(Gtk.Box):
                 int(song['id']), 
                 int(song['artistid']),
                 int(song['albumid']),
-                ])
+                song['formats'],
+            ])
