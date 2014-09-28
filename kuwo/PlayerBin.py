@@ -61,13 +61,11 @@ class PlayerBin(GObject.GObject):
         self.disable_bus_sync()
         self.play()
 
-    def load_video(self, uri, xid, audio_stream):
-        print('load_video:', audio_stream)
+    def load_video(self, uri, xid):
         self.set_uri(uri)
         self.set_xid(xid)
         self.enable_bus_sync()
         self.play()
-        GLib.timeout_add(2000, self.set_current_audio, audio_stream)
 
     def destroy(self):
         self.quit()
@@ -106,7 +104,6 @@ class PlayerBin(GObject.GObject):
 
     def set_position(self, offset):
         self.seek(offset)
-        #self.set_current_audio(self.audio_stream)
 
     def seek(self, offset):
         self.playbin.seek_simple(
@@ -153,7 +150,6 @@ class PlayerBin(GObject.GObject):
             return False
 
     def set_current_audio(self, audio_stream):
-        print('set_current_audio:', audio_stream)
         if self.get_audios() <= audio_stream:
             return
         self.playbin.props.current_audio = audio_stream

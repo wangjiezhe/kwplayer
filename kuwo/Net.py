@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import sys
 import threading
 import time
@@ -21,8 +22,9 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
 
-from kuwo import Config
-from kuwo import Utils
+from . import Config
+from . import Utils
+from . import DES
 
 IMG_CDN = 'http://img4.kwcdn.kuwo.cn/'
 ARTIST = 'http://artistlistinfo.kuwo.cn/mb.slist?'
@@ -722,34 +724,58 @@ def get_song_link(song, conf, use_mv=False):
               music source link, returns ''
      @song_path: target abs-path this song will be cached.
     '''
+    audio_brs = ['128kmp3', '192kmp3', '320kmp3', '2000kflac']
+    audio_formats = ['MP3128', 'MP3192', 'MP3H', 'AL']
+    video_formats = ['MP4L', 'MP4']
     if use_mv:
-        ext = 'mkv|mp4' if conf['use-mkv'] else 'mp4'
-    else:
-        ext = 'ape|mp3' if conf['use-ape'] else 'mp3'
-    url = ''.join([
-        SONG,
-        'response=url&type=convert_url&format=',
-        ext,
-        '&rid=MUSIC_',
-        str(song['rid']),
+        if video_formats[1] in song['formats'] and conf['video'] == 1:
+            br = video_formats[1]
+        else:
+            br = video_formats[0]
+        ext = 'mp4'
+        url = ''.join([
+            'user=359307055300426&prod=kwplayer_ar_6.4.8.0',
+            '&corp=kuwo&source=kwplayer_ar_6.4.8.0_kw.apk&p2p=1',
+            '&type=convert_mv_url2&rid=', str(song['rid']),
+            '&quality=', br,
+            '&network=WIFI&mode=audition&format=mp4&br=&sig='
         ])
-    song_name = (''.join([
-        song['artist'],
-        '-',
-        song['name'],
-        '.',
-        ext,
-        ])).replace('/', '+')
+    else:
+        ext = 'mp3'
+        if conf['audio'] == 3 and audio_formats[3] in song['formats']:
+            br = audio_brs[3]
+            ext = 'flac'
+        elif conf['audio'] >= 2 and audio_formats[2] in song['formats']:
+            br = audio_brs[2]
+        elif conf['audio'] >= 1 and audio_formats[1] in song['formats']:
+            br = audio_brs[1]
+        else:
+            br = audio_brs[0]
+        url = ''.join([
+            'user=359307055300426&prod=kwplayer_ar_6.4.8.0&corp=kuwo',
+            '&source=kwplayer_ar_6.4.8.0_kw.apk&p2p=1&type=convert_url2',
+            '&br=', br,
+            '&format=aac|mp3|flac&sig=0&rid=', str(song['rid']),
+            '&network=WIFI'
+        ])
+
+    url = 'http://mobi.kuwo.cn/mobi.s?f=kuwo&q=' + DES.base64_encrypt(url)
+    song_name = (''.join(
+        [song['artist'], '-', song['name'], '.', ext, ])).replace('/', '+')
     if use_mv:
         song_path = os.path.join(conf['mv-dir'], song_name)
     else:
         song_path = os.path.join(conf['song-dir'], song_name)
     if os.path.exists(song_path):
         return (True, '', song_path)
+    print('url2:', url)
     req_content = urlopen(url)
     if not req_content:
         return (False, '', song_path)
-    song_link = req_content.decode()
+    match = re.search('url=(\S+)\s', req_content.decode())
+    if not match:
+        return (False, '', song_path)
+    song_link = match.group(1)
     if len(song_link) < 20:
         return (False, '', song_path)
     song_list = song_link.split('/')
@@ -808,8 +834,8 @@ class AsyncSong(GObject.GObject):
         async_call(self._download_song, empty_func, song, use_mv)
 
     def _download_song(self, song, use_mv):
-        cached, song_link, song_path = get_song_link(
-                song, self.app.conf, use_mv=use_mv)
+        cached, song_link, song_path = get_song_link(song, self.app.conf,
+                                                     use_mv=use_mv)
         # temp file to store data
         tmp_song_path = song_path + '.part'
 
