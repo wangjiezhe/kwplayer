@@ -66,9 +66,8 @@ class Search(Gtk.Box):
         self.albums_button.search_count = 0
         box_top.pack_start(self.albums_button, False, False, 0)
 
-        # checked, name, artist, album, rid, artistid, albumid
-        self.liststore_songs = Gtk.ListStore(
-                bool, str, str, str, int, int, int)
+        treeview_songs = Widgets.TreeViewSongs(app)
+        self.liststore_songs = treeview_songs.liststore
         self.control_box = Widgets.ControlBox(
                 self.liststore_songs, app, select_all=False)
         box_top.pack_end(self.control_box, False, False, 0)
@@ -81,7 +80,6 @@ class Search(Gtk.Box):
         songs_tab.get_vadjustment().connect(
                 'value-changed', self.on_songs_tab_scrolled)
         self.notebook.append_page(songs_tab, Gtk.Label(_('Songs')))
-        treeview_songs = Widgets.TreeViewSongs(self.liststore_songs, app)
         songs_tab.add(treeview_songs)
 
         artists_tab = Gtk.ScrolledWindow()
@@ -164,6 +162,7 @@ class Search(Gtk.Box):
                         int(song['MUSICRID'][6:]),
                         int(song['ARTISTID']),
                         int(song['ALBUMID']),
+                        song['FORMATS'],
                         ])
             self.songs_button.set_label('{0} ({1})'.format(
                 _('Songs'), len(self.liststore_songs)))

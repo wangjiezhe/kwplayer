@@ -90,15 +90,15 @@ class Artists(Gtk.Box):
         self.buttonbox.pack_start(self.label, False, False, 20)
 
         # control_box for artist's songs
-        # checked, name, artist, album, rid, artistid, albumid
-        self.artist_songs_liststore = Gtk.ListStore(
-                bool, str, str, str, int, int, int)
+        artist_songs_treeview = Widgets.TreeViewSongs(app)
+        self.artist_songs_liststore = artist_songs_treeview.liststore
         self.artist_control_box = Widgets.ControlBox(
                 self.artist_songs_liststore, app)
         self.buttonbox.pack_end(self.artist_control_box, False, False, 0)
 
         # control box for artist's mv
         # pic, name, artist, album, rid, artistid, albumid, tooltip
+        # FIXME: check formats column
         self.artist_mv_liststore = Gtk.ListStore(
                 GdkPixbuf.Pixbuf, str, str, str, int, int, int, str)
         self.artist_mv_control_box = Widgets.MVControlBox(
@@ -106,9 +106,8 @@ class Artists(Gtk.Box):
         self.buttonbox.pack_end(self.artist_mv_control_box, False, False, 0)
 
         # control box for artist's albums
-        # checked, name, artist, album, rid, artistid, albumid
-        self.album_songs_liststore = Gtk.ListStore(
-                bool, str, str, str, int, int, int)
+        album_songs_treeview = Widgets.TreeViewSongs(app)
+        self.album_songs_liststore = album_songs_treeview.liststore
         self.album_control_box = Widgets.ControlBox(
                 self.album_songs_liststore, app)
         self.buttonbox.pack_end(self.album_control_box, False, False, 0)
@@ -216,8 +215,6 @@ class Artists(Gtk.Box):
         self.artist_songs_tab = Gtk.ScrolledWindow()
         self.artist_notebook.append_page(
                 self.artist_songs_tab, Gtk.Label(_('Songs')))
-        artist_songs_treeview = Widgets.TreeViewSongs(
-                self.artist_songs_liststore, app)
         self.artist_songs_tab.add(artist_songs_treeview)
 
 
@@ -315,8 +312,6 @@ class Artists(Gtk.Box):
         # Album tab (tab 2)
         album_songs_tab = Gtk.ScrolledWindow()
         self.notebook.append_page(album_songs_tab, Gtk.Label(_('Album')))
-        album_songs_treeview = Widgets.TreeViewSongs(
-                self.album_songs_liststore, app)
         album_songs_tab.add(album_songs_treeview)
 
         # Favorite artists tab (tab 3)
@@ -501,7 +496,8 @@ class Artists(Gtk.Box):
                     int(song['musicrid']),
                     int(song['artistid']), 
                     int(song['albumid']),
-                    ]) 
+                    song['formats'],
+                ]) 
             # automatically load more songs
             self.artist_songs_page += 1
             if self.artist_songs_page < self.artist_songs_total - 1:
@@ -538,7 +534,7 @@ class Artists(Gtk.Box):
                     Widgets.unescape(album['artist']),
                     int(album['artistid']),
                     Widgets.set_tooltip(album['name'], album['info']),
-                    ])
+                ])
                 urls.append(album['pic'])
                 tree_iters.append(tree_iter)
             Net.update_album_covers(
@@ -727,7 +723,9 @@ class Artists(Gtk.Box):
                     Widgets.unescape(self.curr_album_name),
                     int(song['id']),
                     int(song['artistid']),
-                    int(self.curr_album_id), ])
+                    int(self.curr_album_id),
+                    song['formats'],
+                ])
         self.album_songs_liststore.clear()
         Net.async_call(
                 Net.get_album, _append_album_songs,

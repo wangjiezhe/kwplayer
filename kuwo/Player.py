@@ -25,15 +25,12 @@ GDK_2BUTTON_PRESS = 5
 # set toolbar icon size to Gtk.IconSize.DND
 ICON_SIZE = 5
 
-MTV_AUDIO = 0 # use the first audio stream
-OK_AUDIO = 1  # second audio stream
 
 class PlayType:
     NONE = -1
     SONG = 0
     RADIO = 1
     MV = 2
-    KARAOKE = 3
 
 class RepeatType:
     NONE = 0
@@ -132,24 +129,13 @@ class Player(Gtk.Box):
                 'toggled', self.on_play_type_toggled, PlayType.MV)
         toolbar.insert(self.use_mtv_btn, 6)
 
-        self.use_ok_btn = Gtk.RadioToolButton()
-        self.use_ok_btn.set_label(_('Play Karaoke'))
-        self.use_ok_btn.set_tooltip_text(
-                _('Play Karaoke\nPlease use mkv format'))
-        self.use_ok_btn.set_icon_name('audio-input-microphone-symbolic')
-        self.use_ok_btn.set_sensitive(False)
-        self.use_ok_btn.props.group = self.use_audio_btn
-        self.use_ok_btn.connect(
-                'toggled', self.on_play_type_toggled, PlayType.KARAOKE)
-        toolbar.insert(self.use_ok_btn, 7)
-
         self.fullscreen_btn = Gtk.ToggleToolButton()
         self.fullscreen_btn.set_label(_('Fullscreen'))
         self.fullscreen_btn.set_icon_name('view-fullscreen-symbolic')
         self.fullscreen_btn.props.margin_left = 10
         self.fullscreen_btn.connect(
                 'toggled', self.on_fullscreen_button_toggled)
-        toolbar.insert(self.fullscreen_btn, 8)
+        toolbar.insert(self.fullscreen_btn, 7)
         self.app.window.connect('key-press-event', self.on_window_key_pressed)
 
         self.favorite_btn = Gtk.ToolButton()
@@ -158,11 +144,11 @@ class Player(Gtk.Box):
         self.favorite_btn.set_tooltip_text(_('Add to Favorite playlist'))
         self.favorite_btn.props.margin_left = 10
         self.favorite_btn.connect('clicked', self.on_favorite_btn_clicked)
-        toolbar.insert(self.favorite_btn, 9)
+        toolbar.insert(self.favorite_btn, 8)
 
         # control menu
         menu_tool_item = Gtk.ToolItem()
-        toolbar.insert(menu_tool_item, 10)
+        toolbar.insert(menu_tool_item, 9)
         toolbar.child_set_property(menu_tool_item, 'expand', True)
         main_menu = Gtk.Menu()
         pref_item = Gtk.MenuItem(label=_('Preferences'))
@@ -306,17 +292,16 @@ class Player(Gtk.Box):
                 self.app.lrc.show_music()
                 self.playbin.load_audio(uri)
                 self.get_lrc()
-                self.get_mv_link()
+                if self.curr_song['formats']:
+                    self.use_mtv_btn.set_sensitive(
+                            'MP4' in self.curr_song['formats'])
+                else:
+                    self.get_mv_link()
                 self.get_recommend_lists()
             elif self.play_type == PlayType.MV:
                 self.use_mtv_btn.set_sensitive(True)
-                if not self.use_ok_btn.get_sensitive():
-                    GLib.timeout_add(2000, self.check_audio_streams)
                 self.app.lrc.show_mv()
-                audio_stream = MTV_AUDIO
-                if self.use_ok_btn.get_active():
-                    audio_stream = OK_AUDIO
-                self.playbin.load_video(uri, self.app.lrc.xid, audio_stream)
+                self.playbin.load_video(uri, self.app.lrc.xid)
             self.start_player(load=True)
             self.update_player_info()
         GLib.idle_add(_on_song_can_play)
@@ -508,34 +493,17 @@ class Player(Gtk.Box):
         self.create_new_async(song)
 
     # MV part
-    def check_audio_streams(self):
-        self.use_ok_btn.set_sensitive(self.playbin.get_audios() > 1)
-
     def on_play_type_toggled(self, toggle_button, play_type):
-        if not toggle_button.get_active():
-            return
-        if self.play_type == PlayType.NONE:
+        if (not toggle_button.get_active() or not self.curr_song or
+                self.play_type == PlayType.NONE):
             return
         elif play_type == PlayType.SONG or play_type == PlayType.RADIO:
             self.app.lrc.show_music()
             self.load(self.curr_song)
         elif play_type == PlayType.MV:
-            if self.play_type == PlayType.KARAOKE:
-                self.playbin.set_current_audio(MTV_AUDIO)
-                self.play_type = PlayType.MV
-            else:
-                self.app.lrc.show_mv()
-                self.load_mv(self.curr_song)
-                self.app.popup_page(self.app.lrc.app_page)
-        elif play_type == PlayType.KARAOKE:
-            if self.play_type == PlayType.MV:
-                self.playbin.set_current_audio(OK_AUDIO)
-                self.play_type = PlayType.KARAOKE
-            else:
-                self.app.lrc.show_mv()
-                self.load_mv(self.curr_song)
-                self.app.popup_page(self.app.lrc.app_page)
-
+            self.app.lrc.show_mv()
+            self.load_mv(self.curr_song)
+            self.app.popup_page(self.app.lrc.app_page)
 
     def load_mv(self, song):
         self.play_type = PlayType.MV
@@ -746,7 +714,6 @@ class Player(Gtk.Box):
             self.use_audio_btn.set_active(True)
             self.use_audio_btn.handler_unblock(self.use_audio_sid)
             self.use_mtv_btn.set_sensitive(False)
-            self.use_ok_btn.set_sensitive(False)
         self.time_label.set_label('0:00/0:00')
         if self.adj_timeout > 0:
             GLib.source_remove(self.adj_timeout)

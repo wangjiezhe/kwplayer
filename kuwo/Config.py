@@ -61,6 +61,7 @@ class ShortcutMode:
 
 # Check Gtk version <= 3.6
 GTK_LE_36 = (Gtk.MAJOR_VERSION == 3) and (Gtk.MINOR_VERSION <= 6)
+GTK_GE_312 = Gtk.MINOR_VERSION >= 12
 
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')
@@ -81,8 +82,8 @@ _default_conf = {
         'song-dir': os.path.join(CACHE_DIR, 'song'),
         'mv-dir': os.path.join(CACHE_DIR, 'mv'),
         'volume': 0.08,
-        'use-ape': False,
-        'use-mkv': True,
+        'audio': 0,
+        'video': 0,
         'use-status-icon': True,
         'use-notify': False,
         'use-dark-theme': True,

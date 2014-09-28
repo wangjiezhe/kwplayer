@@ -42,6 +42,7 @@ def get_song_paths(artist, name, conf):
 
 
 class TreeViewColumnText(Widgets.TreeViewColumnText):
+
     def __init__(self, *args, **kwds):
         super().__init__(*args, **kwds)
         self.props.clickable = True
@@ -49,59 +50,59 @@ class TreeViewColumnText(Widgets.TreeViewColumnText):
         self.props.sort_indicator = True
         self.props.sort_column_id = kwds['text']
 
+
 class NormalSongTab(Gtk.ScrolledWindow):
+
+    NAME, ARTIST, ALBUM, RID, ARTISTID, ALBUMID, FORMATS = list(range(7))
+    COL_NAME, COL_ARTIST, COL_ALBUM, COL_DELETE = list(range(4))
+
     def __init__(self, app, list_name):
         super().__init__()
         self.app = app
         self.list_name = list_name
 
-        # name, artist, album, rid, artistid, albumid
-        self.liststore = Gtk.ListStore(str, str, str, int, int, int)
+        # name, artist, album, rid, artistid, albumid, formats
+        self.liststore = Gtk.ListStore(str, str, str, int, int, int, str)
 
         self.treeview = Gtk.TreeView(model=self.liststore)
         self.selection = self.treeview.get_selection()
-        self.treeview.set_search_column(0)
+        self.treeview.set_search_column(self.COL_NAME)
         self.treeview.props.headers_clickable = True
         self.treeview.props.headers_visible = True
         self.treeview.props.reorderable = True
         self.treeview.props.rules_hint = True
         self.treeview.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
-        self.treeview.enable_model_drag_source(
-                Gdk.ModifierType.BUTTON1_MASK,
-                DRAG_TARGETS,
-                DRAG_ACTIONS)
+        self.treeview.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK,
+                                               DRAG_TARGETS, DRAG_ACTIONS)
         self.treeview.connect('drag-data-get', self.on_drag_data_get)
-        self.treeview.enable_model_drag_dest(
-                DRAG_TARGETS, DRAG_ACTIONS)
-        self.treeview.connect(
-                'drag-data-received', self.on_drag_data_received)
-        self.treeview.connect(
-                'row_activated', self.on_treeview_row_activated)
+        self.treeview.enable_model_drag_dest(DRAG_TARGETS, DRAG_ACTIONS)
+        self.treeview.connect('drag-data-received', self.on_drag_data_received)
+        self.treeview.connect('row_activated', self.on_treeview_row_activated)
         self.add(self.treeview)
 
         song_cell = Gtk.CellRendererText()
-        song_col = TreeViewColumnText(_('Title'), song_cell, text=0)
+        song_col = TreeViewColumnText(_('Title'), song_cell,
+                                      text=self.COL_NAME)
         self.treeview.append_column(song_col)
 
         artist_cell = Gtk.CellRendererText()
-        artist_col = TreeViewColumnText(_('Aritst'), artist_cell, text=1)
+        artist_col = TreeViewColumnText(_('Aritst'), artist_cell,
+                                        text=self.COL_ARTIST)
         self.treeview.append_column(artist_col)
 
         album_cell = Gtk.CellRendererText()
-        album_col = TreeViewColumnText(_('Album'), album_cell, text=2)
+        album_col = TreeViewColumnText(_('Album'), album_cell,
+                                       text=self.COL_ALBUM)
         self.treeview.append_column(album_col)
 
-        delete_cell = Gtk.CellRendererPixbuf(
-                icon_name='user-trash-symbolic')
-        self.delete_col = Widgets.TreeViewColumnIcon(
-                _('Delete'), delete_cell)
+        delete_cell = Gtk.CellRendererPixbuf(icon_name='user-trash-symbolic')
+        self.delete_col = Widgets.TreeViewColumnIcon(_('Delete'), delete_cell)
         self.treeview.append_column(self.delete_col)
-        self.treeview.connect(
-                'key-press-event', self.on_treeview_key_pressed)
-        self.treeview.connect(
-                'button-press-event', self.on_treeview_button_pressed)
-        self.treeview.connect(
-                'button-release-event', self.on_treeview_button_released)
+        self.treeview.connect('key-press-event', self.on_treeview_key_pressed)
+        self.treeview.connect('button-press-event',
+                              self.on_treeview_button_pressed)
+        self.treeview.connect('button-release-event',
+                              self.on_treeview_button_released)
 
         self.popup_menu = Gtk.Menu()
         save_as_menu = Gtk.MenuItem(_('Save As..'))
@@ -111,11 +112,11 @@ class NormalSongTab(Gtk.ScrolledWindow):
         self.popup_menu.append(sep)
         delete_song_menu = Gtk.MenuItem(_('Delete from Playlist'))
         delete_song_menu.connect('activate',
-                self.on_delete_song_menu_activated)
+                                 self.on_delete_song_menu_activated)
         self.popup_menu.append(delete_song_menu)
         delete_cache_menu = Gtk.MenuItem(_('Delete Local Cache'))
         delete_cache_menu.connect('activate',
-                self.on_delete_cache_menu_activated)
+                                  self.on_delete_cache_menu_activated)
         self.popup_menu.append(delete_cache_menu)
         
     def on_treeview_key_pressed(self, treeview, event):
@@ -157,11 +158,11 @@ class NormalSongTab(Gtk.ScrolledWindow):
         model = treeview.get_model()
         index = treeview.get_columns().index(column)
         song = Widgets.song_row_to_dict(model[path], start=0)
-        if index == 0:
+        if index == self.COL_NAME:
             self.app.playlist.play_song(song, list_name=self.list_name)
-        elif index == 1:
+        elif index == self.COL_ARTIST:
             self.app.search.search_artist(song['artist'])
-        elif index == 2:
+        elif index == self.COL_ALBUM:
             self.app.search.search_album(song['album'])
 
     def on_drag_data_get(self, treeview, drag_context, sel_data, info, 
@@ -210,7 +211,7 @@ class NormalSongTab(Gtk.ScrolledWindow):
         liststore, paths = selection.get_selected_rows()
         for path in paths:
             filepaths = get_song_paths(self.liststore[path][1],
-                    self.liststore[path][0], self.app.conf)
+                                       self.liststore[path][0], self.app.conf)
             for filepath in filepaths:
                 if os.path.exists(filepath):
                     os.remove(filepath)
@@ -243,7 +244,8 @@ class ExportDialog(Gtk.Dialog):
         box.pack_start(self.folder_chooser, False, True, 0)
 
         self.including_lrc = Gtk.CheckButton(_('Including lyrics'))
-        self.including_lrc.set_tooltip_text(_('Export lyrics to the same folder'))
+        self.including_lrc.set_tooltip_text(
+                _('Export lyrics to the same folder'))
         self.including_lrc.props.margin_top = 20
         box.pack_start(self.including_lrc, False, False, 0)
 
@@ -495,6 +497,9 @@ class PlayList(Gtk.Box):
     def init_tab(self, list_name, songs):
         scrolled_win = NormalSongTab(self.app, list_name)
         for song in songs:
+            # TODO: be compatible with v3.4.7
+            if len(song) == 6:
+                song.append('')
             scrolled_win.liststore.append(song)
         if list_name == 'Caching':
             box_caching = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
