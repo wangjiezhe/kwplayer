@@ -61,6 +61,7 @@ class ShortcutMode:
 
 # Check Gtk version <= 3.6
 GTK_LE_36 = (Gtk.MAJOR_VERSION == 3) and (Gtk.MINOR_VERSION <= 6)
+GTK_GE_312 = Gtk.MINOR_VERSION >= 12
 
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')

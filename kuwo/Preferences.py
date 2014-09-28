@@ -11,8 +11,8 @@ from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Pango
 
-from kuwo import Config
-from kuwo import Widgets
+from . import Config
+from . import Widgets
 
 _ = Config._
 
@@ -67,7 +67,10 @@ class FontBox(Gtk.Box):
         self.pack_start(left_label, False, True, 0)
 
         font_button = Gtk.SpinButton()
-        adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10)
+        if Config.GTK_GE_312:
+            adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10)
+        else:
+            adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10, 1)
         adjustment.connect('value-changed', self.on_font_set)
         font_button.set_adjustment(adjustment)
         font_button.set_value(conf[font_name])
