@@ -97,7 +97,6 @@ class RadioItem(Gtk.EventBox):
         def _on_more_songs_loaded(songs, error=None):
             if error or not songs:
                 return
-                # merge next list of songs to current list
             songs2 = []
             for song in songs:
                 song['formats'] = ''
@@ -129,6 +128,9 @@ class RadioItem(Gtk.EventBox):
         if self.playlists[self.radio_id]['curr_song'] > 19:
             self.label.set_label('Song Name')
             return
+        if not self.playlists[self.radio_id]['songs']:
+            #self.load_more_songs()
+            return
         curr_song = self.playlists[self.radio_id]['curr_song']
         song = self.playlists[self.radio_id]['songs'][curr_song]
         self.label.set_label(Widgets.short_str(song['name'], length=12))
@@ -154,16 +156,16 @@ class RadioItem(Gtk.EventBox):
         self.play_song()
 
     def get_next_song(self):
-        if self.playlists[self.radio_id]['curr_song'] == 10:
+        if self.playlists[self.radio_id]['curr_song'] >= 10:
             self.load_more_songs()
         if self.playlists[self.radio_id]['curr_song'] > 19:
             self.playlists[self.radio_id]['curr_song'] = 0
             self.playlists[self.radio_id]['songs'] = \
                     self.playlists[self.radio_id]['songs'][20:]
         radio = self.playlists[self.radio_id]
-        if not radio['songs']:
+        if not radio['songs'] or len(radio['songs']) == radio['curr_song'] + 1:
             self.load_more_songs()
-            return
+            return None
         return radio['songs'][radio['curr_song'] + 1]
 
     def on_button_pressed(self, widget, event):
