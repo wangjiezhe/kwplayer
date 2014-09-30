@@ -68,12 +68,12 @@ class FontBox(Gtk.Box):
 
         font_button = Gtk.SpinButton()
         if Config.GTK_GE_312:
-            adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10)
-        else:
             adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10, 1)
+        else:
+            adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10)
         adjustment.connect('value-changed', self.on_font_set)
+        adjustment.set_value(conf[font_name])
         font_button.set_adjustment(adjustment)
-        font_button.set_value(conf[font_name])
         self.pack_end(font_button, False, True, 0)
 
         if use_margin:
