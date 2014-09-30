@@ -292,11 +292,6 @@ class Player(Gtk.Box):
                 self.app.lrc.show_music()
                 self.playbin.load_audio(uri)
                 self.get_lrc()
-                if self.curr_song.get('formats', ''):
-                    self.use_mtv_btn.set_sensitive(
-                            'MP4' in self.curr_song['formats'])
-                else:
-                    self.get_mv_link()
                 self.get_recommend_lists()
             elif self.play_type == PlayType.MV:
                 self.use_mtv_btn.set_sensitive(True)
@@ -304,6 +299,13 @@ class Player(Gtk.Box):
                 self.playbin.load_video(uri, self.app.lrc.xid)
             self.start_player(load=True)
             self.update_player_info()
+            if self.play_type == PlayType.SONG:
+                if self.curr_song.get('formats', ''):
+                    self.use_mtv_btn.set_sensitive(
+                            'MP4' in self.curr_song['formats'])
+                else:
+                    # for v3.4.7
+                    self.get_mv_link()
         GLib.idle_add(_on_song_can_play)
 
     def on_song_downloaded(self, widget, song_path):
