@@ -292,7 +292,7 @@ class Player(Gtk.Box):
                 self.app.lrc.show_music()
                 self.playbin.load_audio(uri)
                 self.get_lrc()
-                if self.curr_song['formats']:
+                if self.curr_song.get('formats', ''):
                     self.use_mtv_btn.set_sensitive(
                             'MP4' in self.curr_song['formats'])
                 else:

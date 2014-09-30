@@ -728,7 +728,7 @@ def get_song_link(song, conf, use_mv=False):
     audio_formats = ['MP3128', 'MP3192', 'MP3H', 'AL']
     video_formats = ['MP4L', 'MP4']
     if use_mv:
-        if video_formats[1] in song['formats'] and conf['video'] == 1:
+        if video_formats[1] in song.get('formats', '') and conf['video'] == 1:
             br = video_formats[1]
         else:
             br = video_formats[0]
@@ -742,12 +742,12 @@ def get_song_link(song, conf, use_mv=False):
         ])
     else:
         ext = 'mp3'
-        if conf['audio'] == 3 and audio_formats[3] in song['formats']:
+        if conf['audio'] == 3 and audio_formats[3] in song.get('formats', ''):
             br = audio_brs[3]
             ext = 'flac'
-        elif conf['audio'] >= 2 and audio_formats[2] in song['formats']:
+        elif conf['audio'] >= 2 and audio_formats[2] in song.get('formats', ''):
             br = audio_brs[2]
-        elif conf['audio'] >= 1 and audio_formats[1] in song['formats']:
+        elif conf['audio'] >= 1 and audio_formats[1] in song.get('formats', ''):
             br = audio_brs[1]
         else:
             br = audio_brs[0]

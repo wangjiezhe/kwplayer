@@ -21,14 +21,15 @@ from kuwo import Widgets
 _ = Config._
 
 class RadioItem(Gtk.EventBox):
-    def __init__(self, radio_info, app):
+    def __init__(self, radio_id, app):
         super().__init__()
         self.app = app
-        self.playlists = app.radio.playlists
+        self.parent = app.radio
+        self.playlists = self.parent.playlists
         self.connect('button-press-event', self.on_button_pressed)
         # radio_info contains:
         # pic, name, radio_id, offset
-        self.radio_info = radio_info
+        self.radio_id = radio_id
         self.expanded = False
 
         self.box = Gtk.Box()
@@ -37,7 +38,7 @@ class RadioItem(Gtk.EventBox):
         self.add(self.box)
 
         self.img = Gtk.Image()
-        self.img_path = Net.get_image(radio_info['pic'])
+        self.img_path = Net.get_image(self.playlists[self.radio_id]['pic'])
         self.small_pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 self.img_path, 50, 50)
         self.big_pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
@@ -48,7 +49,8 @@ class RadioItem(Gtk.EventBox):
         box_right = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.box.pack_start(box_right, True, True, 0)
 
-        radio_name = Gtk.Label(Widgets.short_str(radio_info['name'], 8))
+        radio_name = Gtk.Label(Widgets.short_str(
+                self.playlists[self.radio_id]['name'], 8))
         box_right.pack_start(radio_name, True, True, 0)
 
         self.label = Gtk.Label(_('song name'))
@@ -83,26 +85,28 @@ class RadioItem(Gtk.EventBox):
         def _update_songs(songs, error=None):
             if not songs:
                 return
-            self.playlists[index]['songs'] = songs
-            self.playlists[index]['curr_song'] = 0
+            self.playlists[self.radio_id]['songs'] = songs
+            self.playlists[self.radio_id]['curr_song'] = 0
             self.update_label()
-        index = self.get_index()
-        if len(self.playlists[index]['songs']) == 0:
-            Net.async_call(
-                    Net.get_radio_songs, _update_songs, 
-                    self.radio_info['radio_id'], self.radio_info['offset'])
+        if len(self.playlists[self.radio_id]['songs']) == 0:
+            Net.async_call(Net.get_radio_songs, _update_songs, 
+                           self.radio_id,
+                           self.playlists[self.radio_id]['offset'])
     
     def load_more_songs(self):
         def _on_more_songs_loaded(songs, error=None):
-            if songs:
+            if error or not songs:
+                return
                 # merge next list of songs to current list
-                self.playlists[index]['songs'] += songs
-        index = self.get_index()
-        offset = self.playlists[index]['offset'] + 1
-        self.playlists[index]['offset'] = offset
-        Net.async_call(
-                Net.get_radio_songs, _on_more_songs_loaded, 
-                self.radio_info['radio_id'], offset)
+            songs2 = []
+            for song in songs:
+                song['formats'] = ''
+                songs2.append(song)
+            self.playlists[self.radio_id]['songs'] += songs2
+        self.playlists[self.radio_id]['offset'] += 1
+        Net.async_call(Net.get_radio_songs, _on_more_songs_loaded, 
+                       self.playlists[self.radio_id],
+                       self.playlists[self.radio_id]['offset'])
 
     def expand(self):
         if self.expanded:
@@ -122,46 +126,44 @@ class RadioItem(Gtk.EventBox):
         self.toolbar.hide()
 
     def update_label(self):
-        index = self.get_index()
-        radio = self.playlists[index]
-        if radio['curr_song'] > 19:
+        if self.playlists[self.radio_id]['curr_song'] > 19:
             self.label.set_label('Song Name')
             return
-        song = radio['songs'][radio['curr_song']]
+        curr_song = self.playlists[self.radio_id]['curr_song']
+        song = self.playlists[self.radio_id]['songs'][curr_song]
         self.label.set_label(Widgets.short_str(song['name'], length=12))
         Gdk.Window.process_all_updates()
         self.label.realize()
 
-    def get_index(self):
-        for i, radio in enumerate(self.playlists):
-            if radio['radio_id'] == self.radio_info['radio_id']:
-                return i
-        raise IndexError('Radio not exists in playlist')
-
     def play_song(self):
-        index = self.get_index()
-        radio = self.playlists[index]
-        if radio['curr_song'] > 19:
-            radio['curr_song'] = 0
-            radio['songs'] = radio['songs'][20:]
-        song = radio['songs'][radio['curr_song']]
+        if self.playlists[self.radio_id]['curr_song'] > 19:
+            self.playlists[self.radio_id]['curr_song'] = 0
+            self.playlists[self.radio_id]['songs'] = \
+                    self.playlists[self.radio_id]['songs'][20:]
+        curr_song = self.playlists[self.radio_id]['curr_song']
+        if not self.playlists[self.radio_id]['songs']:
+            self.load_more_songs()
+            return
+        song = self.playlists[self.radio_id]['songs'][curr_song]
         song['rid'] = int(song['rid'])
         self.update_label()
         self.app.player.load_radio(song, self)
 
     def play_next_song(self):
-        index = self.get_index()
-        self.playlists[index]['curr_song'] += 1
+        self.playlists[self.radio_id]['curr_song'] += 1
         self.play_song()
 
     def get_next_song(self):
-        index = self.get_index()
-        radio = self.playlists[index]
-        if radio['curr_song'] == 10:
+        if self.playlists[self.radio_id]['curr_song'] == 10:
             self.load_more_songs()
-        if radio['curr_song'] > 19:
-            radio['curr_song'] = 0
-            radio['songs'] = radio['songs'][20:]
+        if self.playlists[self.radio_id]['curr_song'] > 19:
+            self.playlists[self.radio_id]['curr_song'] = 0
+            self.playlists[self.radio_id]['songs'] = \
+                    self.playlists[self.radio_id]['songs'][20:]
+        radio = self.playlists[self.radio_id]
+        if not radio['songs']:
+            self.load_more_songs()
+            return
         return radio['songs'][radio['curr_song'] + 1]
 
     def on_button_pressed(self, widget, event):
@@ -176,7 +178,7 @@ class RadioItem(Gtk.EventBox):
         self.play_song()
 
     def on_button_delete_clicked(self, btn):
-        self.playlists.pop(self.get_index())
+        self.playlists.pop(self.radio_id)
         self.destroy()
 
 
@@ -240,21 +242,30 @@ class Radio(Gtk.Box):
         Net.update_liststore_images(
                 self.liststore_radios, 0, tree_iters, urls)
 
-        for radio in self.playlists:
-            radio_item = RadioItem(radio, self.app)
+        for radio_rid in self.playlists:
+            radio_item = RadioItem(radio_rid, self.app)
             self.box_myradio.pack_start(radio_item, False, False, 0)
 
         GLib.timeout_add(300000, self.dump_playlists)
 
     def load_playlists(self):
         filepath = Config.RADIO_JSON
-        _default = []
+        _default = {}
         if os.path.exists(filepath):
             with open(filepath) as fh:
                 playlists = json.loads(fh.read())
         else:
             playlists = _default
-        self.playlists = playlists
+        # radio playlist is list in v3.5.1
+        if isinstance(playlists, list):
+            playlists2 = {}
+            for radio_item in playlists:
+                radio_id = radio_item['radio_id']
+                radio_item['formats'] = ''
+                playlists2[radio_id] = radio_item
+            self.playlists = playlists2
+        else:
+            self.playlists = playlists
 
     def dump_playlists(self):
         filepath = Config.RADIO_JSON
@@ -279,10 +290,10 @@ class Radio(Gtk.Box):
         self.append_radio(radio_info)
 
     def append_radio(self, radio_info):
-        for radio in self.playlists:
-            # check if this radio already exists
-            if radio['radio_id'] == radio_info['radio_id']:
-                return
-        self.playlists.append(radio_info)
-        radio_item = RadioItem(radio_info, self.app)
+        # check if this radio already exists
+        radio_id = radio_info['radio_id']
+        if radio_id in self.playlists:
+            return
+        self.playlists[radio_id] = radio_info
+        radio_item = RadioItem(radio_id, self.app)
         self.box_myradio.pack_start(radio_item, False, False, 0)
