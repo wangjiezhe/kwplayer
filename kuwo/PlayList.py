@@ -514,6 +514,9 @@ class PlayList(Gtk.Box):
             button_open.connect('clicked', self.open_cache_folder)
             buttonbox.pack_start(button_open, False, False, 0)
 
+            self.cache_speed_label = Gtk.Label()
+            buttonbox.pack_start(self.cache_speed_label, False, False, 5)
+
             box_caching.pack_start(scrolled_win, True, True, 0)
             self.notebook.append_page(box_caching, Gtk.Label(_('Caching')))
             box_caching.show_all()
@@ -618,11 +621,11 @@ class PlayList(Gtk.Box):
 
     # Open API
     def cache_song(self, song):
+        '''Add song to cache playlist'''
         rid = song['rid']
         liststore = self.tabs['Caching'].liststore
         liststore.append(Widgets.song_dict_to_row(song))
-        if not self.cache_enabled:
-            self.switch_caching_daemon()
+        self.start_caching_daemon()
 
     # Open API
     def cache_songs(self, songs):
@@ -633,17 +636,26 @@ class PlayList(Gtk.Box):
         Utils.open_folder(self.app.conf['song-dir'])
 
     # song cache daemon
-    def switch_caching_daemon(self, *args):
+    def switch_caching_daemon(self, button):
+        if self.cache_enabled:
+            self.stop_caching_daemon()
+        else:
+            self.start_caching_daemon()
+
+    def start_caching_daemon(self):
         if not self.cache_enabled:
+            self.cache_speed_label.show()
             self.cache_enabled = True
             self.button_start.set_label(_('Stop Cache Service'))
             self.do_cache_song_pool()
-        else:
-            self.cache_enabled = False
-            self.button_start.set_label(_('Start Cache Service'))
+
+    def stop_caching_daemon(self):
+        self.cache_enabled = False
+        self.cache_speed_label.hide()
+        self.button_start.set_label(_('Start Cache Service'))
 
     def do_cache_song_pool(self):
-        def _move_song():
+        def _remove_song():
             try:
                 liststore.remove(liststore[path].iter)
             except IndexError:
@@ -651,35 +663,40 @@ class PlayList(Gtk.Box):
             Gdk.Window.process_all_updates()
 
         def _on_disk_error(widget, song_path, eror=None):
-            self.cache_enabled = False
+            self.stop_caching_daemon()
             GLib.idle_add(
                     Widgets.filesystem_error,
                     self.app.window,
                     song_path)
 
         def _on_network_error(widget, song_link, error=None):
-            # FIXME: change button text
-            self.cache_enabled = False
+            self.stop_caching_daemon()
             GLib.idle_add(
                     Widgets.network_error,
                     self.app.window,
                     _('Failed to cache song'))
 
+        def _on_chunk_received(widget, percent):
+            GLib.idle_add(do_on_chunk_received, percent)
+
+        def do_on_chunk_received(percent):
+            self.cache_speed_label.set_text('{0} %'.format(int(percent * 100)))
+
         def _on_downloaded(widget, song_path, error=None):
             if song_path:
-                GLib.idle_add(_move_song)
+                GLib.idle_add(_remove_song)
             if self.cache_enabled:
                 GLib.idle_add(self.do_cache_song_pool)
 
         if not self.cache_enabled:
             return
-
+        self.cache_speed_label.set_text('0 %')
         list_name = 'Caching'
         liststore = self.tabs[list_name].liststore
         path = 0
         if len(liststore) == 0:
             print('Caching playlist is empty, please add some songs')
-            self.switch_caching_daemon()
+            self.stop_caching_daemon()
             # FIXME: check Notify class available
             Notify.init('kwplayer-cache')
             notify = Notify.Notification.new(
@@ -691,6 +708,7 @@ class PlayList(Gtk.Box):
         song = Widgets.song_row_to_dict(liststore[path], start=0)
         print('will download:', song)
         self.cache_job = Net.AsyncSong(self.app)
+        self.cache_job.connect('chunk-received', _on_chunk_received)
         self.cache_job.connect('downloaded', _on_downloaded)
         self.cache_job.connect('disk-error', _on_disk_error)
         self.cache_job.connect('network-error', _on_network_error)

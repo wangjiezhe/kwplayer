@@ -115,7 +115,6 @@ class Lrc(Gtk.Notebook):
         self.old_line_iter = None
         self.old_timestamp = -5
         if not lrc_txt:
-            print('Failed to get lrc')
             self.lrc_buf.set_text(_('No lrc available'))
             self.lrc_obj = None
             return

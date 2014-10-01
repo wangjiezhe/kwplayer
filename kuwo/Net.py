@@ -36,7 +36,7 @@ SONG = 'http://antiserver.kuwo.cn/anti.s?'
 CHUNK = 16384                # 2**14, 16k, chunk size for file downloading 
 CHUNK_TO_PLAY = 2097152      # 2**21, 2M, min size to emit can-play signal
 CHUNK_MV_TO_PLAY = 8388608   # 2**23, 8M
-MAXTIMES = 3                 # time to retry http connections
+RETRIES = 3                 # time to retry http connections
 TIMEOUT = 30                 # HTTP connection timeout
 SONG_NUM = 100               # num of songs in each request
 ICON_NUM = 50                # num of icons in each request
@@ -100,7 +100,7 @@ def hash_byte(_str):
 def hash_str(_str):
     return hashlib.sha1(_str.encode()).hexdigest()
 
-def urlopen(_url, use_cache=True, retries=MAXTIMES):
+def urlopen(_url, use_cache=True, retries=RETRIES):
     # set host port from 81 to 80, to fix image problem
     url = _url.replace(':81', '')
     if use_cache and ldb_imported:
@@ -850,7 +850,7 @@ class AsyncSong(GObject.GObject):
         else:
             chunk_to_play = CHUNK_TO_PLAY
 
-        for retried in range(MAXTIMES):
+        for retried in range(RETRIES):
             try:
                 req = request.urlopen(song_link, timeout=TIMEOUT)
                 received_size = 0
@@ -867,7 +867,8 @@ class AsyncSong(GObject.GObject):
                     chunk = req.read(CHUNK)
                     received_size += len(chunk)
                     percent = received_size / content_length
-                    self.emit('chunk-received', percent)
+                    if int(percent * 100) % 5 == 0:
+                        self.emit('chunk-received', percent)
                     # this signal only emit once.
                     if ((received_size > chunk_to_play or percent > 0.4) and
                             not can_play_emited):
