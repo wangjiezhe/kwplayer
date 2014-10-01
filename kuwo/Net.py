@@ -35,7 +35,6 @@ SONG = 'http://antiserver.kuwo.cn/anti.s?'
 
 CHUNK = 16384                # 2**14, 16k, chunk size for file downloading 
 CHUNK_TO_PLAY = 2097152      # 2**21, 2M, min size to emit can-play signal
-CHUNK_APE_TO_PLAY = 8388608  # 2**23, 8M
 CHUNK_MV_TO_PLAY = 8388608   # 2**23, 8M
 MAXTIMES = 3                 # time to retry http connections
 TIMEOUT = 30                 # HTTP connection timeout
@@ -714,7 +713,6 @@ def get_radio_songs(nid, offset):
 def get_song_link(song, conf, use_mv=False):
     '''song is song_info dict.
 
-    @conf, is used to to read conf['use-ape'], conf['use-mkv'],
     conf['song-dir'] and song['mv-dir'].
     use_mv, default is False, which will get mp3 link.
     Return:
@@ -755,7 +753,7 @@ def get_song_link(song, conf, use_mv=False):
             'user=359307055300426&prod=kwplayer_ar_6.4.8.0&corp=kuwo',
             '&source=kwplayer_ar_6.4.8.0_kw.apk&p2p=1&type=convert_url2',
             '&br=', br,
-            '&format=aac|mp3|flac&sig=0&rid=', str(song['rid']),
+            '&format=mp3|flac|aac&sig=0&rid=', str(song['rid']),
             '&network=WIFI'
         ])
 
@@ -827,8 +825,6 @@ class AsyncSong(GObject.GObject):
         '''Get the actual link of music file.
 
         If higher quality of that music unavailable, a lower one is used.
-        like this:
-        response=url&type=convert_url&format=ape|mp3&rid=MUSIC_3312608
         '''
         async_call(self._download_song, empty_func, song, use_mv)
 
@@ -849,11 +845,10 @@ class AsyncSong(GObject.GObject):
             self.emit('network-error', song_link)
             return
 
-        chunk_to_play = CHUNK_TO_PLAY
-        if self.app.conf['use-ape']:
-            chunk_to_play = CHUNK_APE_TO_PLAY
         if use_mv:
             chunk_to_play = CHUNK_MV_TO_PLAY
+        else:
+            chunk_to_play = CHUNK_TO_PLAY
 
         for retried in range(MAXTIMES):
             try:
@@ -874,10 +869,10 @@ class AsyncSong(GObject.GObject):
                     percent = received_size / content_length
                     self.emit('chunk-received', percent)
                     # this signal only emit once.
-                    if ((received_size > chunk_to_play or percent > 40) and
+                    if ((received_size > chunk_to_play or percent > 0.4) and
                             not can_play_emited):
-                        can_play_emited = True
                         self.emit('can-play', tmp_song_path)
+                        can_play_emited = True
                     if not chunk:
                         break
                     fh.write(chunk)
