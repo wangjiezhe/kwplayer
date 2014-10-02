@@ -813,7 +813,7 @@ class AsyncSong(GObject.GObject):
         cached, song_link, song_path = get_song_link(song, self.app.conf,
                                                      use_mv=use_mv)
         # temp file to store data
-        tmp_song_path = song_path + '.part'
+        tmp_song_path = '{0}-{1}.part'.format(song_path, int(time.time()))
 
         # check song already cached 
         if cached:

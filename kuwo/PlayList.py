@@ -370,6 +370,8 @@ class PlayList(Gtk.Box):
         # control cache job
         self.cache_enabled = False
         self.cache_job = None
+        self.cache_global_count = 0
+        self.cache_local_count = 0
 
         self.playlist_menu = Gtk.Menu()
         self.playlist_advice_disname = ''
@@ -637,17 +639,38 @@ class PlayList(Gtk.Box):
         else:
             self.start_caching_daemon()
 
+    def check_caching_daemon(self):
+        '''Caching daemon monitor'''
+        if not self.cache_enabled:
+            return False
+        if self.cache_local_count > self.cache_global_count:
+            self.cache_global_count = self.cache_local_count
+            return True
+        else:
+            # restart caching daemon in 5 seconds
+            self.stop_caching_daemon()
+            GLib.timeout_add(5000, self.start_caching_daemon)
+            return False
+
     def start_caching_daemon(self):
         if not self.cache_enabled:
             self.cache_speed_label.show()
             self.cache_enabled = True
+            self.cache_global_count = 0
+            self.cache_local_count = 0
             self.button_start.set_label(_('Stop Cache Service'))
+            GLib.timeout_add(30000, self.check_caching_daemon)
             self.do_cache_song_pool()
 
     def stop_caching_daemon(self):
         self.cache_enabled = False
+        self.cache_global_count = 0
+        self.cache_local_count = 0
         self.cache_speed_label.hide()
         self.button_start.set_label(_('Start Cache Service'))
+        if self.cache_job:
+            self.cache_job.destroy()
+            self.cache_job = None
 
     def do_cache_song_pool(self):
         def _remove_song():
@@ -670,6 +693,7 @@ class PlayList(Gtk.Box):
             GLib.idle_add(do_on_chunk_received, percent)
 
         def do_on_chunk_received(percent):
+            self.cache_local_count += 1
             self.cache_speed_label.set_text('{0} %'.format(int(percent * 100)))
 
         def _on_downloaded(widget, song_path, error=None):
@@ -680,6 +704,8 @@ class PlayList(Gtk.Box):
 
         if not self.cache_enabled:
             return
+        self.cache_local_count = 0
+        self.cache_global_count = 0
         self.cache_speed_label.set_text('0 %')
         list_name = 'Caching'
         liststore = self.tabs[list_name].liststore
