@@ -39,10 +39,10 @@ class RadioItem(Gtk.EventBox):
 
         self.img = Gtk.Image()
         self.img_path = Net.get_image(self.playlists[self.radio_id]['pic'])
-        self.small_pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                self.img_path, 50, 50)
-        self.big_pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                self.img_path, 75, 75)
+        self.small_pix = GdkPixbuf.Pixbuf.new_from_file_at_size(self.img_path,
+                                                                50, 50)
+        self.big_pix = GdkPixbuf.Pixbuf.new_from_file_at_size(self.img_path,
+                                                              75, 75)
         self.img.set_from_pixbuf(self.small_pix)
         self.box.pack_start(self.img, False, False, 0)
 
@@ -50,7 +50,7 @@ class RadioItem(Gtk.EventBox):
         self.box.pack_start(box_right, True, True, 0)
 
         radio_name = Gtk.Label(Widgets.short_str(
-                self.playlists[self.radio_id]['name'], 8))
+            self.playlists[self.radio_id]['name'], 8))
         box_right.pack_start(radio_name, True, True, 0)
 
         self.label = Gtk.Label(_('song name'))
@@ -97,11 +97,7 @@ class RadioItem(Gtk.EventBox):
         def _on_more_songs_loaded(songs, error=None):
             if error or not songs:
                 return
-            songs2 = []
-            for song in songs:
-                song['formats'] = ''
-                songs2.append(song)
-            self.playlists[self.radio_id]['songs'] += songs2
+            self.playlists[self.radio_id]['songs'] += songs
         self.playlists[self.radio_id]['offset'] += 1
         Net.async_call(Net.get_radio_songs, _on_more_songs_loaded, 
                        self.playlists[self.radio_id],
@@ -212,12 +208,11 @@ class Radio(Gtk.Box):
         self.pack_start(self.scrolled_radios, True, True, 0)
 
         # pic, name, id, num of listeners, pic_url, tooltip
-        self.liststore_radios = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, str, str)
-        iconview_radios = Widgets.IconView(
-                self.liststore_radios, tooltip=5)
-        iconview_radios.connect(
-                'item_activated', self.on_iconview_radios_item_activated)
+        self.liststore_radios = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
+                                              str, str, str)
+        iconview_radios = Widgets.IconView(self.liststore_radios, tooltip=5)
+        iconview_radios.connect('item_activated',
+                                self.on_iconview_radios_item_activated)
         self.scrolled_radios.add(iconview_radios)
 
         self.show_all()
@@ -237,12 +232,11 @@ class Radio(Gtk.Box):
                 Widgets.unescape(radio['info']),
                 radio['pic'],
                 Widgets.set_tooltip(radio['disname'], radio['info']),
-                ])
+            ])
             tree_iters.append(tree_iter)
             urls.append(radio['pic'])
         self.liststore_radios.timestamp = time.time()
-        Net.update_liststore_images(
-                self.liststore_radios, 0, tree_iters, urls)
+        Net.update_liststore_images(self.liststore_radios, 0, tree_iters, urls)
 
         for radio_rid in self.playlists:
             radio_item = RadioItem(radio_rid, self.app)
@@ -282,13 +276,13 @@ class Radio(Gtk.Box):
     def on_iconview_radios_item_activated(self, iconview, path):
         model = iconview.get_model()
         radio_info = {
-                'name': model[path][1],
-                'radio_id': model[path][2],
-                'pic': model[path][4],
-                'offset': 0,
-                'curr_song': 0,
-                'songs': [],
-                }
+            'name': model[path][1],
+            'radio_id': model[path][2],
+            'pic': model[path][4],
+            'offset': 0,
+            'curr_song': 0,
+            'songs': [],
+        }
         self.append_radio(radio_info)
 
     def append_radio(self, radio_info):

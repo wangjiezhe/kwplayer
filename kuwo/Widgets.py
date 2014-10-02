@@ -36,8 +36,8 @@ def short_tooltip(tooltip, length=10):
     return short_str(escape(tooltip), length)
 
 def set_tooltip(head, body=''):
-    return '<b>{0}</b>\n\n{1}'.format(
-            escape(unescape(head)), escape(unescape(body)))
+    return '<b>{0}</b>\n\n{1}'.format(escape(unescape(head)),
+                                      escape(unescape(body)))
 
 def set_tooltip_with_song_tips(head, tip):
     songs = tip.split(';')
@@ -114,7 +114,6 @@ class ListRadioButton(Gtk.RadioButton):
         self.props.draw_indicator = False
         if last_button:
             self.join_group(last_button)
-        # it might need a class name.
 
 
 class BoldLabel(Gtk.Label):
@@ -161,7 +160,7 @@ class FolderChooser(Gtk.Box):
         dialog = Gtk.FileChooserDialog(_('Choose a Folder'), self.parent,
                 Gtk.FileChooserAction.SELECT_FOLDER,
                 (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                    Gtk.STOCK_OK, Gtk.ResponseType.OK))
+                Gtk.STOCK_OK, Gtk.ResponseType.OK))
 
         dialog.connect('file-activated', on_dialog_file_activated)
         response = dialog.run()
@@ -364,20 +363,18 @@ class TreeViewSongs(Gtk.TreeView):
             self.app.playlist.play_song(song)
         elif index == self.COL_ARTIST:
             if not song['artist']:
-                print('artist is empty, no searching')
                 return
             self.app.search.search_artist(song['artist'])
         elif index == self.COL_ALBUM:
             if not song['album']:
-                print('album is empty, no searching')
                 return
             self.app.search.search_album(song['album'])
 
 
 def network_error(parent, msg):
-    dialog = Gtk.MessageDialog(
-            parent, Gtk.DialogFlags.MODAL,
-            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, msg)
+    dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.MODAL,
+                               Gtk.MessageType.ERROR,
+                               Gtk.ButtonsType.CLOSE, msg)
     dialog.format_secondary_text(
             _('Please check network connection and try again'))
     dialog.run()
@@ -386,7 +383,8 @@ def network_error(parent, msg):
 def filesystem_error(parent, path):
     msg = _('Failed to open file or direcotry')
     dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.MODAL,
-            Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, msg)
+                               Gtk.MessageType.ERROR,
+                               Gtk.ButtonsType.CLOSE, msg)
     dialog.format_secondary_text(
             _('Unable to access {0}').format(path))
     dialog.run()

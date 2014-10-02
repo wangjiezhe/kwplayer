@@ -115,8 +115,8 @@ class Player(Gtk.Box):
         self.use_audio_btn.set_icon_name('audio-x-generic-symbolic')
         self.use_audio_btn.props.margin_left = 10
         self.use_audio_btn.set_active(True)
-        self.use_audio_sid = self.use_audio_btn.connect(
-                'toggled', self.on_play_type_toggled, PlayType.SONG)
+        self.use_audio_sid = self.use_audio_btn.connect('toggled',
+                self.on_play_type_toggled, PlayType.SONG)
         toolbar.insert(self.use_audio_btn, 5)
 
         self.use_mtv_btn = Gtk.RadioToolButton()
@@ -125,16 +125,16 @@ class Player(Gtk.Box):
         self.use_mtv_btn.set_icon_name('video-x-generic-symbolic')
         self.use_mtv_btn.set_sensitive(False)
         self.use_mtv_btn.props.group = self.use_audio_btn
-        self.use_mtv_sid = self.use_mtv_btn.connect(
-                'toggled', self.on_play_type_toggled, PlayType.MV)
+        self.use_mtv_sid = self.use_mtv_btn.connect('toggled',
+                self.on_play_type_toggled, PlayType.MV)
         toolbar.insert(self.use_mtv_btn, 6)
 
         self.fullscreen_btn = Gtk.ToggleToolButton()
         self.fullscreen_btn.set_label(_('Fullscreen'))
         self.fullscreen_btn.set_icon_name('view-fullscreen-symbolic')
         self.fullscreen_btn.props.margin_left = 10
-        self.fullscreen_btn.connect(
-                'toggled', self.on_fullscreen_button_toggled)
+        self.fullscreen_btn.connect('toggled',
+                self.on_fullscreen_button_toggled)
         toolbar.insert(self.fullscreen_btn, 7)
         self.app.window.connect('key-press-event', self.on_window_key_pressed)
 
@@ -152,30 +152,26 @@ class Player(Gtk.Box):
         toolbar.child_set_property(menu_tool_item, 'expand', True)
         main_menu = Gtk.Menu()
         pref_item = Gtk.MenuItem(label=_('Preferences'))
-        pref_item.connect(
-                'activate', self.on_main_menu_pref_activate)
+        pref_item.connect('activate', self.on_main_menu_pref_activate)
         main_menu.append(pref_item)
         sep_item = Gtk.SeparatorMenuItem()
         main_menu.append(sep_item)
         about_item = Gtk.MenuItem(label=_('About'))
-        about_item.connect(
-                'activate', self.on_main_menu_about_activate)
+        about_item.connect('activate', self.on_main_menu_about_activate)
         main_menu.append(about_item)
         quit_item = Gtk.MenuItem(label=_('Quit'))
         key, mod = Gtk.accelerator_parse('<Ctrl>Q')
-        quit_item.add_accelerator(
-                'activate', app.accel_group,
-                key, mod, Gtk.AccelFlags.VISIBLE)
-        quit_item.connect(
-                'activate', self.on_main_menu_quit_activate)
+        quit_item.add_accelerator('activate', app.accel_group, key, mod,
+                                  Gtk.AccelFlags.VISIBLE)
+        quit_item.connect('activate', self.on_main_menu_quit_activate)
         main_menu.append(quit_item)
         main_menu.show_all()
         menu_image = Gtk.Image()
         menu_image.set_from_icon_name('view-list-symbolic', ICON_SIZE)
         if Config.GTK_LE_36:
             menu_btn = Gtk.Button()
-            menu_btn.connect(
-                    'clicked', self.on_main_menu_button_clicked, main_menu)
+            menu_btn.connect('clicked', self.on_main_menu_button_clicked,
+                             main_menu)
         else:
             menu_btn = Gtk.MenuButton()
             menu_btn.set_popup(main_menu)
@@ -211,8 +207,8 @@ class Player(Gtk.Box):
         self.volume = Gtk.VolumeButton()
         self.volume.props.use_symbolic = True
         self.volume.set_value(app.conf['volume'] ** 0.33)
-        self.volume_sid = self.volume.connect(
-                'value-changed', self.on_volume_value_changed)
+        self.volume_sid = self.volume.connect('value-changed',
+                                              self.on_volume_value_changed)
         scale_box.pack_start(self.volume, False, False, 0)
 
         # init playbin and dbus
@@ -221,8 +217,7 @@ class Player(Gtk.Box):
         self.playbin.connect('eos', self.on_playbin_eos)
         self.playbin.connect('error', self.on_playbin_error)
         self.playbin.connect('mute-changed', self.on_playbin_mute_changed)
-        self.playbin.connect(
-                'volume-changed', self.on_playbin_volume_changed)
+        self.playbin.connect('volume-changed', self.on_playbin_volume_changed)
         self.dbus = PlayerDBus(self)
         self.notify = PlayerNotify(self)
 
@@ -269,8 +264,7 @@ class Player(Gtk.Box):
 
     def on_song_disk_error(self, widget, song_path):
         '''Disk error: occurs when disk is not available.'''
-        GLib.idle_add(
-                Widgets.filesystem_error, self.app.window, song_path)
+        GLib.idle_add(Widgets.filesystem_error, self.app.window, song_path)
         self.stop_player_cb()
 
     def on_song_network_error(self, widget, song_link):
@@ -384,8 +378,7 @@ class Player(Gtk.Box):
 
     # Control panel
     def on_pic_pressed(self, eventbox, event):
-        if event.type == GDK_2BUTTON_PRESS and \
-                self.play_type == PlayType.SONG:
+        if event.type == GDK_2BUTTON_PRESS and self.play_type == PlayType.SONG:
             self.app.playlist.locate_curr_song()
 
     def on_prev_button_clicked(self, button):
@@ -430,8 +423,8 @@ class Player(Gtk.Box):
                     Widgets.short_tooltip(info['info'], length=500))
             if info['pic']:
                 self.meta_artUrl = info['pic']
-                pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                        info['pic'], 100, 100)
+                pix = GdkPixbuf.Pixbuf.new_from_file_at_size(info['pic'],
+                                                             100, 100)
                 self.artist_pic.set_from_pixbuf(pix)
             else:
                 self.meta_artUrl = self.app.theme_path['anonymous']
@@ -453,13 +446,13 @@ class Player(Gtk.Box):
         self.label.set_label(label)
         self.app.window.set_title(name)
         self.artist_pic.set_from_pixbuf(self.app.theme['anonymous'])
-        Net.async_call(
-                Net.get_artist_info, _update_pic, 
-                song['artistid'], song['artist'])
+        Net.async_call(Net.get_artist_info, _update_pic, 
+                       song['artistid'], song['artist'])
 
     def get_lrc(self):
         def _update_lrc(lrc_text, error=None):
             self.app.lrc.set_lrc(lrc_text)
+
         Net.async_call(Net.get_lrc, _update_lrc, self.curr_song)
 
     def get_recommend_lists(self):
@@ -469,15 +462,16 @@ class Player(Gtk.Box):
                 self.recommend_imgs = None
             else:
                 self.recommend_imgs = imgs.splitlines()
-        Net.async_call(
-                Net.get_recommend_lists, _on_list_received, 
-                self.curr_song['artist'])
+
+        Net.async_call(Net.get_recommend_lists, _on_list_received, 
+                       self.curr_song['artist'])
 
     def update_lrc_background(self, url):
         def _update_background(filepath, error=None):
             if error or not filepath:
                 return
             self.app.lrc.update_background(filepath)
+
         Net.async_call(Net.get_recommend_image, _update_background, url)
 
     # Radio part
@@ -527,9 +521,8 @@ class Player(Gtk.Box):
                     self.use_mtv_btn.set_sensitive(True)
                 else:
                     self.use_mtv_btn.set_sensitive(False)
-        Net.async_call(
-                Net.get_song_link, _update_mv_link,
-                self.curr_song, self.app.conf, True)
+        Net.async_call(Net.get_song_link, _update_mv_link,
+                       self.curr_song, self.app.conf, True)
 
     # Fullscreen
     def toggle_fullscreen(self):
@@ -556,7 +549,8 @@ class Player(Gtk.Box):
             self.fullscreen_btn.set_active(False)
         # press F11 to toggle fullscreen mode
         elif event.keyval == Gdk.KEY_F11:
-            self.fullscreen_btn.set_active(not self.fullscreen_btn.get_active())
+            self.fullscreen_btn.set_active(
+                    not self.fullscreen_btn.get_active())
 
     def on_fullscreen_button_toggled(self, button):
         self.toggle_fullscreen()
@@ -575,26 +569,25 @@ class Player(Gtk.Box):
             self.favorite_btn.set_icon_name('no-favorite')
 
     def get_favorite_status(self):
-        return self.app.playlist.check_song_in_playlist(
-                self.curr_song, 'Favorite')
+        return self.app.playlist.check_song_in_playlist(self.curr_song,
+                                                        'Favorite')
 
     def toggle_favorite_status(self):
         if not self.curr_song:
             return
-        if self.app.playlist.check_song_in_playlist(
-                self.curr_song, 'Favorite'):
-            self.app.playlist.remove_song_from_playlist(
-                    self.curr_song, 'Favorite')
+        if self.app.playlist.check_song_in_playlist(self.curr_song,
+                                                    'Favorite'):
+            self.app.playlist.remove_song_from_playlist(self.curr_song,
+                                                        'Favorite')
             self.favorite_btn.set_icon_name('no-favorite')
         else:
-            self.app.playlist.add_song_to_playlist(
-                    self.curr_song, 'Favorite')
+            self.app.playlist.add_song_to_playlist(self.curr_song, 'Favorite')
             self.favorite_btn.set_icon_name('favorite')
 
     # menu button
     def on_main_menu_button_clicked(self, button, main_menu):
-        main_menu.popup(
-                None, None, None, None, 1, Gtk.get_current_event_time())
+        main_menu.popup(None, None, None, None, 1,
+                        Gtk.get_current_event_time())
 
     def on_main_menu_pref_activate(self, menu_item):
         dialog = Preferences(self.app)
@@ -728,11 +721,11 @@ class Player(Gtk.Box):
         if self.play_type == PlayType.NONE or not self.can_go_previous():
             return
         self.stop_player()
-        _repeat = self.repeat_btn.get_active()
+        repeat = self.repeat_btn.get_active()
         if self.play_type == PlayType.SONG:
-            self.app.playlist.play_prev_song(repeat=_repeat, use_mv=False)
+            self.app.playlist.play_prev_song(repeat=repeat, use_mv=False)
         elif self.play_type == PlayType.MV:
-            self.app.playlist.play_prev_song(repeat=_repeat, use_mv=True)
+            self.app.playlist.play_prev_song(repeat=repeat, use_mv=True)
 
     def load_prev_cb(self):
         GLib.idle_add(self.load_prev)

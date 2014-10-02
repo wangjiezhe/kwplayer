@@ -137,7 +137,7 @@ def get_nodes(nid, page):
         str(page),
         '&node=',
         str(nid),
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
@@ -167,7 +167,7 @@ def get_image(url, filepath=None):
     # Now, check its mime type
     file_ = Gio.File.new_for_path(filepath)
     file_info = file_.query_info(Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-            Gio.FileQueryInfoFlags.NONE)
+                                 Gio.FileQueryInfoFlags.NONE)
     content_type = file_info.get_content_type()
     if 'image' in content_type:
         return filepath
@@ -176,11 +176,7 @@ def get_image(url, filepath=None):
         return None
 
 def get_album(albumid):
-    url = ''.join([
-        SEARCH,
-        'stype=albuminfo&albumid=',
-        str(albumid),
-        ])
+    url = '{0}type=albuminfo&albumid={1}'.format(SEARCH, albumid)
     req_content = urlopen(url)
     if not req_content:
         return None
@@ -205,8 +201,8 @@ def update_liststore_images(liststore,  col, tree_iters, urls,
     '''
     def update_image(filepath, tree_iter):
         try:
-            pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                    filepath, resize, resize)
+            pix = GdkPixbuf.Pixbuf.new_from_file_at_size(filepath, resize,
+                                                         resize)
             tree_path = liststore.get_path(tree_iter)
             if tree_path is not None:
                 liststore[tree_path][col] = pix
@@ -234,11 +230,7 @@ def update_album_covers(liststore, col, tree_iters, urls):
         url = url.strip()
         if not url:
             return ''
-        return ''.join([
-            IMG_CDN,
-            'star/albumcover/',
-            url,
-            ])
+        return '{0}star/albumcover/{1}'.format(IMG_CDN, url)
     update_liststore_images(liststore, col, tree_iters, urls, url_proxy)
 
 def update_mv_images(liststore, col, tree_iters, urls):
@@ -246,13 +238,9 @@ def update_mv_images(liststore, col, tree_iters, urls):
         url = url.strip()
         if not url:
             return ''
-        return ''.join([
-            IMG_CDN,
-            'wmvpic/',
-            url,
-            ])
+        return '{0}wmvpic/{1}'.format(IMG_CDN, url)
     update_liststore_images(liststore, col, tree_iters, urls,
-            url_proxy=url_proxy, resize=120)
+                            url_proxy=url_proxy, resize=120)
 
 def get_toplist_songs(nid):
     # no need to use pn, because toplist contains very few songs
@@ -262,7 +250,7 @@ def get_toplist_songs(nid):
         str(SONG_NUM),
         '&id=',
         str(nid),
-        ])
+    ])
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if not req_content:
@@ -283,7 +271,7 @@ def get_artists(catid, page, prefix):
         str(catid),
         '&pn=',
         str(page),
-        ])
+    ])
     if len(prefix) > 0:
         url = url + '&prefix=' + prefix
     req_content = urlopen(url)
@@ -302,13 +290,12 @@ def get_artist_pic_url(pic_path):
         return None
     if pic_path[:2] in ('55', '90',):
         pic_path = '100/' + pic_path[2:]
-    url = ''.join([IMG_CDN, 'star/starheads/', pic_path, ])
+    url = '{0}start/starheads/{1}'.format(IMG_CDN, pic_path)
     return url
 
 def update_artist_logos(liststore, col, tree_iters, urls):
-    update_liststore_images(
-            liststore, col, tree_iters, urls,
-            url_proxy=get_artist_pic_url)
+    update_liststore_images(liststore, col, tree_iters, urls,
+                            url_proxy=get_artist_pic_url)
 
 def get_artist_info(artistid, artist=None):
     '''Get artist info, if cached, just return it.
@@ -320,13 +307,13 @@ def get_artist_info(artistid, artist=None):
             SEARCH,
             'stype=artistinfo&artist=', 
             Utils.encode_uri(artist),
-            ])
+        ])
     else:
         url = ''.join([
             SEARCH,
             'stype=artistinfo&artistid=', 
             str(artistid),
-            ])
+        ])
     req_content = urlopen(url)
     if not req_content:
         return None
@@ -352,7 +339,7 @@ def get_artist_songs(artist, page):
         str(page),
         '&primitive=0&rformat=json&encoding=UTF8&artist=',
         artist,
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
@@ -373,7 +360,7 @@ def get_artist_songs_by_id(artistid, page):
         str(SONG_NUM),
         '&pn=',
         str(page),
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
@@ -394,7 +381,7 @@ def get_artist_albums(artistid, page):
         str(artistid),
         '&pn=',
         str(page),
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
@@ -415,7 +402,7 @@ def get_artist_mv(artistid, page):
         str(artistid),
         '&pn=',
         str(page),
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
@@ -437,7 +424,7 @@ def get_artist_similar(artistid, page):
         str(page),
         '&artistid=',
         str(artistid),
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
@@ -495,7 +482,7 @@ def get_recommend_lists(artist):
         'type=big_artist_pic&pictype=url&content=list&&id=0&from=pc',
         '&name=',
         Utils.encode_uri(artist),
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return None
@@ -519,7 +506,7 @@ def search_songs(keyword, page):
         parse.quote(keyword),
         '&pn=',
         str(page),
-        ])
+    ])
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if not req_content:
@@ -544,7 +531,7 @@ def search_artists(keyword, page):
         '&newsearch=1&primitive=0&cluster=0',
         '&itemset=newkm&rformat=json&encoding=utf8&all=',
         parse.quote(keyword),
-        ])
+    ])
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if not req_content:
@@ -569,7 +556,7 @@ def search_albums(keyword, page):
         '&newsearch=1&primitive=0&cluster=0',
         '&itemset=newkm&rformat=json&encoding=utf8&all=',
         parse.quote(keyword),
-        ])
+    ])
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if not req_content:
@@ -592,7 +579,7 @@ def get_index_nodes(nid):
         str(ICON_NUM),
         '&node=',
         str(nid),
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return None
@@ -615,7 +602,7 @@ def get_themes_main():
                     'nid': int(node['id']),
                     'info': node['info'],
                     'pic': node['pic'],
-                    })
+                })
         else:
             # Because of different image style, we use child picture instaed
             node = nodes_wrap['ninfo']
@@ -625,7 +612,7 @@ def get_themes_main():
                 'nid': int(node['id']),
                 'info': node['info'],
                 'pic': pic,
-                })
+            })
 
     nodes = []
     # Languages 10(+)
@@ -658,7 +645,7 @@ def get_themes_songs(nid, page):
         str(nid),
         '&pn=',
         str(page),
-        ])
+    ])
     if url not in req_cache:
         req_content = urlopen(url, use_cache=False)
         if not req_content:
@@ -680,7 +667,7 @@ def get_mv_songs(pid, page):
         str(ICON_NUM),
         '&encode=utf-8&keyset=mvpl&pid=',
         str(pid),
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
@@ -703,7 +690,7 @@ def get_radio_songs(nid, offset):
         str(nid),
         '&offset=',
         str(offset),
-        ])
+    ])
     req_content = urlopen(url)
     if not req_content:
         return None
@@ -740,12 +727,13 @@ def get_song_link(song, conf, use_mv=False):
         ])
     else:
         ext = 'mp3'
-        if conf['audio'] == 3 and audio_formats[3] in song.get('formats', ''):
+        song_formats = song.get('formats', '')
+        if conf['audio'] == 3 and audio_formats[3] in song_formats:
             br = audio_brs[3]
             ext = 'flac'
-        elif conf['audio'] >= 2 and audio_formats[2] in song.get('formats', ''):
+        elif conf['audio'] >= 2 and audio_formats[2] in song_formats:
             br = audio_brs[2]
-        elif conf['audio'] >= 1 and audio_formats[1] in song.get('formats', ''):
+        elif conf['audio'] >= 1 and audio_formats[1] in song_formats:
             br = audio_brs[1]
         else:
             br = audio_brs[0]
@@ -798,20 +786,13 @@ class AsyncSong(GObject.GObject):
     user that a new song is downloaded.
     '''
     __gsignals__ = {
-            'can-play': (GObject.SIGNAL_RUN_LAST, 
-                # sogn_path
-                GObject.TYPE_NONE, (str, )),
-            'chunk-received': (GObject.SIGNAL_RUN_LAST,
-                # percent
-                GObject.TYPE_NONE, (GObject.TYPE_DOUBLE, )),
-            'downloaded': (GObject.SIGNAL_RUN_LAST, 
-                # song_path
-                GObject.TYPE_NONE, (str, )),
-            'disk-error': (GObject.SIGNAL_RUN_LAST,
-                GObject.TYPE_NONE, (str, )),
-            'network-error': (GObject.SIGNAL_RUN_LAST,
-                GObject.TYPE_NONE, (str, )),
-            }
+        'can-play': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (str, )),
+        'chunk-received': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
+                           (GObject.TYPE_DOUBLE, )),
+        'downloaded': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (str, )),
+        'disk-error': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (str, )),
+        'network-error': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (str, )),
+    }
 
     def __init__(self, app):
         super().__init__()

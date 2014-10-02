@@ -53,31 +53,31 @@ class TopCategories(Gtk.Box):
         self.scrolled_main = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_main, True, True, 0)
         # logo, name, nid, num of lists(info), tooltip
-        self.liststore_main = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, str)
+        self.liststore_main = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
+                                            str, str)
         iconview_main = Widgets.IconView(self.liststore_main, tooltip=4)
-        iconview_main.connect(
-                'item_activated', self.on_iconview_main_item_activated)
+        iconview_main.connect('item_activated',
+                              self.on_iconview_main_item_activated)
         self.scrolled_main.add(iconview_main)
 
         self.scrolled_sub1 = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_sub1, True, True, 0)
         # logo, name, nid, num of lists(info), tooltip
-        self.liststore_sub1 = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, str)
+        self.liststore_sub1 = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
+                                            str, str)
         iconview_sub1 = Widgets.IconView(self.liststore_sub1, tooltip=4)
-        iconview_sub1.connect(
-                'item_activated', self.on_iconview_sub1_item_activated)
+        iconview_sub1.connect('item_activated',
+                              self.on_iconview_sub1_item_activated)
         self.scrolled_sub1.add(iconview_sub1)
 
         self.scrolled_sub2 = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_sub2, True, True, 0)
         # logo, name, nid, info, tooltip
-        self.liststore_sub2 = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, str)
+        self.liststore_sub2 = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
+                                            str, str)
         iconview_sub2 = Widgets.IconView(self.liststore_sub2, tooltip=4)
-        iconview_sub2.connect(
-                'item_activated', self.on_iconview_sub2_item_activated)
+        iconview_sub2.connect('item_activated',
+                              self.on_iconview_sub2_item_activated)
         self.scrolled_sub2.add(iconview_sub2)
 
         self.scrolled_songs = Gtk.ScrolledWindow()
@@ -108,12 +108,11 @@ class TopCategories(Gtk.Box):
                 int(node['id']),
                 Widgets.unescape(node['info']),
                 Widgets.set_tooltip(node['disname'], node['info']),
-                ])
+            ])
             tree_iters.append(tree_iter)
             urls.append(node['pic'])
         self.liststore_main.timestamp = time.time()
-        Net.update_liststore_images(
-                self.liststore_main, 0, tree_iters, urls)
+        Net.update_liststore_images(self.liststore_main, 0, tree_iters, urls)
 
     def on_iconview_main_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -141,8 +140,8 @@ class TopCategories(Gtk.Box):
             for node in nodes:
                 _id = 'id' if self.use_sub2 else 'sourceid'
                 if 'tips' in node and len(node['tips']) > 5:
-                    tooltip = Widgets.set_tooltip_with_song_tips(
-                            node['name'], node['tips'])
+                    tooltip = Widgets.set_tooltip_with_song_tips(node['name'],
+                                                                 node['tips'])
                 else:
                     tooltip = Widgets.set_tooltip(node['name'], node['info'])
                 tree_iter = self.liststore_sub1.append([
@@ -151,11 +150,11 @@ class TopCategories(Gtk.Box):
                     int(node[_id]),
                     Widgets.unescape(node['info']),
                     tooltip,
-                    ])
+                ])
                 urls.append(node['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_liststore_images(
-                    self.liststore_sub1, 0, tree_iters, urls)
+            Net.update_liststore_images(self.liststore_sub1, 0,
+                                        tree_iters, urls)
 
             self.sub1_page += 1
             if self.sub1_page < self.sub1_total - 1:
@@ -173,9 +172,8 @@ class TopCategories(Gtk.Box):
             self.liststore_sub1.clear()
         if init or not hasattr(self.liststore_sub1, 'timestamp'):
             self.liststore_sub1.timestamp = time.time()
-        Net.async_call(
-                Net.get_nodes, _show_sub1, self.curr_sub1_id,
-                self.sub1_page)
+        Net.async_call(Net.get_nodes, _show_sub1, self.curr_sub1_id,
+                       self.sub1_page)
 
     def on_iconview_sub1_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -206,13 +204,13 @@ class TopCategories(Gtk.Box):
                     Widgets.unescape(node['name']),
                     int(node['sourceid']),
                     Widgets.unescape(node['info']),
-                    Widgets.set_tooltip_with_song_tips(
-                        node['name'], node['tips']),
-                    ])
+                    Widgets.set_tooltip_with_song_tips(node['name'],
+                                                       node['tips'])
+                ])
                 urls.append(node['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_liststore_images(
-                    self.liststore_sub2, 0, tree_iter, urls)
+            Net.update_liststore_images(self.liststore_sub2, 0,
+                                        tree_iter, urls)
 
             self.sub2_page += 1
             if self.sub2_page < self.sub2_total - 1:
@@ -227,9 +225,8 @@ class TopCategories(Gtk.Box):
             self.liststore_sub2.clear()
         if init or not hasattr(self.liststore_sub2, 'timestamp'):
             self.liststore_sub2.timestamp = time.time()
-        Net.async_call(
-                Net.get_nodes, _show_sub2, self.curr_sub2_id,
-                self.sub2_page)
+        Net.async_call(Net.get_nodes, _show_sub2, self.curr_sub2_id,
+                       self.sub2_page)
 
     def on_iconview_sub2_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -288,9 +285,8 @@ class TopCategories(Gtk.Box):
             self.scrolled_songs.show_all()
             self.liststore_songs.clear()
 
-        Net.async_call(
-                Net.get_themes_songs, _append_songs, self.curr_list_id,
-                self.songs_page)
+        Net.async_call(Net.get_themes_songs, _append_songs,
+                       self.curr_list_id, self.songs_page)
 
     # buttonbox
     def on_button_main_clicked(self, btn):

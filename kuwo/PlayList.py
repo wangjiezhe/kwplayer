@@ -27,18 +27,19 @@ from kuwo import Widgets
 _ = Config._
 
 DRAG_TARGETS = [
-        ('text/plain', Gtk.TargetFlags.SAME_APP, 0),
-        ('TEXT', Gtk.TargetFlags.SAME_APP, 1),
-        ('STRING', Gtk.TargetFlags.SAME_APP, 2),
-        ]
+    ('text/plain', Gtk.TargetFlags.SAME_APP, 0),
+    ('TEXT', Gtk.TargetFlags.SAME_APP, 1),
+    ('STRING', Gtk.TargetFlags.SAME_APP, 2),
+]
 DRAG_ACTIONS = Gdk.DragAction.MOVE
 
 def get_song_paths(artist, name, conf):
     song_name = (artist + '-' + name).replace('/', '+')
-    return (os.path.join(conf['song-dir'], song_name) + '.mp3',
-            os.path.join(conf['song-dir'], song_name) + '.ape',
-            os.path.join(conf['mv-dir'], song_name) + '.mp4',
-            os.path.join(conf['mv-dir'], song_name) + '.mkv',)
+    return (
+        os.path.join(conf['song-dir'], song_name) + '.mp3',
+        os.path.join(conf['song-dir'], song_name) + '.flac',
+        os.path.join(conf['mv-dir'], song_name) + '.mp4',
+    )
 
 
 class TreeViewColumnText(Widgets.TreeViewColumnText):
@@ -140,8 +141,8 @@ class NormalSongTab(Gtk.ScrolledWindow):
         elif event.button == Gdk.BUTTON_SECONDARY:
             liststore, selected_paths = selection.get_selected_rows()
             self.popup_menu.show_all()
-            self.popup_menu.popup(None, None, None, None,
-                    event.button, event.time)
+            self.popup_menu.popup(None, None, None, None, event.button,
+                                  event.time)
             return True
         return False
 
@@ -174,8 +175,8 @@ class NormalSongTab(Gtk.ScrolledWindow):
         for path in paths:
             song = [i for i in model[path]]
             songs.append(song)
-            _iter = model.get_iter(path)
-            self.drag_data_old_iters.append(_iter)
+            tree_iter = model.get_iter(path)
+            self.drag_data_old_iters.append(tree_iter)
         sel_data.set_text(json.dumps(songs), -1)
 
     def on_drag_data_received(self, treeview, drag_context, x, y, sel_data,
@@ -192,8 +193,8 @@ class NormalSongTab(Gtk.ScrolledWindow):
         songs = json.loads(data)
         for song in songs:
             model.insert(pos, song)
-        for _iter in self.drag_data_old_iters:
-            model.remove(_iter)
+        for tree_iter in self.drag_data_old_iters:
+            model.remove(tree_iter)
 
     def on_save_as_menu_activated(self, menu_item):
         export_dialog = ExportDialog(self, self.treeview, export_all=False)
@@ -222,9 +223,9 @@ class ExportDialog(Gtk.Dialog):
     export_worker = None
 
     def __init__(self, parent, treeview, export_all=True):
-        super().__init__(
-                _('Export Songs'), parent.app.window, Gtk.DialogFlags.MODAL,
-                (Gtk.STOCK_CLOSE, Gtk.ResponseType.OK,))
+        super().__init__(_('Export Songs'), parent.app.window,
+                         Gtk.DialogFlags.MODAL,
+                         (Gtk.STOCK_CLOSE, Gtk.ResponseType.OK,))
         self.parent = parent
         self.treeview = treeview
         self.export_all = export_all
@@ -287,8 +288,9 @@ class ExportDialog(Gtk.Dialog):
 
         self.export_btn.set_sensitive(False)
         self.export_worker = ExportWorker(self.app.conf, self.treeview,
-                self.folder_chooser.get_filename(),
-                self.including_lrc.get_active(), self.export_all)
+                                          self.folder_chooser.get_filename(),
+                                          self.including_lrc.get_active(),
+                                          self.export_all)
 
         self.export_worker.connect('copied', on_song_copied)
         self.export_worker.connect('finished', on_worker_finished)
@@ -304,11 +306,11 @@ class ExportWorker(threading.Thread, GObject.GObject):
     stop_flag = False
 
     __gsignals__ = {
-            'copied': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
-                       (str, GObject.TYPE_INT64)),  # song_name, number
-            'finished': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
-                         (GObject.TYPE_INT64, )),  # number of songs
-            }
+        'copied': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
+                   (str, GObject.TYPE_INT64)),  # song_name, number
+        'finished': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
+                     (GObject.TYPE_INT64, )),  # number of songs
+    }
 
     def __init__(self, conf, treeview, export_dir, including_lrc, export_all):
         threading.Thread.__init__(self)
@@ -385,8 +387,8 @@ class PlayList(Gtk.Box):
         self.treeview_left.set_tooltip_column(3)
         list_disname = Gtk.CellRendererText()
         list_disname.connect('edited', self.on_list_disname_edited)
-        col_name = Gtk.TreeViewColumn(
-                'List Name', list_disname, text=0, editable=2)
+        col_name = Gtk.TreeViewColumn('List Name', list_disname, text=0,
+                                      editable=2)
         self.treeview_left.append_column(col_name)
         #col_name.props.max_width = 75
         #col_name.props.fixed_width = 75
@@ -394,16 +396,13 @@ class PlayList(Gtk.Box):
         col_name.props.sizing = Gtk.TreeViewColumnSizing.FIXED
         tree_sel = self.treeview_left.get_selection()
         tree_sel.connect('changed', self.on_tree_selection_left_changed)
-        self.treeview_left.enable_model_drag_dest(
-                DRAG_TARGETS, DRAG_ACTIONS)
-        self.treeview_left.connect(
-                'drag-data-received',
-                self.on_treeview_left_drag_data_received)
+        self.treeview_left.enable_model_drag_dest(DRAG_TARGETS, DRAG_ACTIONS)
+        self.treeview_left.connect('drag-data-received',
+                                   self.on_treeview_left_drag_data_received)
         win_left.add(self.treeview_left)
 
         toolbar = Gtk.Toolbar()
-        toolbar.get_style_context().add_class(
-                Gtk.STYLE_CLASS_INLINE_TOOLBAR)
+        toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR)
         toolbar.props.show_arrow = False
         toolbar.props.toolbar_style = Gtk.ToolbarStyle.ICONS
         toolbar.props.icon_size = 1
@@ -417,15 +416,13 @@ class PlayList(Gtk.Box):
         remove_btn.set_name('Remove')
         remove_btn.set_tooltip_text(_('Remove selected playlist'))
         remove_btn.set_icon_name('list-remove-symbolic')
-        remove_btn.connect(
-                'clicked', self.on_remove_playlist_button_clicked)
+        remove_btn.connect('clicked', self.on_remove_playlist_button_clicked)
         toolbar.insert(remove_btn, 1)
         export_btn = Gtk.ToolButton()
         export_btn.set_name('Export')
         export_btn.set_tooltip_text(_('Export songs in selected playlist'))
         export_btn.set_icon_name('media-eject-symbolic')
-        export_btn.connect(
-                'clicked', self.on_export_playlist_button_clicked)
+        export_btn.connect('clicked', self.on_export_playlist_button_clicked)
         toolbar.insert(export_btn, 2)
         box_left.pack_start(toolbar, False, False, 0)
 
@@ -471,15 +468,15 @@ class PlayList(Gtk.Box):
     def load_playlists(self):
         filepath = Config.PLS_JSON
         _default = {
-                '_names_': [
-                    [_('Caching'), 'Caching', False],
-                    [_('Default'), 'Default', False],
-                    [_('Favorite'), 'Favorite', False],
-                    ],
-                'Caching': [],
-                'Default': [],
-                'Favorite': [],
-                }
+            '_names_': [
+                [_('Caching'), 'Caching', False],
+                [_('Default'), 'Default', False],
+                [_('Favorite'), 'Favorite', False],
+            ],
+            'Caching': [],
+            'Default': [],
+            'Favorite': [],
+        }
         if os.path.exists(filepath):
             with open(filepath) as fh:
                 playlists = json.loads(fh.read())
@@ -489,8 +486,7 @@ class PlayList(Gtk.Box):
         for playlist in playlists['_names_']:
             disname, list_name, editable = playlist
             tooltip = Widgets.escape(disname)
-            self.liststore_left.append(
-                    [disname, list_name, editable, tooltip])
+            self.liststore_left.append([disname, list_name, editable, tooltip])
             songs = playlists[list_name]
             self.init_tab(list_name, songs)
 
@@ -534,9 +530,8 @@ class PlayList(Gtk.Box):
         index = path.get_indices()[0]
         self.notebook.set_current_page(index)
 
-    def on_treeview_left_drag_data_received(self, treeview, drag_context,
-                                            x, y, sel_data, info,
-                                            event_time):
+    def on_treeview_left_drag_data_received(self, treeview, drag_context, x,
+                                            y, sel_data, info, event_time):
         model = treeview.get_model()
         data = sel_data.get_text()
         if not data:
@@ -567,7 +562,7 @@ class PlayList(Gtk.Box):
         else:
             liststore.append(Widgets.song_dict_to_row(song))
             self.curr_playing = [
-                    list_name, liststore.get_iter(len(liststore)-1)]
+                    list_name, liststore.get_iter(len(liststore) - 1)]
             #self.locate_curr_song(popup_page=False)
         if use_mv is True:
             self.app.player.load_mv(song)
@@ -664,17 +659,12 @@ class PlayList(Gtk.Box):
 
         def _on_disk_error(widget, song_path, eror=None):
             self.stop_caching_daemon()
-            GLib.idle_add(
-                    Widgets.filesystem_error,
-                    self.app.window,
-                    song_path)
+            GLib.idle_add(Widgets.filesystem_error, self.app.window, song_path)
 
         def _on_network_error(widget, song_link, error=None):
             self.stop_caching_daemon()
-            GLib.idle_add(
-                    Widgets.network_error,
-                    self.app.window,
-                    _('Failed to cache song'))
+            GLib.idle_add(Widgets.network_error, self.app.window,
+                          _('Failed to cache song'))
 
         def _on_chunk_received(widget, percent):
             GLib.idle_add(do_on_chunk_received, percent)
@@ -699,8 +689,7 @@ class PlayList(Gtk.Box):
             self.stop_caching_daemon()
             # FIXME: check Notify class available
             Notify.init('kwplayer-cache')
-            notify = Notify.Notification.new(
-                    'Kwplayer',
+            notify = Notify.Notification.new('Kwplayer',
                     _('All songs in caching list have been downloaded.'),
                     'kwplayer')
             notify.show()
@@ -894,8 +883,7 @@ class PlayList(Gtk.Box):
             sep_item = Gtk.SeparatorMenuItem()
             menu.append(sep_item)
             advice_item = Gtk.MenuItem('+ ' + self.playlist_advice_disname)
-            advice_item.connect(
-                    'activate', self.on_advice_menu_item_activated)
+            advice_item.connect('activate', self.on_advice_menu_item_activated)
             advice_item.set_tooltip_text(
                     _('Create this playlist and add songs into it'))
             menu.append(advice_item)

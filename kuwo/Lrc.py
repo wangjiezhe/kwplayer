@@ -57,8 +57,7 @@ class Lrc(Gtk.Notebook):
         self.set_show_tabs(False)
         self.app = app
         self.lrc_obj = None
-        self.lrc_default_background = os.path.join(
-                Config.THEME_DIR, 'lrc-background.jpg')
+        self.lrc_default_background = Config.LRC_BACKGROUND_IMG
         self.lrc_background = None
         self.old_provider = None
 
@@ -73,8 +72,8 @@ class Lrc(Gtk.Notebook):
         fore_rgba.parse(app.conf['lrc-highlighted-text-color'])
         font_size = app.conf['lrc-highlighted-text-size']
         # Need to use size_points, not size property
-        self.highlighted_tag = self.lrc_buf.create_tag(
-                size_points=font_size, foreground_rgba=fore_rgba)
+        self.highlighted_tag = self.lrc_buf.create_tag(size_points=font_size,
+                foreground_rgba=fore_rgba)
 
         self.lrc_tv = Gtk.TextView(buffer=self.lrc_buf)
         self.lrc_tv.get_style_context().add_class('lrc_tv')
@@ -86,8 +85,8 @@ class Lrc(Gtk.Notebook):
         self.lrc_tv.props.cursor_visible = False
         self.lrc_tv.props.justification = Gtk.Justification.CENTER
         self.lrc_tv.props.pixels_above_lines = 10
-        self.lrc_tv.connect(
-                'button-press-event', self.on_lrc_tv_button_pressed)
+        self.lrc_tv.connect('button-press-event',
+                            self.on_lrc_tv_button_pressed)
         self.lrc_window.add(self.lrc_tv)
 
         # mv window
@@ -121,11 +120,9 @@ class Lrc(Gtk.Notebook):
         self.lrc_obj = lrc_parser(lrc_txt)
         self.lrc_content = [l[1] for l in self.lrc_obj]
 
-        self.lrc_buf.remove_all_tags(
-                self.lrc_buf.get_start_iter(),
-                self.lrc_buf.get_end_iter())
+        self.lrc_buf.remove_all_tags(self.lrc_buf.get_start_iter(),
+                                     self.lrc_buf.get_end_iter())
         self.lrc_buf.set_text('\n'.join(self.lrc_content))
-        #self.sync_lrc(0)
         self.lrc_window.get_vadjustment().set_value(0)
 
     def sync_lrc(self, timestamp):
@@ -133,14 +130,13 @@ class Lrc(Gtk.Notebook):
             return
         # current line, do nothing
         if (self.lrc_obj[self.old_line_num][0] < timestamp and
-            timestamp < self.lrc_obj[self.old_line_num + 1][0]):
+                timestamp < self.lrc_obj[self.old_line_num + 1][0]):
             return
 
         line_num = self.old_line_num + 1
         # remove old highlighted tags
         if self.old_line_num >= 0 and self.old_line_iter:
-            self.lrc_buf.remove_tag(
-                    self.highlighted_tag, *self.old_line_iter)
+            self.lrc_buf.remove_tag(self.highlighted_tag, *self.old_line_iter)
 
         # backward seeking
         if timestamp < self.old_timestamp:
@@ -182,9 +178,9 @@ class Lrc(Gtk.Notebook):
             'GtkScrolledWindow.lrc_window {',
                 "background-image: url('{0}');".format(self.lrc_background),
             '}',
-            ])
-        new_provider = self.app.apply_css(
-                self.lrc_window, css, old_provider=self.old_provider)
+        ])
+        new_provider = self.app.apply_css(self.lrc_window, css,
+                                          old_provider=self.old_provider)
         self.old_provider = new_provider
 
     def update_highlighted_tag(self):

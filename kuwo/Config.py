@@ -53,6 +53,7 @@ RADIO_JSON = os.path.join(CACHE_DIR, 'radio.json')
 FAV_ARTISTS_JSON = os.path.join(CACHE_DIR, 'fav_artists.json')
 
 THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
+LRC_BACKGROUND_IMG = os.path.join(THEME_DIR, 'lrc-background.jpg')
 
 class ShortcutMode:
     NONE = 0
@@ -66,57 +67,57 @@ GTK_GE_312 = Gtk.MINOR_VERSION >= 12
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')
 SHORT_CUT_I18N = {
-        'VolumeUp': _('VolumeUp'),
-        'VolumeDown': _('VolumeDown'),
-        'Mute': _('Mute'),
-        'Previous': _('Previous'),
-        'Next': _('Next'),
-        'Pause': _('Pause'),
-        'Play': _('Play'),
-        'Stop': _('Stop'),
-        'Launch': _('Launch'),
-        }
+    'VolumeUp': _('VolumeUp'),
+    'VolumeDown': _('VolumeDown'),
+    'Mute': _('Mute'),
+    'Previous': _('Previous'),
+    'Next': _('Next'),
+    'Pause': _('Pause'),
+    'Play': _('Play'),
+    'Stop': _('Stop'),
+    'Launch': _('Launch'),
+}
 _default_conf = {
-        'version': VERSION,
-        'window-size': (960, 680),
-        'song-dir': os.path.join(CACHE_DIR, 'song'),
-        'mv-dir': os.path.join(CACHE_DIR, 'mv'),
-        'volume': 0.08,
-        'audio': 0,
-        'video': 0,
-        'use-status-icon': True,
-        'use-notify': False,
-        'use-dark-theme': True,
-        'show-pls': False,
-        'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
-        'lrc-back-color': 'rgba(237, 221, 221, 0.28)',
-        'lrc-text-size': 22,
-        'lrc-highlighted-text-color': 'rgba(0, 0, 0, 0.999)',
-        'lrc-highlighted-text-size': 26,
-        'shortcut-mode': ShortcutMode.DEFAULT,
-        'custom-shortcut': {
-            'VolumeUp': '<Ctrl><Shift>U',
-            'VolumeDown': '<Ctrl><Shift>D',
-            'Mute': '<Ctrl><Shift>M',
-            'Previous': '<Ctrl><Shift>Left',
-            'Next': '<Ctrl><Shift>Right',
-            'Pause': '<Ctrl><Shift>Down',
-            'Play': '<Ctrl><Shift>Down',
-            'Stop': '<Ctrl><Shift>Up',
-            'Launch': '<Ctrl><Shift>L',
-            },
-        'default-shortcut': {
-            'VolumeUp': 'XF86AudioRaiseVolume',
-            'VolumeDown': 'XF86AudioLowerVolume',
-            'Mute': 'XF86AudioMute',
-            'Previous': 'XF86AudioPrev',
-            'Next': 'XF86AudioNext',
-            'Pause': 'XF86AudioPause',
-            'Play': 'XF86AudioPlay',
-            'Stop': 'XF86AudioStop',
-            'Launch': 'XF86AudioMedia',
-            },
-        }
+    'version': VERSION,
+    'window-size': (960, 680),
+    'song-dir': os.path.join(CACHE_DIR, 'song'),
+    'mv-dir': os.path.join(CACHE_DIR, 'mv'),
+    'volume': 0.08,
+    'audio': 0,
+    'video': 0,
+    'use-status-icon': True,
+    'use-notify': False,
+    'use-dark-theme': True,
+    'show-pls': False,
+    'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
+    'lrc-back-color': 'rgba(237, 221, 221, 0.28)',
+    'lrc-text-size': 22,
+    'lrc-highlighted-text-color': 'rgba(0, 0, 0, 0.999)',
+    'lrc-highlighted-text-size': 26,
+    'shortcut-mode': ShortcutMode.DEFAULT,
+    'custom-shortcut': {
+        'VolumeUp': '<Ctrl><Shift>U',
+        'VolumeDown': '<Ctrl><Shift>D',
+        'Mute': '<Ctrl><Shift>M',
+        'Previous': '<Ctrl><Shift>Left',
+        'Next': '<Ctrl><Shift>Right',
+        'Pause': '<Ctrl><Shift>Down',
+        'Play': '<Ctrl><Shift>Down',
+        'Stop': '<Ctrl><Shift>Up',
+        'Launch': '<Ctrl><Shift>L',
+    },
+    'default-shortcut': {
+        'VolumeUp': 'XF86AudioRaiseVolume',
+        'VolumeDown': 'XF86AudioLowerVolume',
+        'Mute': 'XF86AudioMute',
+        'Previous': 'XF86AudioPrev',
+        'Next': 'XF86AudioNext',
+        'Pause': 'XF86AudioPause',
+        'Play': 'XF86AudioPlay',
+        'Stop': 'XF86AudioStop',
+        'Launch': 'XF86AudioMedia',
+    },
+}
 
 def check_first():
     if not os.path.exists(CONF_DIR):

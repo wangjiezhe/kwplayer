@@ -22,16 +22,16 @@ class Shortcut:
         self.player = player
 
         self.callbacks = {
-                'VolumeUp': self.volume_up,
-                'VolumeDown': self.volume_down,
-                'Mute': lambda *args: player.toggle_mute_cb(),
-                'Previous': lambda *args: player.load_prev_cb(),
-                'Next': lambda *args: player.load_next_cb(),
-                'Pause': lambda *args: player.play_pause_cb(),
-                'Play': lambda *args: player.play_pause_cb(),
-                'Stop': lambda *args: player.stop_player_cb(),
-                'Launch': self.present_window,
-                }
+            'VolumeUp': self.volume_up,
+            'VolumeDown': self.volume_down,
+            'Mute': lambda *args: player.toggle_mute_cb(),
+            'Previous': lambda *args: player.load_prev_cb(),
+            'Next': lambda *args: player.load_next_cb(),
+            'Pause': lambda *args: player.play_pause_cb(),
+            'Play': lambda *args: player.play_pause_cb(),
+            'Stop': lambda *args: player.stop_player_cb(),
+            'Launch': self.present_window,
+        }
 
         if keybinder_imported:
             self.keybinder = KeybinderGtk()

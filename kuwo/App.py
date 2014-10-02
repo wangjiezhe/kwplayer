@@ -318,9 +318,8 @@ class App:
         # delay 2 seconds and hide them
         self.fullscreen_timestamp = time.time()
         GLib.timeout_add(100, self.player.playbin.expose)
-        GLib.timeout_add(
-                2000, self.hide_control_panel_and_label, 
-                self.fullscreen_timestamp)
+        GLib.timeout_add(2000, self.hide_control_panel_and_label,
+                         self.fullscreen_timestamp)
 
     def hide_control_panel_and_label(self, timestamp):
         if (timestamp == self.fullscreen_timestamp and 

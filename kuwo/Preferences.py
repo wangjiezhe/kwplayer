@@ -117,8 +117,7 @@ class ChooseFolder(Gtk.Box):
                 self.app.conf[self.conf_name] = new_dir
             return
 
-        dialog = Gtk.FileChooserDialog(
-                _('Choose a Folder'), self.parent,
+        dialog = Gtk.FileChooserDialog(_('Choose a Folder'), self.parent,
                 Gtk.FileChooserAction.SELECT_FOLDER,
                 (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                  Gtk.STOCK_OK, Gtk.ResponseType.OK))

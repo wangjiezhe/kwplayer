@@ -24,15 +24,12 @@ class PlayerBin(GObject.GObject):
     '''
     
     __gsignals__ = {
-            'eos': (GObject.SIGNAL_RUN_LAST, 
-                GObject.TYPE_NONE, (bool, )),
-            'error': (GObject.SIGNAL_RUN_LAST, 
-                GObject.TYPE_NONE, (str, )),
-            'mute-changed': (GObject.SIGNAL_RUN_LAST, 
-                GObject.TYPE_NONE, (bool, )),
-            'volume-changed': (GObject.SIGNAL_RUN_LAST, 
-                GObject.TYPE_NONE, (float, )),
-            }
+        'eos': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (bool, )),
+        'error': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (str, )),
+        'mute-changed': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (bool, )),
+        'volume-changed': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
+                           (float, )),
+    }
     xid = None
     bus_sync_sid = 0
     audio_stream = 0
@@ -50,10 +47,10 @@ class PlayerBin(GObject.GObject):
         self.bus.add_signal_watch()
         self.bus.connect('message::eos', self.on_eos)
         self.bus.connect('message::error', self.on_error)
-        self.volume_sid = self.playbin.connect(
-                'notify::volume', self.on_volume_changed)
-        self.mute_sid = self.playbin.connect(
-                'notify::mute', self.on_mute_changed)
+        self.volume_sid = self.playbin.connect('notify::volume',
+                                               self.on_volume_changed)
+        self.mute_sid = self.playbin.connect('notify::mute',
+                                             self.on_mute_changed)
 
     # Open APIs
     def load_audio(self, uri):
@@ -97,7 +94,7 @@ class PlayerBin(GObject.GObject):
     def get_position(self):
         if GST_LOWER_THAN_1:
             status, _type, offset = self.playbin.query_position(
-                Gst.Format.TIME)
+                    Gst.Format.TIME)
         else:
             status, offset = self.playbin.query_position(Gst.Format.TIME)
         return (status, offset)
@@ -106,15 +103,13 @@ class PlayerBin(GObject.GObject):
         self.seek(offset)
 
     def seek(self, offset):
-        self.playbin.seek_simple(
-                Gst.Format.TIME,
-                Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT,
-                offset)
+        self.playbin.seek_simple(Gst.Format.TIME,
+                                 Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT,
+                                 offset)
 
     def get_duration(self):
         if GST_LOWER_THAN_1:
-            status, _type, upper = self.playbin.query_duration(
-                Gst.Format.TIME)
+            status, _type, upper = self.playbin.query_duration(Gst.Format.TIME)
         else:
             status, upper = self.playbin.query_duration(Gst.Format.TIME)
         return (status, upper)
@@ -163,8 +158,8 @@ class PlayerBin(GObject.GObject):
     # private functions
     def enable_bus_sync(self):
         self.bus.enable_sync_message_emission()
-        self.bus_sync_sid = self.bus.connect(
-                'sync-message::element', self.on_sync_message)
+        self.bus_sync_sid = self.bus.connect('sync-message::element',
+                                             self.on_sync_message)
 
     def disable_bus_sync(self):
         if self.bus_sync_sid > 0:

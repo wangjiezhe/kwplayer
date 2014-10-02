@@ -72,7 +72,7 @@ def encode_lrc_url(rid):
     DBYAHlRcXUlcUVRYXUI0MDYlKjBYV1dLXUdbQhIQEgNbX19LSwAUDEMlDigQHwAMSAsAFBkMHBocF1gABgwPFQ0KHx1JHBwUWF1PHAEXAgsNBApTtMqhhk8OHA0MFhhUrbDNlra/Tx0HHVgoOTomLSZXVltRWF1fCRcPEVJf
     '''
     param = ('user=12345,web,web,web&requester=localhost&req=1&rid=MUSIC_' +
-              str(rid))
+             str(rid))
     str_bytes = xor_bytes(param.encode())
     output = base64.encodebytes(str_bytes).decode()
     return output.replace('\n', '')
@@ -106,7 +106,8 @@ def parse_radio_songs(txt):
             'artistid': 0,
             'album': '',
             'albumid': 0,
-            })
+            'formats': '',
+        })
     return songs
 
 def iconvtag(song_path, song):
@@ -136,7 +137,8 @@ def iconvtag(song_path, song):
     try:
         if ext == '.mp3':
             use_id3()
-        elif ext == '.ape':
+        # TODO: check flac tag
+        elif ext == '.flac':
             use_ape()
     except Exception as e:
         print('Error in Utils.iconvtag():', e)
