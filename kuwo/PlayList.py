@@ -528,9 +528,9 @@ class PlayList(Gtk.Box):
     # Side Panel
     def on_tree_selection_left_changed(self, tree_sel):
         model, tree_iter = tree_sel.get_selected()
-        path = model.get_path(tree_iter)
-        if path is None:
+        if not tree_iter:
             return
+        path = model.get_path(tree_iter)
         index = path.get_indices()[0]
         self.notebook.set_current_page(index)
 
@@ -837,21 +837,21 @@ class PlayList(Gtk.Box):
 
     def on_remove_playlist_button_clicked(self, button):
         selection = self.treeview_left.get_selection()
-        model, _iter = selection.get_selected()
-        if not _iter:
+        model, tree_iter = selection.get_selected()
+        if not tree_iter:
             return
-        path = model.get_path(_iter)
+        path = model.get_path(tree_iter)
         index = path.get_indices()[0]
         disname, list_name, editable, tooltip = model[path]
         if not editable:
             return
         self.notebook.remove_page(index)
-        model.remove(_iter)
+        model.remove(tree_iter)
 
     def on_export_playlist_button_clicked(self, button):
         selection = self.treeview_left.get_selection()
-        model, _iter = selection.get_selected()
-        if not _iter:
+        model, tree_iter = selection.get_selected()
+        if not tree_iter:
             return
         song_tab = self.notebook.get_nth_page(self.notebook.get_current_page())
         treeview = song_tab.treeview
