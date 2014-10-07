@@ -65,21 +65,16 @@ class FontBox(Gtk.Box):
         left_label = Gtk.Label(label)
         self.pack_start(left_label, False, True, 0)
 
-        font_button = Gtk.SpinButton()
-        if Config.GTK_GE_312:
-            adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10, 1)
-        else:
-            adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10)
-        adjustment.connect('value-changed', self.on_font_set)
-        adjustment.set_value(conf[font_name])
-        font_button.set_adjustment(adjustment)
+        font_button = Gtk.SpinButton.new_with_range(4, 72, 1)
+        font_button.set_value(conf[font_name])
+        font_button.connect('value-changed', self.on_font_set)
         self.pack_end(font_button, False, True, 0)
 
         if use_margin:
             self.props.margin_left = 20
 
-    def on_font_set(self, adjustment):
-        self.conf[self.font_name] = adjustment.get_value()
+    def on_font_set(self, font_button):
+        self.conf[self.font_name] = font_button.get_value()
 
 
 class ChooseFolder(Gtk.Box):
