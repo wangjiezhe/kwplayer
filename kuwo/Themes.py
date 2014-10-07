@@ -10,10 +10,11 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from kuwo import Config
+_ = Config._
 from kuwo import Net
 from kuwo import Widgets
+from kuwo.log import logger
 
-_ = Config._
 
 class Themes(Gtk.Box):
     '''Themes tab in notebook.'''
@@ -82,7 +83,7 @@ class Themes(Gtk.Box):
 
         nodes = Net.get_themes_main()
         if not nodes:
-            print('Failed to get nodes!')
+            logger.warn('Failed to get nodes!')
             return
         urls = []
         tree_iters = []

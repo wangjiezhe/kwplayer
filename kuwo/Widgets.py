@@ -7,14 +7,14 @@
 import html
 from html.parser import HTMLParser
 import os
+import traceback
+
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
 from gi.repository import Gtk
 
-
 from kuwo import Config
-
 _ = Config._
 
 def unescape(tooltip):
@@ -49,8 +49,8 @@ def set_tooltip_with_song_tips(head, tip):
         item = song.split('@')
         try:
             results.append(fmt.format(escape(item[1]), escape(item[3])))
-        except IndexError as e:
-            continue
+        except IndexError:
+            logger.error(traceback.format_exc())
     return '<b>{0}</b>\n\n{1}'.format(escape(head), '\n'.join(results))
 
 def song_row_to_dict(song_row, start=1):

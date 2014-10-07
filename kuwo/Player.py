@@ -5,6 +5,7 @@
 # in the LICENSE file.
 
 import sys
+
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
@@ -18,6 +19,7 @@ from kuwo.PlayerBin import PlayerBin
 from kuwo.PlayerDBus import PlayerDBus
 from kuwo.PlayerNotify import PlayerNotify
 from kuwo import Widgets
+from kuwo.log import logger
 
 _ = Config._
 # Gdk.EventType.2BUTTON_PRESS is an invalid variable
@@ -621,7 +623,7 @@ class Player(Gtk.Box):
         self.load_next()
 
     def on_playbin_error(self, playbin, error_msg):
-        print('Player.on_playbin_error(), ', error_msg)
+        logger.warn('Player.on_playbin_error(): %s.' % error_msg)
         self.load_next()
 
     def on_playbin_mute_changed(self, playbin, mute):

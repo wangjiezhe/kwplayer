@@ -10,10 +10,11 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from kuwo import Config
+_ = Config._
 from kuwo import Net
 from kuwo import Widgets
+from kuwo.log import logger
 
-_ = Config._
 
 class TopCategories(Gtk.Box):
     '''Categories tab in notebook.'''
@@ -94,7 +95,7 @@ class TopCategories(Gtk.Box):
         page = 0
         nodes, total_page = Net.get_nodes(nid, page)
         if not nodes:
-            print('Failed to get nodes, do something!')
+            logger.warn('Failed to get nodes, do something!')
             return
         urls = []
         tree_iters = []

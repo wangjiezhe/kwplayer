@@ -4,15 +4,14 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in http://www.gnu.org/licenses/gpl-3.0.html
 
-
 from gi.repository import GLib
 from gi.repository import Notify
+Notify.init('kwplayer')
 
 from kuwo import Config
+_ = Config._
 from kuwo import Widgets
 
-Notify.init('kwplayer')
-_ = Config._
 
 class PlayerNotify:
     '''Notification wrapper.

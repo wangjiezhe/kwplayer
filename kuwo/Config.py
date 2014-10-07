@@ -1,4 +1,3 @@
-
 # Copyright (C) 2013-2014 LiuLang <gsushzhsosgsu@gmail.com>
 
 # Use of this source code is governed by GPLv3 license that can be found
@@ -9,11 +8,14 @@ import json
 import os
 import shutil
 import sys
+import traceback
+
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
 from gi.repository import Gtk
 
 import kuwo
+from kuwo.log import logger
 
 if __file__.startswith('/usr/local/'):
     PREF = '/usr/local/share'
@@ -150,8 +152,8 @@ def load_theme():
     try:
         with open(theme_file) as fh:
             theme = json.loads(fh.read())
-    except ValueError as e:
-        print(e)
+    except ValueError:
+        logger.critical(traceback.format_exc())
         sys.exit(1)
 
     theme_pix = {}
@@ -161,7 +163,7 @@ def load_theme():
         try:
             theme_pix[img_name] = GdkPixbuf.Pixbuf.new_from_file(filepath)
             theme_path[img_name] = filepath
-        except GLib.GError as e:
-            print(e)
+        except GLib.GError:
+            logger.critical(traceback.format_exc())
             sys.exit(1)
     return (theme_pix, theme_path)

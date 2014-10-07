@@ -5,6 +5,8 @@
 # in the LICENSE file.
 
 import sys
+import traceback
+
 from gi.repository import Gdk
 from gi.repository import GLib
 from gi.repository import GObject
@@ -15,6 +17,8 @@ from gi.repository import Gtk
 # init Gst so that play works ok.
 Gst.init(None)
 GST_LOWER_THAN_1 = (Gst.version()[0] < 1)
+
+from kuwo.log import logger
 
 
 class PlayerBin(GObject.GObject):
@@ -41,8 +45,11 @@ class PlayerBin(GObject.GObject):
         self.fullscreen_rect = (0, 0, screen.width(), screen.height())
         
         if not self.playbin:
-            print('Gst Error: playbin failed to be inited, abort!')
+            e = 'Gst Error: playbin failed to be inited, abort!'
+            print(e)
+            logger.error(e)
             sys.exit(1)
+
         self.bus = self.playbin.get_bus()
         self.bus.add_signal_watch()
         self.bus.connect('message::eos', self.on_eos)
@@ -142,6 +149,7 @@ class PlayerBin(GObject.GObject):
         try:
             return self.playbin.get_property('mute')
         except TypeError:
+            logger.warn(traceback.format_exc())
             return False
 
     def set_current_audio(self, audio_stream):

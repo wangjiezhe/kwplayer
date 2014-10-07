@@ -12,10 +12,10 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from kuwo import Config
+_ = Config._
 from kuwo import Widgets
 from kuwo import Net
 
-_ = Config._
 
 class Search(Gtk.Box):
     '''Search tab in notebook.'''

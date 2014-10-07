@@ -11,10 +11,9 @@ from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Pango
 
-from . import Config
-from . import Widgets
-
+from kuwo import Config
 _ = Config._
+from kuwo import Widgets
 
 MARGIN_LEFT = 15
 MARGIN_TOP = 20
@@ -334,7 +333,6 @@ class Preferences(Gtk.Dialog):
         super().run()
 
     def on_destroy(self):
-        print('dialog.on_destroy()')
         Config.dump_conf(self.app.conf)
 
     # generic tab signal handlers

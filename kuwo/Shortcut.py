@@ -4,18 +4,23 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in http://www.gnu.org/licenses/gpl-3.0.html
 
+import traceback
+
 from gi.repository import GLib
+
+from kuwo.log import logger
+from kuwo import Config
+ShortcutMode = Config.ShortcutMode
 
 try:
     from keybinder.keybinder_gtk import KeybinderGtk
     keybinder_imported = True
-except ImportError as e:
+except ImportError:
+    logger.warn(traceback.format_exc())
     keybinder_imported = False
-    print('Warning: no python3-keybinder module found,',
-          'global keyboard shortcut will be disabled!')
+    logger.warn('Warning: no python3-keybinder module found,',
+                'global keyboard shortcut will be disabled!')
 
-from kuwo import Config
-ShortcutMode = Config.ShortcutMode
 
 class Shortcut:
     def __init__(self, player):

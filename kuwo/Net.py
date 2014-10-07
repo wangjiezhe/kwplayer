@@ -12,6 +12,7 @@ import re
 import sys
 import threading
 import time
+import traceback
 from urllib.error import URLError
 from urllib import parse
 from urllib import request
@@ -22,9 +23,10 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
 
-from . import Config
-from . import Utils
-from . import DES
+from kuwo import Config
+from kuwo import DES
+from kuwo import Utils
+from kuwo.log import logger
 
 IMG_CDN = 'http://img4.kwcdn.kuwo.cn/'
 ARTIST = 'http://artistlistinfo.kuwo.cn/mb.slist?'
@@ -53,12 +55,13 @@ try:
     # Debian: http://code.google.com/p/py-leveldb/
     from leveldb import LevelDB
     ldb_imported = True
-except ImportError as e:
+except ImportError:
     try:
         # Fedora: https://github.com/wbolster/plyvel
         from plyvel import DB as LevelDB
         ldb_imported = True
-    except ImportError as e:
+    except ImportError:
+        logger.debug(traceback.format_exc())
         ldb_imported = False
 
 ldb = None
@@ -72,7 +75,8 @@ if ldb_imported:
         else:
             ldb_get = ldb.Get
             ldb_put = ldb.Put
-    except Exception as e:
+    except Exception:
+        logger.debug(traceback.format_exc())
         ldb_imported = False
 
 def empty_func(*args, **kwds):
@@ -86,8 +90,9 @@ def async_call(func, func_done, *args):
 
         try:
             result = func(*args)
-        except Exception as e:
-            error = e
+        except Exception:
+            error = traceback.format_exc()
+            logger.warn(error)
         GLib.idle_add(lambda: func_done(result, error))
 
     thread = threading.Thread(target=do_call, args=args)
@@ -113,9 +118,9 @@ def urlopen(_url, use_cache=True, retries=RETRIES):
                     if (time.time() - timestamp) < CACHE_TIMEOUT:
                         return content[10:]
                 except (ValueError, UnicodeDecodeError):
-                    pass
+                    logger.info(traceback.format_exc())
         except KeyError:
-            pass
+            logger.error(traceback.format_exc())
     for i in range(retries):
         try:
             req = request.urlopen(url, timeout=TIMEOUT)
@@ -123,8 +128,8 @@ def urlopen(_url, use_cache=True, retries=RETRIES):
             if use_cache and ldb_imported:
                 ldb_put(key, str(int(time.time())).encode() + req_content)
             return req_content
-        except URLError as e:
-            pass
+        except URLError:
+            logger.warn(traceback.format_exc())
     return None
 
 def get_nodes(nid, page):
@@ -143,7 +148,8 @@ def get_nodes(nid, page):
         return (None, 0)
     try:
         nodes_wrap = json.loads(req_content.decode())
-    except ValueError as e:
+    except ValueError:
+        logger.error(traceback.format_exc())
         return (None, 0)
     nodes = nodes_wrap['child']
     pages = math.ceil(int(nodes_wrap['total']) / ICON_NUM)
@@ -180,9 +186,8 @@ def get_album(albumid):
     req_content = urlopen(url)
     if not req_content:
         return None
-    try:
-        songs_wrap = Utils.json_loads_single(req_content.decode())
-    except ValueError as e:
+    songs_wrap = Utils.json_loads_single(req_content.decode())
+    if not songs_wrap:
         return None
     songs = songs_wrap['musiclist']
     return songs
@@ -207,7 +212,7 @@ def update_liststore_images(liststore,  col, tree_iters, urls,
             if tree_path is not None:
                 liststore[tree_path][col] = pix
         except GLib.GError:
-            pass
+            logger.error(traceback.format_exc())
 
     def get_images():
         for tree_iter, url in zip(tree_iters, urls):
@@ -258,7 +263,8 @@ def get_toplist_songs(nid):
         req_cache[url] = req_content
     try:
         songs_wrap = json.loads(req_cache[url].decode())
-    except ValueError as e:
+    except ValueError:
+        logger.error(traceback.format_exc())
         return None
     return songs_wrap['musiclist']
 
@@ -277,9 +283,8 @@ def get_artists(catid, page, prefix):
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
-    try:
-        artists_wrap = Utils.json_loads_single(req_content.decode())
-    except ValueError as e:
+    artists_wrap = Utils.json_loads_single(req_content.decode())
+    if not artists_wrap:
         return (None, 0)
     pages = int(artists_wrap['total'])
     artists = artists_wrap['artistlist']
@@ -317,9 +322,8 @@ def get_artist_info(artistid, artist=None):
     req_content = urlopen(url)
     if not req_content:
         return None
-    try:
-        info = Utils.json_loads_single(req_content.decode())
-    except ValueError as e:
+    info = Utils.json_loads_single(req_content.decode())
+    if not info:
         return None
     # set logo size to 100x100
     pic_path = info['pic']
@@ -343,9 +347,8 @@ def get_artist_songs(artist, page):
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
-    try:
-        songs_wrap = Utils.json_loads_single(req_content.decode())
-    except ValueError as e:
+    songs_wrap = Utils.json_loads_single(req_content.decode())
+    if not songs_wrap:
         return (None, 0)
     songs = songs_wrap['abslist']
     pages = math.ceil(int(songs_wrap['TOTAL']) / SONG_NUM)
@@ -364,9 +367,8 @@ def get_artist_songs_by_id(artistid, page):
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
-    try:
-        songs_wrap = Utils.json_loads_single(req_content.decode())
-    except ValueError as e:
+    songs_wrap = Utils.json_loads_single(req_content.decode())
+    if not songs_wrap:
         return (None, 0)
     songs = songs_wrap['musiclist']
     pages = math.ceil(int(songs_wrap['total']) / SONG_NUM)
@@ -385,9 +387,8 @@ def get_artist_albums(artistid, page):
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
-    try:
-        albums_wrap = Utils.json_loads_single(req_content.decode())
-    except ValueError as e:
+    albums_wrap = Utils.json_loads_single(req_content.decode())
+    if not albums_wrap:
         return (None, 0)
     albums = albums_wrap['albumlist']
     pages = math.ceil(int(albums_wrap['total']) / ICON_NUM)
@@ -406,9 +407,8 @@ def get_artist_mv(artistid, page):
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
-    try:
-        mvs_wrap = Utils.json_loads_single(req_content.decode())
-    except ValueError as e:
+    mvs_wrap = Utils.json_loads_single(req_content.decode())
+    if not mvs_wrap:
         return (None, 0)
     mvs = mvs_wrap['mvlist']
     pages = math.ceil(int(mvs_wrap['total']) / ICON_NUM)
@@ -428,9 +428,8 @@ def get_artist_similar(artistid, page):
     req_content = urlopen(url)
     if not req_content:
         return (None, 0)
-    try:
-       artists_wrap = Utils.json_loads_single(req_content.decode())
-    except ValueError as e:
+    artists_wrap = Utils.json_loads_single(req_content.decode())
+    if not artists_wrap:
         return (None, 0)
     artists = artists_wrap['artistlist']
     pages = math.ceil(int(artists_wrap['total']) / ICON_NUM)
@@ -458,7 +457,8 @@ def get_lrc(song):
         try:
             lrc = Utils.decode_lrc_content(req_content)
             return lrc
-        except Exception as e:
+        except Exception:
+            logger.error(traceback.format_exc())
             return None
 
     rid = str(song['rid'])
@@ -469,11 +469,8 @@ def get_lrc(song):
 
     lrc = _parse_lrc()
     if lrc:
-        try:
-            with open(lrc_path, 'w') as fh:
-                fh.write(lrc)
-        except FileNotFoundError as e:
-            pass
+        with open(lrc_path, 'w') as fh:
+            fh.write(lrc)
     return lrc
 
 def get_recommend_lists(artist):
@@ -512,9 +509,8 @@ def search_songs(keyword, page):
         if not req_content:
             return (None, 0, 0)
         req_cache[url] = req_content
-    try:
-        songs_wrap = Utils.json_loads_single(req_cache[url].decode())
-    except ValueError as e:
+    songs_wrap = Utils.json_loads_single(req_cache[url].decode())
+    if not songs_wrap:
         return (None, 0, 0)
     hit = int(songs_wrap['TOTAL'])
     pages = math.ceil(hit / SONG_NUM)
@@ -537,9 +533,8 @@ def search_artists(keyword, page):
         if not req_content:
             return (None, 0, 0)
         req_cache[url] = req_content
-    try:
-        artists_wrap = Utils.json_loads_single(req_cache[url].decode())
-    except ValueError as e:
+    artists_wrap = Utils.json_loads_single(req_cache[url].decode())
+    if not artists_wrap:
         return (None, 0, 0)
     hit = int(artists_wrap['TOTAL'])
     pages = math.ceil(hit / SONG_NUM)
@@ -562,9 +557,8 @@ def search_albums(keyword, page):
         if not req_content:
             return (None, 0, 0)
         req_cache[url] = req_content
-    try:
-        albums_wrap = Utils.json_loads_single(req_cache[url].decode())
-    except ValueError  as e:
+    albums_wrap = Utils.json_loads_single(req_cache[url].decode())
+    if not albums_wrap:
         return (None, 0, 0)
     hit = int(albums_wrap['total'])
     pages = math.ceil(hit / ICON_NUM)
@@ -585,7 +579,8 @@ def get_index_nodes(nid):
         return None
     try:
         nodes_wrap = json.loads(req_content.decode())
-    except ValueError as e:
+    except ValueError:
+        logger.error(traceback.format_exc())
         return None
     return nodes_wrap
 
@@ -653,7 +648,8 @@ def get_themes_songs(nid, page):
         req_cache[url] = req_content
     try:
         songs_wrap = json.loads(req_cache[url].decode())
-    except ValueError as e:
+    except ValueError:
+        logger.error(traceback.format_exc())
         return (None, 0)
     pages = math.ceil(int(songs_wrap['total']) / SONG_NUM)
     return (songs_wrap['musiclist'], pages)
@@ -673,7 +669,8 @@ def get_mv_songs(pid, page):
         return (None, 0)
     try:
         songs_wrap = json.loads(req_content.decode())
-    except ValueError as e:
+    except ValueError:
+        logger.error(traceback.format_exc())
         return (None, 0)
     songs = songs_wrap['musiclist']
     pages = math.ceil(int(songs_wrap['total']) / ICON_NUM)
@@ -823,6 +820,7 @@ class AsyncSong(GObject.GObject):
 
         # this song has no link to download
         if not song_link:
+            logger.debug('%s does not allowed to download.' % song)
             self.emit('network-error', song_link)
             return
 
@@ -870,9 +868,10 @@ class AsyncSong(GObject.GObject):
                 elif os.path.exists(tmp_song_path):
                     os.remove(tmp_song_path)
 
-            except URLError as e:
-                print('URLError:', e)
-            except FileNotFoundError as e:
+            except URLError:
+                logger.error(traceback.format_exc())
+            except FileNotFoundError:
+                logger.error(traceback.format_exc())
                 self.emit('disk-error', song_path)
                 if os.path.exists(tmp_song_path):
                     os.remove(tmp_song_path)

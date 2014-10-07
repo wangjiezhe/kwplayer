@@ -15,10 +15,9 @@ from gi.repository import Gtk
 from gi.repository import Pango
 
 from kuwo import Config
+_ = Config._
 from kuwo import Net
 from kuwo import Widgets
-
-_ = Config._
 
 class RadioItem(Gtk.EventBox):
     def __init__(self, radio_id, app):

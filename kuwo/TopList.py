@@ -10,10 +10,11 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from kuwo import Config
+_ = Config._
 from kuwo import Net
 from kuwo import Widgets
+from kuwo.log import logger
 
-_ = Config._
 
 class TopList(Gtk.Box):
     '''TopList tab in notebook.'''
@@ -99,7 +100,7 @@ class TopList(Gtk.Box):
 
         songs = Net.get_toplist_songs(nid)
         if not songs:
-            print('Error, failed to get toplist songs')
+            logger.warn('Failed to get toplist songs')
             return
         self.liststore_songs.clear()
         for song in songs:

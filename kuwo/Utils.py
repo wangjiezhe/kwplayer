@@ -10,8 +10,10 @@ import os
 import sys
 from urllib import parse
 import subprocess
+import traceback
 import zlib
 
+from kuwo.log import logger
 
 mutagenx_imported = False
 if sys.version_info.major >= 3 and sys.version_info.minor >= 3:
@@ -20,10 +22,10 @@ if sys.version_info.major >= 3 and sys.version_info.minor >= 3:
         from mutagen.easyid3 import EasyID3
         from mutagen.apev2 import APEv2File
         mutagenx_imported = True
-    except ImportError as e:
-        print('Warning: module `mutagen` was not found')
+    except ImportError:
+        logger.warn('module `mutagen` was not found!')
 else:
-    print('Warning: Python3 < 3.3, `mutagen` is not supported')
+    logger.warn('Python3 < 3.3, `mutagen` is not supported')
 
 
 def decode_lrc_content(lrc, is_lrcx=False):
@@ -84,8 +86,12 @@ def decode_lrc_url(url):
 
 def json_loads_single(s):
     '''Actually this is not a good idea. '''
-    return json.loads(
-            s.replace('"', '''\\"''').replace("'", '"').replace('\t', ''))
+    try:
+        return json.loads(
+                s.replace('"', '''\\"''').replace("'", '"').replace('\t', ''))
+    except ValueError:
+        logger.error(traceback.format_exc())
+        return None
 
 def encode_uri(text):
     return parse.quote(text, safe='~@#$&()*!+=:;,.?/\'')
@@ -140,12 +146,12 @@ def iconvtag(song_path, song):
         # TODO: check flac tag
         elif ext == '.flac':
             use_ape()
-    except Exception as e:
-        print('Error in Utils.iconvtag():', e)
+    except Exception:
+        logger.error(traceback.format_exc())
 
 
 def open_folder(folder):
     try:
         subprocess.call(['xdg-open', folder, ])
-    except FileNotFoundError as e:
-        print(e)
+    except FileNotFoundError:
+        logger.error(traceback.format_exc())
