@@ -20,11 +20,11 @@ from gi.repository import Gtk
 from gi.repository import Notify
 
 from kuwo import Config
+_ = Config._
 from kuwo import Net
 from kuwo import Utils
 from kuwo import Widgets
-
-_ = Config._
+from kuwo.log import logger
 
 DRAG_TARGETS = [
     ('text/plain', Gtk.TargetFlags.SAME_APP, 0),
@@ -711,7 +711,7 @@ class PlayList(Gtk.Box):
         liststore = self.tabs[list_name].liststore
         path = 0
         if len(liststore) == 0:
-            print('Caching playlist is empty, please add some songs')
+            logger.info('Caching playlist is empty, please add some songs')
             self.stop_caching_daemon()
             # FIXME: check Notify class available
             Notify.init('kwplayer-cache')
@@ -721,7 +721,7 @@ class PlayList(Gtk.Box):
             notify.show()
             return
         song = Widgets.song_row_to_dict(liststore[path], start=0)
-        print('will download:', song)
+        logger.debug('will download: %s' % song)
         self.cache_job = Net.AsyncSong(self.app)
         self.cache_job.connect('chunk-received', _on_chunk_received)
         self.cache_job.connect('downloaded', _on_downloaded)
@@ -828,7 +828,7 @@ class PlayList(Gtk.Box):
 
     def get_song_path_in_liststore(self, liststore, rid, pos=3):
         for i, row in enumerate(liststore):
-            if row[pos] == rid:
+            if row and row[pos] == rid:
                 return i
         return -1
 
