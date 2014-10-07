@@ -14,6 +14,7 @@ from gi.repository import Gtk
 
 from kuwo import Config
 _ = Config._
+from kuwo.log import logger
 
 LRC_WINDOW, MV_WINDOW = 0, 1
 
@@ -43,6 +44,9 @@ def lrc_parser(lrc_txt):
         for tag in tags:
             lrc_obj.append((tag, content))
     last_time = lrc_obj[-1][0]
+    if last_time <= 0:
+        logger.error('last_time <= 0, %s.' % last_time)
+        return None
     for i in range(last_time, last_time * 2 + 5, last_time // 4 + 1):
         lrc_obj.append((i, '', ))
     return sorted(lrc_obj)
@@ -118,11 +122,14 @@ class Lrc(Gtk.Notebook):
             self.lrc_obj = None
             return
         self.lrc_obj = lrc_parser(lrc_txt)
-        self.lrc_content = [l[1] for l in self.lrc_obj]
+        if not self.lrc_obj:
+            self.lrc_buf.set_text(_('No lrc available'))
+            return
+        lrc_content = [l[1] for l in self.lrc_obj]
 
         self.lrc_buf.remove_all_tags(self.lrc_buf.get_start_iter(),
                                      self.lrc_buf.get_end_iter())
-        self.lrc_buf.set_text('\n'.join(self.lrc_content))
+        self.lrc_buf.set_text('\n'.join(lrc_content))
         self.lrc_window.get_vadjustment().set_value(0)
 
     def sync_lrc(self, timestamp):
