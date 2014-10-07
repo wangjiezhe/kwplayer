@@ -83,8 +83,8 @@ _default_conf = {
     'song-dir': os.path.join(CACHE_DIR, 'song'),
     'mv-dir': os.path.join(CACHE_DIR, 'mv'),
     'volume': 0.08,
-    'audio': 0,
-    'video': 0,
+    'audio': 2,  # 320k mp3
+    'video': 1,  # mp4 high
     'use-status-icon': True,
     'use-notify': False,
     'use-dark-theme': True,
