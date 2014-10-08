@@ -89,7 +89,7 @@ def json_loads_single(s):
     try:
         return json.loads(
                 s.replace('"', '''\\"''').replace("'", '"').replace('\t', ''))
-    except ValueError:
+    except (ValueError, UnicodeDecodeError):
         logger.error(traceback.format_exc())
         return None
 
