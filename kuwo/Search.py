@@ -12,10 +12,10 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from kuwo import Config
+_ = Config._
 from kuwo import Widgets
 from kuwo import Net
 
-_ = Config._
 
 class Search(Gtk.Box):
     '''Search tab in notebook.'''
@@ -54,22 +54,22 @@ class Search(Gtk.Box):
         self.songs_button.search_count = 0
         box_top.pack_start(self.songs_button, False, False, 0)
 
-        self.artists_button = Widgets.ListRadioButton(
-                _('Artists'), self.songs_button)
+        self.artists_button = Widgets.ListRadioButton(_('Artists'),
+                                                      self.songs_button)
         self.artists_button.connect('toggled', self.switch_notebook_page, 1)
         self.artists_button.search_count = 0
         box_top.pack_start(self.artists_button, False, False, 0)
 
-        self.albums_button = Widgets.ListRadioButton(
-                _('Albums'), self.songs_button)
+        self.albums_button = Widgets.ListRadioButton(_('Albums'),
+                                                     self.songs_button)
         self.albums_button.connect('toggled', self.switch_notebook_page, 2)
         self.albums_button.search_count = 0
         box_top.pack_start(self.albums_button, False, False, 0)
 
         treeview_songs = Widgets.TreeViewSongs(app)
         self.liststore_songs = treeview_songs.liststore
-        self.control_box = Widgets.ControlBox(
-                self.liststore_songs, app, select_all=False)
+        self.control_box = Widgets.ControlBox(self.liststore_songs, app,
+                                              select_all=False)
         box_top.pack_end(self.control_box, False, False, 0)
 
         self.notebook = Gtk.Notebook()
@@ -77,36 +77,35 @@ class Search(Gtk.Box):
         self.pack_start(self.notebook, True, True, 0)
 
         songs_tab = Gtk.ScrolledWindow()
-        songs_tab.get_vadjustment().connect(
-                'value-changed', self.on_songs_tab_scrolled)
+        songs_tab.get_vadjustment().connect('value-changed',
+                                            self.on_songs_tab_scrolled)
         self.notebook.append_page(songs_tab, Gtk.Label(_('Songs')))
         songs_tab.add(treeview_songs)
 
         artists_tab = Gtk.ScrolledWindow()
-        artists_tab.get_vadjustment().connect(
-                'value-changed', self.on_artists_tab_scrolled)
+        artists_tab.get_vadjustment().connect('value-changed',
+                                              self.on_artists_tab_scrolled)
         self.notebook.append_page(artists_tab, Gtk.Label(_('Artists')))
 
         # pic, artist, artistid, country
-        self.liststore_artists = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str)
+        self.liststore_artists = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int, str)
         iconview_artists = Widgets.IconView(self.liststore_artists)
-        iconview_artists.connect(
-                'item_activated', self.on_iconview_artists_item_activated)
+        iconview_artists.connect('item_activated',
+                                 self.on_iconview_artists_item_activated)
         artists_tab.add(iconview_artists)
 
         albums_tab = Gtk.ScrolledWindow()
-        albums_tab.get_vadjustment().connect(
-                'value-changed', self.on_albums_tab_scrolled)
+        albums_tab.get_vadjustment().connect('value-changed',
+                                             self.on_albums_tab_scrolled)
         self.notebook.append_page(albums_tab, Gtk.Label(_('Albums')))
         albums_tab.search_count = 0
 
         # logo, album, albumid, artist, artistid, info
-        self.liststore_albums = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, int, str)
+        self.liststore_albums = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
+                                              str, int, str)
         iconview_albums = Widgets.IconView(self.liststore_albums, tooltip=5)
-        iconview_albums.connect(
-                'item_activated', self.on_iconview_albums_item_activated)
+        iconview_albums.connect('item_activated',
+                                self.on_iconview_albums_item_activated)
         albums_tab.add(iconview_albums)
 
     def after_init(self):
@@ -163,13 +162,13 @@ class Search(Gtk.Box):
                         int(song['ARTISTID']),
                         int(song['ALBUMID']),
                         song['FORMATS'],
-                        ])
-            self.songs_button.set_label('{0} ({1})'.format(
-                _('Songs'), len(self.liststore_songs)))
+                    ])
+            self.songs_button.set_label('{0} ({1})'.format(_('Songs'),
+                len(self.liststore_songs)))
 
         self.app.playlist.advise_new_playlist_name(self.keyword)
-        Net.async_call(Net.search_songs, _append_songs,
-                       self.keyword, self.songs_page)
+        Net.async_call(Net.search_songs, _append_songs, self.keyword,
+                       self.songs_page)
 
     def show_artists(self):
         def _append_artists(artists_args, error=None):
@@ -182,14 +181,14 @@ class Search(Gtk.Box):
                         Widgets.unescape(artist['ARTIST']),
                         int(artist['ARTISTID']),
                         Widgets.unescape(artist['COUNTRY']),
-                        ])
+                    ])
                     tree_iters.append(tree_iter)
                     urls.append(artist['PICPATH'])
                 Net.update_artist_logos(self.liststore_artists, 0,
                                         tree_iters, urls)
 
-            self.artists_button.set_label('{0} ({1})'.format(
-                    _('Artists'), len(self.liststore_artists)))
+            self.artists_button.set_label('{0} ({1})'.format(_('Artists'),
+                    len(self.liststore_artists)))
 
         # timestamp is used to mark Liststore ID
         if self.artists_page == 0:
@@ -212,14 +211,14 @@ class Search(Gtk.Box):
                         Widgets.unescape(album['artist']),
                         int(album['artistid']),
                         tooltip,
-                        ])
+                    ])
                     tree_iters.append(tree_iter)
                     urls.append(album['pic'])
                 Net.update_album_covers(self.liststore_albums, 0,
                                         tree_iters, urls)
 
-            self.albums_button.set_label('{0} ({1})'.format(
-                    _('Albums'), len(self.liststore_albums)))
+            self.albums_button.set_label('{0} ({1})'.format(_('Albums'),
+                    len(self.liststore_albums)))
 
         if self.albums_page == 0:
             self.liststore_albums.timestamp = time.time()

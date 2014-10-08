@@ -50,12 +50,12 @@ class ArtistButton(Gtk.RadioButton):
             return
         self.parent.artist_notebook.set_current_page(self.tab)
         methods = [
-                self.parent.show_artist_songs,
-                self.parent.show_artist_albums,
-                self.parent.show_artist_mv,
-                self.parent.show_artist_similar,
-                self.parent.show_artist_info,
-                ]
+            self.parent.show_artist_songs,
+            self.parent.show_artist_albums,
+            self.parent.show_artist_mv,
+            self.parent.show_artist_similar,
+            self.parent.show_artist_info,
+        ]
         methods[self.tab]()
 
 
@@ -99,8 +99,8 @@ class Artists(Gtk.Box):
         # control box for artist's mv
         # pic, name, artist, album, rid, artistid, albumid, tooltip
         # FIXME: check formats column
-        self.artist_mv_liststore = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, str, str, int, int, int, str)
+        self.artist_mv_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, str,
+                str, int, int, int, str)
         self.artist_mv_control_box = Widgets.MVControlBox(
                 self.artist_mv_liststore, app)
         self.buttonbox.pack_end(self.artist_mv_control_box, False, False, 0)
@@ -159,16 +159,15 @@ class Artists(Gtk.Box):
 
         # main window of artists
         self.artists_win = Gtk.ScrolledWindow()
-        self.artists_win.get_vadjustment().connect(
-                'value-changed', self.on_artists_win_scrolled)
+        self.artists_win.get_vadjustment().connect('value-changed',
+                self.on_artists_win_scrolled)
         self.artists_tab.pack_start(self.artists_win, True, True, 0)
         # icon, artist name, artist id, num of songs, tooltip
-        self.artists_liststore = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, str)
-        artists_iconview = Widgets.IconView(
-                self.artists_liststore, tooltip=4)
-        artists_iconview.connect(
-                'item_activated', self.on_artists_iconview_item_activated)
+        self.artists_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
+                                               str, str)
+        artists_iconview = Widgets.IconView(self.artists_liststore, tooltip=4)
+        artists_iconview.connect('item_activated',
+                                 self.on_artists_iconview_item_activated)
         self.artists_win.add(artists_iconview)
 
         # Artist tab (tab 1)
@@ -176,21 +175,20 @@ class Artists(Gtk.Box):
         self.notebook.append_page(self.artist_tab, Gtk.Label(_('Artist')))
 
         # left panel of artist
-        self.artist_buttons = Gtk.Box(
-                spacing=5, orientation=Gtk.Orientation.VERTICAL)
+        self.artist_buttons = Gtk.Box(spacing=5,
+                                      orientation=Gtk.Orientation.VERTICAL)
         self.artist_buttons.props.margin_top = 15
         self.artist_tab.pack_start(self.artist_buttons, False, False, 0)
 
-        self.artist_songs_button = ArtistButton(
-                self, _('Songs'), None, 0)
-        self.artist_albums_button = ArtistButton(
-                self, _('Albums'), self.artist_songs_button, 1)
-        self.artist_mv_button = ArtistButton(
-                self, _('MV'), self.artist_songs_button, 2)
-        self.artist_similar_button = ArtistButton(
-                self, _('Similar'), self.artist_songs_button, 3)
-        self.artist_info_button = ArtistButton(
-                self, _('Info'), self.artist_songs_button, 4)
+        self.artist_songs_button = ArtistButton(self, _('Songs'), None, 0)
+        self.artist_albums_button = ArtistButton(self, _('Albums'),
+                                                 self.artist_songs_button, 1)
+        self.artist_mv_button = ArtistButton(self, _('MV'),
+                                             self.artist_songs_button, 2)
+        self.artist_similar_button = ArtistButton(self, _('Similar'),
+                                                  self.artist_songs_button, 3)
+        self.artist_info_button = ArtistButton(self, _('Info'),
+                                               self.artist_songs_button, 4)
 
         # Add fav_btn to artist_tab
         fav_curr_artist_btn = Gtk.Button()
@@ -199,10 +197,9 @@ class Artists(Gtk.Box):
         fav_curr_artist_btn.props.image = self.fav_no_img
         if not Config.GTK_LE_36:
             fav_curr_artist_btn.props.always_show_image = True
-        fav_curr_artist_btn.set_tooltip_text(
-                _('Add to favorite artists list'))
-        fav_curr_artist_btn.connect(
-                'clicked', self.on_fav_curr_artist_btn_clicked)
+        fav_curr_artist_btn.set_tooltip_text(_('Add to favorite artists list'))
+        fav_curr_artist_btn.connect('clicked',
+                                    self.on_fav_curr_artist_btn_clicked)
         self.artist_buttons.pack_start(fav_curr_artist_btn, False, False, 0)
         self.fav_curr_artist_btn = fav_curr_artist_btn
 
@@ -213,46 +210,44 @@ class Artists(Gtk.Box):
 
         # songs tab for artist (tab 0)
         self.artist_songs_tab = Gtk.ScrolledWindow()
-        self.artist_notebook.append_page(
-                self.artist_songs_tab, Gtk.Label(_('Songs')))
+        self.artist_notebook.append_page(self.artist_songs_tab,
+                                         Gtk.Label(_('Songs')))
         self.artist_songs_tab.add(artist_songs_treeview)
 
 
         # albums tab for artist (tab 1)
         self.artist_albums_tab = Gtk.ScrolledWindow()
-        self.artist_notebook.append_page(
-                self.artist_albums_tab, Gtk.Label(_('Albums')))
+        self.artist_notebook.append_page(self.artist_albums_tab,
+                                         Gtk.Label(_('Albums')))
         # pic, album, albumid, artist, artistid, info/tooltip
-        self.artist_albums_liststore = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, int, str)
-        artist_albums_iconview = Widgets.IconView(
-                self.artist_albums_liststore, tooltip=5)
-        artist_albums_iconview.connect(
-                'item_activated',
+        self.artist_albums_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str,
+                                                     int, str, int, str)
+        artist_albums_iconview = Widgets.IconView(self.artist_albums_liststore,
+                                                  tooltip=5)
+        artist_albums_iconview.connect('item_activated',
                 self.on_artist_albums_iconview_item_activated)
         self.artist_albums_tab.add(artist_albums_iconview)
 
         # MVs tab for artist (tab 2)
         self.artist_mv_tab = Gtk.ScrolledWindow()
-        self.artist_notebook.append_page(
-                self.artist_mv_tab, Gtk.Label(_('MV')))
-        artist_mv_iconview = Widgets.IconView(
-                self.artist_mv_liststore, info_pos=2, tooltip=7)
-        artist_mv_iconview.connect(
-                'item_activated', self.on_artist_mv_iconview_item_activated)
+        self.artist_notebook.append_page(self.artist_mv_tab,
+                                         Gtk.Label(_('MV')))
+        artist_mv_iconview = Widgets.IconView(self.artist_mv_liststore,
+                                              info_pos=2, tooltip=7)
+        artist_mv_iconview.connect('item_activated',
+                                   self.on_artist_mv_iconview_item_activated)
         self.artist_mv_tab.add(artist_mv_iconview)
 
         # Similar tab for artist (tab 3)
         self.artist_similar_tab = Gtk.ScrolledWindow()
-        self.artist_notebook.append_page(
-                self.artist_similar_tab, Gtk.Label(_('Similar')))
+        self.artist_notebook.append_page(self.artist_similar_tab,
+                                         Gtk.Label(_('Similar')))
         # pic, artist name, artist id, num of songs, tooltip
-        self.artist_similar_liststore = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, str)
+        self.artist_similar_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str,
+                                                      int, str, str)
         artist_similar_iconview = Widgets.IconView(
                 self.artist_similar_liststore, tooltip=4)
-        artist_similar_iconview.connect(
-                'item_activated',
+        artist_similar_iconview.connect('item_activated',
                 self.on_artist_similar_iconview_item_activated)
         self.artist_similar_tab.add(artist_similar_iconview)
 
@@ -262,10 +257,9 @@ class Artists(Gtk.Box):
         artist_info_tab.add(artist_info_tab_vp)
         artist_info_tab.props.margin_left = 20
         artist_info_tab.props.margin_top = 5
-        self.artist_notebook.append_page(
-                artist_info_tab, Gtk.Label(_('Info')))
-        artist_info_box = Gtk.Box(
-                spacing=10, orientation=Gtk.Orientation.VERTICAL)
+        self.artist_notebook.append_page(artist_info_tab, Gtk.Label(_('Info')))
+        artist_info_box = Gtk.Box(spacing=10,
+                                  orientation=Gtk.Orientation.VERTICAL)
         artist_info_box.props.margin_right = 10
         artist_info_box.props.margin_bottom = 10
         artist_info_tab_vp.add(artist_info_box)
@@ -281,24 +275,23 @@ class Artists(Gtk.Box):
         artist_info_grid = Gtk.Grid()
         artist_info_grid.props.row_spacing = 10
         artist_info_grid.props.column_spacing = 30
-        self.artist_info_name = InfoLabel(
-                artist_info_grid, _('Name'), 0, 0)
-        self.artist_info_birthday = InfoLabel(
-                artist_info_grid, _('Birthday'), 0, 1)
-        self.artist_info_birthplace = InfoLabel(
-                artist_info_grid, _('Birthplace'), 1, 1)
-        self.artist_info_height = InfoLabel(
-                artist_info_grid, _('Height'), 0, 2)
-        self.artist_info_weight = InfoLabel(
-                artist_info_grid, _('Weight'), 1, 2)
-        self.artist_info_country = InfoLabel(
-                artist_info_grid, _('Country'), 0, 3)
-        self.artist_info_language = InfoLabel(
-                artist_info_grid, _('Language'), 1, 3)
-        self.artist_info_gender = InfoLabel(
-                artist_info_grid, _('Gender'), 0, 4)
-        self.artist_info_constellation = InfoLabel(
-                artist_info_grid, _('Constellation'), 1, 4)
+        self.artist_info_name = InfoLabel(artist_info_grid, _('Name'), 0, 0)
+        self.artist_info_birthday = InfoLabel(artist_info_grid,
+                                              _('Birthday'), 0, 1)
+        self.artist_info_birthplace = InfoLabel(artist_info_grid,
+                                                _('Birthplace'), 1, 1)
+        self.artist_info_height = InfoLabel(artist_info_grid,
+                                            _('Height'), 0, 2)
+        self.artist_info_weight = InfoLabel(artist_info_grid,
+                                            _('Weight'), 1, 2)
+        self.artist_info_country = InfoLabel(artist_info_grid,
+                                             _('Country'), 0, 3)
+        self.artist_info_language = InfoLabel(artist_info_grid,
+                                              _('Language'), 1, 3)
+        self.artist_info_gender = InfoLabel(artist_info_grid,
+                                            _('Gender'), 0, 4)
+        self.artist_info_constellation = InfoLabel(artist_info_grid,
+                                                   _('Constellation'), 1, 4)
         artist_info_hbox.pack_start(artist_info_grid, False, False, 0)
 
         artist_info_textview = Gtk.TextView()
@@ -327,40 +320,41 @@ class Artists(Gtk.Box):
         fav_win = Gtk.ScrolledWindow()
         fav_artists_tab.pack_start(fav_win, True, True, 0)
         # icon, artist name, artist id, tooltip
-        self.fav_artists_liststore = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str)
-        fav_artists_iconview = Widgets.IconView(
-                self.fav_artists_liststore, info_pos=None, tooltip=3)
+        self.fav_artists_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf,
+                                                   str, int, str)
+        fav_artists_iconview = Widgets.IconView(self.fav_artists_liststore,
+                                                info_pos=None, tooltip=3)
         fav_artists_iconview.connect('item_activated',
                 self.on_fav_artists_iconview_item_activated)
         fav_win.add(fav_artists_iconview)
 
-        prefs = ((_('All'), ''),
-                ('A', 'a'), ('B', 'b'), ('C', 'c'), ('D', 'd'),
-                ('E', 'e'), ('F', 'f'), ('G', 'g'), ('H', 'h'), ('I', 'i'),
-                ('J', 'j'), ('K', 'k'), ('L', 'l'), ('M', 'm'), ('N', 'n'),
-                ('O', 'o'), ('P', 'p'), ('Q', 'q'), ('R', 'r'), ('S', 's'),
-                ('T', 't'), ('U', 'u'), ('V', 'v'), ('W', 'w'), ('X', 'x'),
-                ('Y', 'y'), ('Z', 'z'), ('#', '%26'),
-                )
+        prefs = (
+            (_('All'), ''),
+            ('A', 'a'), ('B', 'b'), ('C', 'c'), ('D', 'd'),
+            ('E', 'e'), ('F', 'f'), ('G', 'g'), ('H', 'h'), ('I', 'i'),
+            ('J', 'j'), ('K', 'k'), ('L', 'l'), ('M', 'm'), ('N', 'n'),
+            ('O', 'o'), ('P', 'p'), ('Q', 'q'), ('R', 'r'), ('S', 's'),
+            ('T', 't'), ('U', 'u'), ('V', 'v'), ('W', 'w'), ('X', 'x'),
+            ('Y', 'y'), ('Z', 'z'), ('#', '%26'),
+        )
         for pref in prefs:
             self.pref_liststore.append(pref)
         self.pref_combo.set_active(0)
         self.pref_combo.connect('changed', self.on_cate_changed)
 
         cates = (
-                (_('Hot Artists'), 0),
-                (_('Chinese Male'), 1),
-                (_('Chinese Female'), 2),
-                (_('Chinese Band'), 3),
-                (_('Japanese Male'), 4),
-                (_('Japanese Female'), 5),
-                (_('Japanese Band'), 6),
-                (_('European Male'), 7),
-                (_('European Female'), 8),
-                (_('European Band'), 9),
-                (_('Others'), 10),
-                )
+            (_('Hot Artists'), 0),
+            (_('Chinese Male'), 1),
+            (_('Chinese Female'), 2),
+            (_('Chinese Band'), 3),
+            (_('Japanese Male'), 4),
+            (_('Japanese Female'), 5),
+            (_('Japanese Band'), 6),
+            (_('European Male'), 7),
+            (_('European Female'), 8),
+            (_('European Band'), 9),
+            (_('Others'), 10),
+        )
         for cate in cates:
             self.cate_liststore.append(cate)
         selection = self.cate_treeview.get_selection()
@@ -401,8 +395,8 @@ class Artists(Gtk.Box):
                     ])
                 urls.append(artist['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_artist_logos(
-                    self.artists_liststore, 0, tree_iters, urls)
+            Net.update_artist_logos(self.artists_liststore, 0,
+                                    tree_iters, urls)
 
         if init:
             self.artists_liststore.clear()
@@ -418,9 +412,8 @@ class Artists(Gtk.Box):
         pref_index = self.pref_combo.get_active()
         catid = model[_iter][1]
         prefix = self.pref_liststore[pref_index][1]
-        Net.async_call(
-                Net.get_artists, on_append_artists, catid,
-                self.artists_page, prefix)
+        Net.async_call(Net.get_artists, on_append_artists, catid,
+                       self.artists_page, prefix)
 
     def on_artists_iconview_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -436,7 +429,7 @@ class Artists(Gtk.Box):
     # scrolled windows
     def on_artists_win_scrolled(self, adj):
         if (Widgets.reach_scrolled_bottom(adj) and 
-            self.artists_page < self.artists_total - 1):
+                self.artists_page < self.artists_total - 1):
             self.artists_page += 1
             self.append_artists()
 
@@ -506,9 +499,8 @@ class Artists(Gtk.Box):
         if init:
             self.artist_songs_liststore.clear()
             self.artist_songs_page = 0
-        Net.async_call(
-                Net.get_artist_songs_by_id, _append_artist_songs, 
-                self.curr_artist_id, self.artist_songs_page)
+        Net.async_call(Net.get_artist_songs_by_id, _append_artist_songs, 
+                       self.curr_artist_id, self.artist_songs_page)
 
     def show_artist_albums(self):
         self.artist_control_box.hide()
@@ -537,8 +529,8 @@ class Artists(Gtk.Box):
                 ])
                 urls.append(album['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_album_covers(
-                    self.artist_albums_liststore, 0, tree_iters, urls)
+            Net.update_album_covers(self.artist_albums_liststore, 0,
+                                    tree_iters, urls)
             self.artist_albums_page += 1
             if self.artist_albums_page < self.artist_albums_total - 1:
                 self.append_artist_albums()
@@ -548,9 +540,8 @@ class Artists(Gtk.Box):
             self.artist_albums_page = 0
         if init or not hasattr(self.artist_albums, 'timestamp'):
             self.artist_albums_liststore.timestamp = time.time()
-        Net.async_call(
-                Net.get_artist_albums, _append_artist_albums,
-                self.curr_artist_id, self.artist_albums_page)
+        Net.async_call(Net.get_artist_albums, _append_artist_albums,
+                       self.curr_artist_id, self.artist_albums_page)
 
     def show_artist_mv(self):
         self.artist_control_box.hide()
@@ -578,11 +569,10 @@ class Artists(Gtk.Box):
                     int(mv['artistid']),
                     0,
                     Widgets.set_tooltip(mv['name'], mv['artist']),
-                    ])
+                ])
                 tree_iters.append(tree_iter)
                 urls.append(mv['pic'])
-            Net.update_mv_images(
-                    self.artist_mv_liststore, 0, tree_iters, urls)
+            Net.update_mv_images(self.artist_mv_liststore, 0, tree_iters, urls)
             self.artist_mv_page += 1
             if self.artist_mv_page < self.artist_mv_total - 1:
                 self.append_artist_mv()
@@ -592,9 +582,8 @@ class Artists(Gtk.Box):
             self.artist_mv_page = 0
         if init or not hasattr(self.artist_mv_liststore, 'timestamp'):
             self.artist_mv_liststore.timestamp = time.time()
-        Net.async_call(
-                Net.get_artist_mv, _append_artist_mv,
-                self.curr_artist_id, self.artist_mv_page)
+        Net.async_call(Net.get_artist_mv, _append_artist_mv,
+                       self.curr_artist_id, self.artist_mv_page)
 
     def show_artist_similar(self):
         self.artist_control_box.hide()
@@ -621,11 +610,11 @@ class Artists(Gtk.Box):
                     int(artist['id']),
                     _info,
                     Widgets.set_tooltip(artist['name'], _info),
-                    ])
+                ])
                 urls.append(artist['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_artist_logos(
-                    self.artist_similar_liststore, 0, tree_iters, urls)
+            Net.update_artist_logos(self.artist_similar_liststore, 0,
+                                    tree_iters, urls)
             self.artist_similar_page += 1
             if self.artist_similar_page < self.artist_similar_total - 1:
                 self.append_artist_similar()
@@ -635,9 +624,8 @@ class Artists(Gtk.Box):
             self.artist_similar_page = 0
         if init or not hasattr(self.artist_similar_liststore, 'timestamp'):
             self.artist_similar_liststore.timestamp = time.time()
-        Net.async_call(
-                Net.get_artist_similar, _append_artist_similar,
-                self.curr_artist_id, self.artist_similar_page)
+        Net.async_call(Net.get_artist_similar, _append_artist_similar,
+                       self.curr_artist_id, self.artist_similar_page)
 
     def show_artist_info(self):
         self.artist_control_box.hide()
@@ -669,9 +657,8 @@ class Artists(Gtk.Box):
             else:
                 self.artist_info_textbuffer.set_text('')
 
-        Net.async_call(
-                Net.get_artist_info, _append_artist_info,
-                self.curr_artist_id)
+        Net.async_call(Net.get_artist_info, _append_artist_info,
+                       self.curr_artist_id)
 
 
     def on_artist_albums_iconview_item_activated(self, iconview, path):
@@ -727,9 +714,8 @@ class Artists(Gtk.Box):
                     song['formats'],
                 ])
         self.album_songs_liststore.clear()
-        Net.async_call(
-                Net.get_album, _append_album_songs,
-                self.curr_album_id)
+        Net.async_call(Net.get_album, _append_album_songs,
+                       self.curr_album_id)
 
     def on_artist_button_clicked(self, button):
         self.show_artist(self.curr_artist_name, self.curr_artist_id)
@@ -740,13 +726,13 @@ class Artists(Gtk.Box):
             if error or not info:
                 return
             if info.get('pic', None):
-                pix = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                        info['pic'], 100, 100)
+                pix = GdkPixbuf.Pixbuf.new_from_file_at_size(info['pic'],
+                                                             100, 100)
             else:
                 pix = self.app.theme['anonymous']
             tip = Widgets.escape(info.get('info', ''))
-            self.fav_artists_liststore.append(
-                    [pix, info['name'], artist_id, tip])
+            self.fav_artists_liststore.append([pix, info['name'],
+                                               artist_id, tip])
 
         if init is False and self.check_artist_favorited(artist_id):
             return

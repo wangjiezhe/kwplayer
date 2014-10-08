@@ -156,15 +156,14 @@ class App:
         css_encoded = css.encode()
         style_provider.load_from_data(css_encoded)
         if overall:
-            Gtk.StyleContext.add_provider_for_screen(
-                Gdk.Screen.get_default(), style_provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),
+                    style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
             if old_provider:
                 Gtk.StyleContext.remove_provider_for_screen(
                     Gdk.Screen.get_default(), style_provider)
         else:
-            widget.get_style_context().add_provider(
-                    style_provider,Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            widget.get_style_context().add_provider(style_provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
             if old_provider:
                 widget.get_style_context().remove_provider(old_provider)
         return style_provider
@@ -296,8 +295,8 @@ class App:
             # fullscreen
             self.player.hide()
             self.notebook.set_show_tabs(False)
-            self.fullscreen_sid = self.window.connect(
-                    'motion-notify-event', self.on_window_motion_notified)
+            self.fullscreen_sid = self.window.connect('motion-notify-event',
+                    self.on_window_motion_notified)
         else:
             # unfullscreen
             self.player.show()
@@ -318,9 +317,8 @@ class App:
         # delay 2 seconds and hide them
         self.fullscreen_timestamp = time.time()
         GLib.timeout_add(100, self.player.playbin.expose)
-        GLib.timeout_add(
-                2000, self.hide_control_panel_and_label, 
-                self.fullscreen_timestamp)
+        GLib.timeout_add(2000, self.hide_control_panel_and_label,
+                         self.fullscreen_timestamp)
 
     def hide_control_panel_and_label(self, timestamp):
         if (timestamp == self.fullscreen_timestamp and 

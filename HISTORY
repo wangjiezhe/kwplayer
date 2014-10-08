@@ -1,3 +1,11 @@
+3.4.2 - 2014.10.1
+* Fixed: replace aac format with 128k mp3
+* Fixed: emit can-play signal
+* Automatically load next page when curr_song >= 10
+* Fixed: lrc text size reset to 4pt in gtk3.14
+* Fixed: list index out of range in Radio tab
+* Fixed: do not fetch MV info while playing radio
+
 3.4.1 - 2014.9.28
 * KARAOKE mode removed
 * Support 320k mp3 and flac format

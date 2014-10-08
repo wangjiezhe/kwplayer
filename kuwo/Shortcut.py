@@ -4,34 +4,39 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in http://www.gnu.org/licenses/gpl-3.0.html
 
+import traceback
+
 from gi.repository import GLib
+
+from kuwo.log import logger
+from kuwo import Config
+ShortcutMode = Config.ShortcutMode
 
 try:
     from keybinder.keybinder_gtk import KeybinderGtk
     keybinder_imported = True
-except ImportError as e:
+except ImportError:
+    logger.warn(traceback.format_exc())
     keybinder_imported = False
-    print('Warning: no python3-keybinder module found,',
-          'global keyboard shortcut will be disabled!')
+    logger.warn('Warning: no python3-keybinder module found,',
+                'global keyboard shortcut will be disabled!')
 
-from kuwo import Config
-ShortcutMode = Config.ShortcutMode
 
 class Shortcut:
     def __init__(self, player):
         self.player = player
 
         self.callbacks = {
-                'VolumeUp': self.volume_up,
-                'VolumeDown': self.volume_down,
-                'Mute': lambda *args: player.toggle_mute_cb(),
-                'Previous': lambda *args: player.load_prev_cb(),
-                'Next': lambda *args: player.load_next_cb(),
-                'Pause': lambda *args: player.play_pause_cb(),
-                'Play': lambda *args: player.play_pause_cb(),
-                'Stop': lambda *args: player.stop_player_cb(),
-                'Launch': self.present_window,
-                }
+            'VolumeUp': self.volume_up,
+            'VolumeDown': self.volume_down,
+            'Mute': lambda *args: player.toggle_mute_cb(),
+            'Previous': lambda *args: player.load_prev_cb(),
+            'Next': lambda *args: player.load_next_cb(),
+            'Pause': lambda *args: player.play_pause_cb(),
+            'Play': lambda *args: player.play_pause_cb(),
+            'Stop': lambda *args: player.stop_player_cb(),
+            'Launch': self.present_window,
+        }
 
         if keybinder_imported:
             self.keybinder = KeybinderGtk()

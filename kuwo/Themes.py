@@ -10,10 +10,11 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from kuwo import Config
+_ = Config._
 from kuwo import Net
 from kuwo import Widgets
+from kuwo.log import logger
 
-_ = Config._
 
 class Themes(Gtk.Box):
     '''Themes tab in notebook.'''
@@ -50,28 +51,28 @@ class Themes(Gtk.Box):
         self.scrolled_main = Gtk.ScrolledWindow()
         self.pack_start(self.scrolled_main, True, True, 0)
         # pic, name, id, info(num of lists), tooltip
-        self.liststore_main = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, str)
+        self.liststore_main = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
+                                            str, str)
         iconview_main = Widgets.IconView(self.liststore_main, tooltip=4)
-        iconview_main.connect(
-                'item_activated', self.on_iconview_main_item_activated)
+        iconview_main.connect('item_activated',
+                              self.on_iconview_main_item_activated)
         self.scrolled_main.add(iconview_main)
 
         self.scrolled_sub = Gtk.ScrolledWindow()
-        self.scrolled_sub.get_vadjustment().connect(
-                'value-changed', self.on_scrolled_sub_scrolled)
+        self.scrolled_sub.get_vadjustment().connect('value-changed',
+                self.on_scrolled_sub_scrolled)
         self.pack_start(self.scrolled_sub, True, True, 0)
         # pic, name, sourceid, info(num of lists), tooltip
-        self.liststore_sub = Gtk.ListStore(
-                GdkPixbuf.Pixbuf, str, int, str, str)
+        self.liststore_sub = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
+                                           str, str)
         iconview_sub = Widgets.IconView(self.liststore_sub, tooltip=4)
-        iconview_sub.connect(
-                'item_activated', self.on_iconview_sub_item_activated)
+        iconview_sub.connect('item_activated',
+                             self.on_iconview_sub_item_activated)
         self.scrolled_sub.add(iconview_sub)
 
         self.scrolled_songs = Gtk.ScrolledWindow()
-        self.scrolled_songs.get_vadjustment().connect(
-                'value-changed', self.on_scrolled_songs_scrolled)
+        self.scrolled_songs.get_vadjustment().connect('value-changed',
+                self.on_scrolled_songs_scrolled)
         self.pack_start(self.scrolled_songs, True, True, 0)
         self.scrolled_songs.add(treeview_songs)
 
@@ -82,7 +83,7 @@ class Themes(Gtk.Box):
 
         nodes = Net.get_themes_main()
         if not nodes:
-            print('Failed to get nodes!')
+            logger.warn('Failed to get nodes!')
             return
         urls = []
         tree_iters = []
@@ -122,13 +123,13 @@ class Themes(Gtk.Box):
                     Widgets.unescape(node['name']),
                     int(node['sourceid']),
                     Widgets.unescape(node['info']),
-                    Widgets.set_tooltip_with_song_tips(
-                        node['name'], node['tips']),
-                    ])
+                    Widgets.set_tooltip_with_song_tips(node['name'],
+                                                       node['tips']),
+                ])
                 tree_iters.append(tree_iter)
                 urls.append(node['pic'])
-            Net.update_liststore_images(
-                    self.liststore_sub, 0, tree_iters, urls)
+            Net.update_liststore_images(self.liststore_sub, 0,
+                                        tree_iters, urls)
         if init:
             self.scrolled_main.hide()
             self.scrolled_songs.hide()
@@ -141,11 +142,8 @@ class Themes(Gtk.Box):
             self.liststore_sub.clear()
         if init or not hasattr(self.liststore_sub, 'timestamp'):
             self.liststore_sub.timestamp = time.time()
-        #nodes, self.nodes_total = Net.get_nodes(
-        #        self.curr_sub_id, self.nodes_page)
-        Net.async_call(
-                Net.get_nodes, on_show_sub, self.curr_sub_id,
-                self.nodes_page)
+        Net.async_call(Net.get_nodes, on_show_sub, self.curr_sub_id,
+                       self.nodes_page)
 
     def on_iconview_sub_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -157,8 +155,7 @@ class Themes(Gtk.Box):
     
     def show_songs(self, init=False):
         if init:
-            self.app.playlist.advise_new_playlist_name(
-                    self.label.get_text())
+            self.app.playlist.advise_new_playlist_name(self.label.get_text())
             self.liststore_songs.clear()
             self.songs_page = 0
             self.scrolled_sub.hide()
@@ -167,8 +164,8 @@ class Themes(Gtk.Box):
             self.scrolled_songs.get_vadjustment().set_value(0.0)
             self.scrolled_songs.show_all()
 
-        songs, self.songs_total = Net.get_themes_songs(
-                self.curr_list_id, self.songs_page)
+        songs, self.songs_total = Net.get_themes_songs(self.curr_list_id,
+                                                       self.songs_page)
         if not songs:
             return
         for song in songs:
@@ -201,12 +198,12 @@ class Themes(Gtk.Box):
 
     def on_scrolled_sub_scrolled(self, adj):
         if (Widgets.reach_scrolled_bottom(adj) and
-            self.nodes_page < self.nodes_total - 1):
+                self.nodes_page < self.nodes_total - 1):
             self.nodes_page += 1
             self.show_sub()
 
     def on_scrolled_songs_scrolled(self, adj):
         if (Widgets.reach_scrolled_bottom(adj) and
-            self.songs_page < self.songs_total - 1):
+                self.songs_page < self.songs_total - 1):
             self.songs_page += 1
             self.show_songs()

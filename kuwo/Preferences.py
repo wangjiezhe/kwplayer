@@ -11,10 +11,9 @@ from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Pango
 
-from . import Config
-from . import Widgets
-
+from kuwo import Config
 _ = Config._
+from kuwo import Widgets
 
 MARGIN_LEFT = 15
 MARGIN_TOP = 20
@@ -66,21 +65,16 @@ class FontBox(Gtk.Box):
         left_label = Gtk.Label(label)
         self.pack_start(left_label, False, True, 0)
 
-        font_button = Gtk.SpinButton()
-        if Config.GTK_GE_312:
-            adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10, 1)
-        else:
-            adjustment = Gtk.Adjustment(conf[font_name], 4, 72, 1, 10)
-        adjustment.connect('value-changed', self.on_font_set)
-        adjustment.set_value(conf[font_name])
-        font_button.set_adjustment(adjustment)
+        font_button = Gtk.SpinButton.new_with_range(4, 72, 1)
+        font_button.set_value(conf[font_name])
+        font_button.connect('value-changed', self.on_font_set)
         self.pack_end(font_button, False, True, 0)
 
         if use_margin:
             self.props.margin_left = 20
 
-    def on_font_set(self, adjustment):
-        self.conf[self.font_name] = adjustment.get_value()
+    def on_font_set(self, font_button):
+        self.conf[self.font_name] = font_button.get_value()
 
 
 class ChooseFolder(Gtk.Box):
@@ -117,8 +111,7 @@ class ChooseFolder(Gtk.Box):
                 self.app.conf[self.conf_name] = new_dir
             return
 
-        dialog = Gtk.FileChooserDialog(
-                _('Choose a Folder'), self.parent,
+        dialog = Gtk.FileChooserDialog(_('Choose a Folder'), self.parent,
                 Gtk.FileChooserAction.SELECT_FOLDER,
                 (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                  Gtk.STOCK_OK, Gtk.ResponseType.OK))
@@ -335,7 +328,6 @@ class Preferences(Gtk.Dialog):
         super().run()
 
     def on_destroy(self):
-        print('dialog.on_destroy()')
         Config.dump_conf(self.app.conf)
 
     # generic tab signal handlers

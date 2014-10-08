@@ -4,15 +4,14 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in http://www.gnu.org/licenses/gpl-3.0.html
 
-
 from gi.repository import GLib
 from gi.repository import Notify
+Notify.init('kwplayer')
 
 from kuwo import Config
+_ = Config._
 from kuwo import Widgets
 
-Notify.init('kwplayer')
-_ = Config._
 
 class PlayerNotify:
     '''Notification wrapper.
@@ -42,69 +41,42 @@ class PlayerNotify:
         else:
             album = _('Unknown')
         notify.update(
-                song['name'],
-                'by {0} from {1}'.format(artist, album),
-                self.player.meta_artUrl
-                )
-        notify.set_hint('image-path', GLib.Variant.new_string(
-            self.player.meta_artUrl))
+            song['name'],
+            'by {0} from {1}'.format(artist, album),
+            self.player.meta_artUrl
+        )
+        notify.set_hint('image-path',
+                        GLib.Variant.new_string(self.player.meta_artUrl))
 
         notify.clear_actions()
 
         try:
-            notify.add_action(
-                    'media-skip-backward',
-                    _('Previous'),
-                    self.on_prev_action_activated,
-                    None)
+            notify.add_action('media-skip-backward', _('Previous'),
+                              self.on_prev_action_activated, None)
             if self.player.is_playing():
-                notify.add_action(
-                        'media-playback-pause',
-                        _('Pause'),
-                        self.on_playpause_action_activated,
-                        None)
+                notify.add_action('media-playback-pause', _('Pause'),
+                                  self.on_playpause_action_activated, None)
             else:
-                notify.add_action(
-                        'media-playback-start',
-                        _('Play'),
-                        self.on_playpause_action_activated,
-                        None)
-            notify.add_action(
-                    'media-skip-forward',
-                    _('Next'),
-                    self.on_next_action_activated,
-                    None)
+                notify.add_action('media-playback-start', _('Play'),
+                                  self.on_playpause_action_activated, None)
+            notify.add_action('media-skip-forward', _('Next'),
+                              self.on_next_action_activated, None)
         except TypeError:
             # For Fedora 19, which needs 6 parameters.
-            notify.add_action(
-                    'media-skip-backward',
-                    _('Previous'),
-                    self.on_prev_action_activated,
-                    None,
-                    None)
+            notify.add_action('media-skip-backward', _('Previous'),
+                              self.on_prev_action_activated, None, None)
             if self.player.is_playing():
-                notify.add_action(
-                        'media-playback-pause',
-                        _('Pause'),
-                        self.on_playpause_action_activated,
-                        None,
-                        None)
+                notify.add_action('media-playback-pause', _('Pause'),
+                                  self.on_playpause_action_activated,
+                                  None, None)
             else:
-                notify.add_action(
-                        'media-playback-start',
-                        _('Play'),
-                        self.on_playpause_action_activated,
-                        None,
-                        None)
-            notify.add_action(
-                    'media-skip-forward',
-                    _('Next'),
-                    self.on_next_action_activated,
-                    None,
-                    None)
+                notify.add_action('media-playback-start', _('Play'),
+                                  self.on_playpause_action_activated,
+                                  None, None)
+            notify.add_action('media-skip-forward', _('Next'),
+                              self.on_next_action_activated, None, None)
 
-        notify.set_hint(
-                'action-icons', GLib.Variant.new_boolean(True))
+        notify.set_hint('action-icons', GLib.Variant.new_boolean(True))
 
         # gnome shell screenlocker will get `x-gnome.music` notification
         # and the whole notification content will be presented

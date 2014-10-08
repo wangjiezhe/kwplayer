@@ -19,7 +19,6 @@ MPRIS_PATH = '/org/mpris/MediaPlayer2'
 ROOT_IFACE = 'org.mpris.MediaPlayer2'
 PLAYER_IFACE = 'org.mpris.MediaPlayer2.Player'
 
-# TODO:
 URI_SCHEMES = ['file', 'http', 'smb']
 MIME_TYPES = ['application/ogg', ]
 
@@ -39,9 +38,9 @@ class PlayerDBus(dbus.service.Object):
         super().__init__(bus_name=bus_name, object_path=mpris_path)
 
         self.properties = {
-                ROOT_IFACE: self._get_root_iface_properties(),
-                PLAYER_IFACE: self._get_player_iface_properties(),
-                }
+            ROOT_IFACE: self._get_root_iface_properties(),
+            PLAYER_IFACE: self._get_player_iface_properties(),
+        }
 
     def _get_root_iface_properties(self):
         return {
@@ -54,10 +53,9 @@ class PlayerDBus(dbus.service.Object):
             'DesktopEntry': ('kwplayer', None),
             'SupportedUriSchemes': 
                 (dbus.Array(URI_SCHEMES, signature='s'), None),
-            #'SupportedMimeTypes': (dbus.Array([], signature='s'), None),
             'SupportedMimeTypes':
                 (dbus.Array(MIME_TYPES, signature='s'), None),
-            }
+        }
 
     def _get_player_iface_properties(self):
         return {
@@ -76,7 +74,7 @@ class PlayerDBus(dbus.service.Object):
             'CanPause': (True, None),
             'CanSeek': (False, None),
             'CanControl': (True, None),
-            }
+        }
 
     # interface properties
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss',
@@ -105,8 +103,8 @@ class PlayerDBus(dbus.service.Object):
         _, setter = self.properties[interface][prop]
         if setter:
             setter(value)
-            self.PropertiesChanged(
-                    interface, {prop: self.Get(interface, prop)}, [])
+            self.PropertiesChanged(interface,
+                                   {prop: self.Get(interface, prop)}, [])
 
     @dbus.service.signal(dbus.PROPERTIES_IFACE, signature='sa{sv}as')
     def PropertiesChanged(self, interface, changed_properties,
@@ -194,23 +192,23 @@ class PlayerDBus(dbus.service.Object):
         artUrl = self.player.meta_artUrl
 
         meta_obj = {
-                'xesam:genre': ['', ],
-                'xesam:userCount': 1,
-                'xesam:trackNumber': 1,
-                #'xesam:comment': ['by kwplayer'],
-                #'xesam:contentCreated': '2008-01-01T00:00:00Z',
-                'xesam:userRating': 0.0,
-                #'xesam:lastUsed': '2013-01-01T00:00:00Z',
-                'mpris:trackid': '',
+            'xesam:genre': ['', ],
+            'xesam:userCount': 1,
+            'xesam:trackNumber': 1,
+            #'xesam:comment': ['by kwplayer'],
+            #'xesam:contentCreated': '2008-01-01T00:00:00Z',
+            'xesam:userRating': 0.0,
+            #'xesam:lastUsed': '2013-01-01T00:00:00Z',
+            'mpris:trackid': '',
 
-                'xesam:title': song['name'],
-                'xesam:artist': 
-                    dbus.Array(song['artist'].split('&'), signature='s'),
-                'xesam:album': song['album'],
-                'xesam:url': self.player.meta_url,
-                'mpris:length': self.get_Length(),
-                'mpris:artUrl': 'file://' + artUrl
-                }
+            'xesam:title': song['name'],
+            'xesam:artist': 
+                dbus.Array(song['artist'].split('&'), signature='s'),
+            'xesam:album': song['album'],
+            'xesam:url': self.player.meta_url,
+            'mpris:length': self.get_Length(),
+            'mpris:artUrl': 'file://' + artUrl
+        }
         return dbus.Dictionary(meta_obj, signature='sv')
 
 
@@ -244,13 +242,11 @@ class PlayerDBus(dbus.service.Object):
         self.Seeked(pos)
 
     def set_Playing(self):
-        self.PropertiesChanged(
-                PLAYER_IFACE, {'PlaybackStatus': 'Playing'}, [])
+        self.PropertiesChanged(PLAYER_IFACE, {'PlaybackStatus': 'Playing'}, [])
         self.update_meta()
 
     def set_Pause(self):
-        self.PropertiesChanged(
-                PLAYER_IFACE, {'PlaybackStatus': 'Paused'}, [])
+        self.PropertiesChanged(PLAYER_IFACE, {'PlaybackStatus': 'Paused'}, [])
 
     def get_Length(self):
         length = self.player.adjustment.get_upper()
