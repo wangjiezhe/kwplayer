@@ -18,6 +18,7 @@ from kuwo import Config
 _ = Config._
 from kuwo import Net
 from kuwo import Widgets
+from kuwo.log import logger
 
 class RadioItem(Gtk.EventBox):
     def __init__(self, radio_id, app):
@@ -82,7 +83,8 @@ class RadioItem(Gtk.EventBox):
     
     def init_songs(self):
         def _update_songs(songs, error=None):
-            if not songs:
+            if error or not songs:
+                logger.error('songs: %s, error: %s' % (songs, error))
                 return
             self.playlists[self.radio_id]['songs'] = songs
             self.playlists[self.radio_id]['curr_song'] = 0
@@ -95,6 +97,7 @@ class RadioItem(Gtk.EventBox):
     def load_more_songs(self):
         def _on_more_songs_loaded(songs, error=None):
             if error or not songs:
+                logger.error('songs: %s, error: %s' % (songs, error))
                 return
             self.playlists[self.radio_id]['songs'] += songs
         self.playlists[self.radio_id]['offset'] += 1

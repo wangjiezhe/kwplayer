@@ -123,6 +123,7 @@ class Lrc(Gtk.Notebook):
             return
         self.lrc_obj = lrc_parser(lrc_txt)
         if not self.lrc_obj:
+            logger.warn('Failed to parse lrc')
             self.lrc_buf.set_text(_('No lrc available'))
             return
         lrc_content = [l[1] for l in self.lrc_obj]

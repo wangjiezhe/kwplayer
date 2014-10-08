@@ -12,10 +12,10 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from kuwo import Config
+_ = Config._
 from kuwo import Net
 from kuwo import Widgets
-
-_ = Config._
+from kuwo.log import logger
 
 
 class InfoLabel(Gtk.Label):
@@ -381,6 +381,8 @@ class Artists(Gtk.Box):
         def on_append_artists(info, error=None):
             artists, self.artists_total = info
             if error or not self.artists_total or not artists:
+                logger.error('artists_total: %s, artists: %s, error: %s' %
+                        (self.artists_total, artists, error))
                 return
             urls = []
             tree_iters = []
@@ -479,6 +481,8 @@ class Artists(Gtk.Box):
         def _append_artist_songs(songs_args, error=None):
             songs, self.artist_songs_total = songs_args
             if error or self.artist_songs_total == 0:
+                logger.error('artist_songs_total: %s, error: %s' %
+                        (self.artist_songs_total, error))
                 return
             for song in songs:
                 self.artist_songs_liststore.append([
@@ -515,6 +519,8 @@ class Artists(Gtk.Box):
         def _append_artist_albums(albums_args, error=None):
             albums, self.artist_albums_total = albums_args
             if error or self.artist_albums_total == 0:
+                logger.error('artist_albums_total: %s, error: %s' %
+                        (self.artist_albums_taotal, error))
                 return
             urls = []
             tree_iters = []
@@ -556,6 +562,8 @@ class Artists(Gtk.Box):
         def _append_artist_mv(mv_args, error=None):
             mvs, self.artist_mv_total = mv_args
             if error or self.artist_mv_total == 0:
+                logger.error('artist_mv_total: %s, error: %s' %
+                        (self.artist_mv_total, error))
                 return
             urls = []
             tree_iters = []
@@ -599,6 +607,8 @@ class Artists(Gtk.Box):
         def _append_artist_similar(similar_args, error=None):
             artists, self.artist_similar_total = similar_args
             if error or not self.artist_similar_total:
+                logger.error('artist_similar_total: %s, error: %s' %
+                        (self.artist_similar_total, error))
                 return
             urls = []
             tree_iters = []
@@ -639,6 +649,7 @@ class Artists(Gtk.Box):
     def append_artist_info(self):
         def _append_artist_info(info, error=None):
             if error or not info:
+                logger.error('info: %s, error: %s' % (info, error))
                 return
             if info.get('pic', None):
                 self.artist_info_pic.set_from_file(info['pic'])
@@ -701,6 +712,7 @@ class Artists(Gtk.Box):
     def append_album_songs(self):
         def _append_album_songs(songs, error=None):
             if error or not songs:
+                logger.error('songs: %s, error: %s' % (songs, error))
                 return
             for song in songs:
                 self.album_songs_liststore.append([
@@ -724,6 +736,7 @@ class Artists(Gtk.Box):
     def add_to_fav_artists(self, artist_id, init=False):
         def _append_fav_artist(info, error=None):
             if error or not info:
+                logger.error('info: %s, error: %s' % (info, error))
                 return
             if info.get('pic', None):
                 pix = GdkPixbuf.Pixbuf.new_from_file_at_size(info['pic'],

@@ -15,6 +15,7 @@ from kuwo import Config
 _ = Config._
 from kuwo import Widgets
 from kuwo import Net
+from kuwo.log import logger
 
 
 class Search(Gtk.Box):
@@ -186,6 +187,9 @@ class Search(Gtk.Box):
                     urls.append(artist['PICPATH'])
                 Net.update_artist_logos(self.liststore_artists, 0,
                                         tree_iters, urls)
+            else:
+                logger.error('self.artists_total: %s, error: %s' %
+                        (self.artists_total, error))
 
             self.artists_button.set_label('{0} ({1})'.format(_('Artists'),
                     len(self.liststore_artists)))
@@ -216,6 +220,9 @@ class Search(Gtk.Box):
                     urls.append(album['pic'])
                 Net.update_album_covers(self.liststore_albums, 0,
                                         tree_iters, urls)
+            else:
+                logger.error('self.albums_total: %s, error: %s' %
+                        (self.albums_total, error))
 
             self.albums_button.set_label('{0} ({1})'.format(_('Albums'),
                     len(self.liststore_albums)))

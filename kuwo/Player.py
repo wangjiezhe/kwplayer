@@ -420,6 +420,7 @@ class Player(Gtk.Box):
     def update_player_info(self):
         def _update_pic(info, error=None):
             if not info or error:
+                logger.error('info: %s, error: %s' % (info, error))
                 return
             self.artist_pic.set_tooltip_text(
                     Widgets.short_tooltip(info['info'], length=500))
@@ -453,6 +454,8 @@ class Player(Gtk.Box):
 
     def get_lrc(self):
         def _update_lrc(lrc_text, error=None):
+            if error:
+                logger.error('get_lrc(), error: %s', error)
             self.app.lrc.set_lrc(lrc_text)
 
         Net.async_call(Net.get_lrc, _update_lrc, self.curr_song)
@@ -460,7 +463,8 @@ class Player(Gtk.Box):
     def get_recommend_lists(self):
         self.recommend_imgs = None
         def _on_list_received(imgs, error=None):
-            if not imgs or len(imgs) < 10:
+            if error or not imgs or len(imgs) < 10:
+                logger.warn('imgs: %s, error: %s' % (imgs, error))
                 self.recommend_imgs = None
             else:
                 self.recommend_imgs = imgs.splitlines()
@@ -471,6 +475,7 @@ class Player(Gtk.Box):
     def update_lrc_background(self, url):
         def _update_background(filepath, error=None):
             if error or not filepath:
+                logger.error('filepath: %s, error: %s' % (filepath, error))
                 return
             self.app.lrc.update_background(filepath)
 
@@ -516,6 +521,7 @@ class Player(Gtk.Box):
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
             if error or not mv_args:
+                logger.error('mv_args: %s, error: %s' % (mv_args, error))
                 self.use_mtv_btn.set_sensitive(False)
             else:
                 cached, mv_link, mv_path = mv_args

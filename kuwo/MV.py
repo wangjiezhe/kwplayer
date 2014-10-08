@@ -10,10 +10,10 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from kuwo import Config
+_ = Config._
 from kuwo import Net
 from kuwo import Widgets
-
-_ = Config._
+from kuwo.log import logger
 
 class MV(Gtk.Box):
     '''MV tab in notebook.'''
@@ -97,6 +97,8 @@ class MV(Gtk.Box):
         def _append_songs(songs_args, error=None):
             songs, self.songs_total = songs_args
             if error or not self.songs_total:
+                logger.error('songs_total: %s, error: %s' %
+                        (self.songs_total, error))
                 return
             urls = []
             tree_iters = []

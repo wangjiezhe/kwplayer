@@ -196,6 +196,8 @@ class TopCategories(Gtk.Box):
         def _show_sub2(sub2_args, error=None):
             nodes, self.sub2_total = sub2_args
             if error or not nodes or not self.sub2_total:
+                logger.error('nodes: %s, self.sub2_total: %s, error: %s' %
+                        (nodes, self.sub2_total, error))
                 return
             urls = []
             tree_iters = []
