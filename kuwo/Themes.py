@@ -81,25 +81,26 @@ class Themes(Gtk.Box):
         self.scrolled_sub.hide()
         self.scrolled_songs.hide()
 
-        nodes = Net.get_themes_main()
-        if not nodes:
-            logger.warn('Failed to get nodes!')
-            return
-        urls = []
-        tree_iters = []
-        for node in nodes:
-            tree_iter = self.liststore_main.append([
-                self.app.theme['anonymous'],
-                Widgets.unescape(node['name']),
-                int(node['nid']),
-                Widgets.unescape(node['info']),
-                Widgets.set_tooltip(node['name'], node['info']),
-                ])
-            urls.append(node['pic'])
-            tree_iters.append(tree_iter)
-        self.liststore_main.timestamp = time.time()
-        Net.async_call(Net.update_liststore_images, self.liststore_main, 0,
-                       tree_iters, urls)
+        def _on_get_themes(nodes, error):
+            if not nodes:
+                logger.warn('_on_get_themes(): %s, %s' % (nodes, error))
+                return
+            urls = []
+            tree_iters = []
+            for node in nodes:
+                tree_iter = self.liststore_main.append([
+                    self.app.theme['anonymous'],
+                    Widgets.unescape(node['name']),
+                    int(node['nid']),
+                    Widgets.unescape(node['info']),
+                    Widgets.set_tooltip(node['name'], node['info']),
+                    ])
+                urls.append(node['pic'])
+                tree_iters.append(tree_iter)
+            self.liststore_main.timestamp = time.time()
+            Net.async_call(Net.update_liststore_images, self.liststore_main, 0,
+                           tree_iters, urls)
+        Net.async_call(Net.get_themes_main, callback=_on_get_themes)
 
     def on_iconview_main_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -110,11 +111,10 @@ class Themes(Gtk.Box):
 
     def show_sub(self, init=False):
         def on_show_sub(info, error=None):
-            if error or not info:
+            if error or not info or not info[0] or not info[1]:
+                logger.error('show_sub(): %s, %s' % (info, error))
                 return
             nodes, self.nodes_total = info
-            if not nodes:
-                return
             urls = []
             tree_iters = []
             for node in nodes:
@@ -164,21 +164,25 @@ class Themes(Gtk.Box):
             self.scrolled_songs.get_vadjustment().set_value(0.0)
             self.scrolled_songs.show_all()
 
-        songs, self.songs_total = Net.get_themes_songs(self.curr_list_id,
-                                                       self.songs_page)
-        if not songs:
-            return
-        for song in songs:
-            self.liststore_songs.append([
-                True,
-                Widgets.unescape(song['name']),
-                Widgets.unescape(song['artist']),
-                Widgets.unescape(song['album']),
-                int(song['id']),
-                int(song['artistid']), 
-                int(song['albumid']),
-                song['formats'],
-            ])
+        def _on_get_themes_songs(info, error):
+            if not info or not info[0] or not info[1] or error:
+                logger.error('show_songs(): %s, %s' % (info, error))
+                return
+            songs, self.songs_total = info
+            for song in songs:
+                self.liststore_songs.append([
+                    True,
+                    Widgets.unescape(song['name']),
+                    Widgets.unescape(song['artist']),
+                    Widgets.unescape(song['album']),
+                    int(song['id']),
+                    int(song['artistid']), 
+                    int(song['albumid']),
+                    song['formats'],
+                ])
+
+        Net.async_call(Net.get_themes_songs, self.curr_list_id,
+                       self.songs_page, callback=_on_get_themes_songs)
     
     # buttonbox buttons
     def on_button_main_clicked(self, btn):
