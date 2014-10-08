@@ -113,7 +113,8 @@ class TopCategories(Gtk.Box):
             tree_iters.append(tree_iter)
             urls.append(node['pic'])
         self.liststore_main.timestamp = time.time()
-        Net.update_liststore_images(self.liststore_main, 0, tree_iters, urls)
+        Net.async_call(Net.update_liststore_images, self.liststore_main, 0,
+                       tree_iters, urls)
 
     def on_iconview_main_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -154,8 +155,8 @@ class TopCategories(Gtk.Box):
                 ])
                 urls.append(node['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_liststore_images(self.liststore_sub1, 0,
-                                        tree_iters, urls)
+            Net.async_call(Net.update_liststore_images, self.liststore_sub1, 0,
+                           tree_iters, urls)
 
             self.sub1_page += 1
             if self.sub1_page < self.sub1_total - 1:
@@ -173,8 +174,8 @@ class TopCategories(Gtk.Box):
             self.liststore_sub1.clear()
         if init or not hasattr(self.liststore_sub1, 'timestamp'):
             self.liststore_sub1.timestamp = time.time()
-        Net.async_call(Net.get_nodes, _show_sub1, self.curr_sub1_id,
-                       self.sub1_page)
+        Net.async_call(Net.get_nodes, self.curr_sub1_id, self.sub1_page,
+                       callback=_show_sub1)
 
     def on_iconview_sub1_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -212,8 +213,8 @@ class TopCategories(Gtk.Box):
                 ])
                 urls.append(node['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_liststore_images(self.liststore_sub2, 0,
-                                        tree_iter, urls)
+            Net.async_call(Net.update_liststore_images, self.liststore_sub2, 0,
+                           tree_iters, urls)
 
             self.sub2_page += 1
             if self.sub2_page < self.sub2_total - 1:
@@ -228,8 +229,8 @@ class TopCategories(Gtk.Box):
             self.liststore_sub2.clear()
         if init or not hasattr(self.liststore_sub2, 'timestamp'):
             self.liststore_sub2.timestamp = time.time()
-        Net.async_call(Net.get_nodes, _show_sub2, self.curr_sub2_id,
-                       self.sub2_page)
+        Net.async_call(Net.get_nodes, self.curr_sub2_id, self.sub2_page,
+                       callback=_show_sub2)
 
     def on_iconview_sub2_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -288,8 +289,8 @@ class TopCategories(Gtk.Box):
             self.scrolled_songs.show_all()
             self.liststore_songs.clear()
 
-        Net.async_call(Net.get_themes_songs, _append_songs,
-                       self.curr_list_id, self.songs_page)
+        Net.async_call(Net.get_themes_songs, self.curr_list_id,
+                       self.songs_page, callback=_append_songs)
 
     # buttonbox
     def on_button_main_clicked(self, btn):

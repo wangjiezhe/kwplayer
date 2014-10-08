@@ -168,8 +168,8 @@ class Search(Gtk.Box):
                 len(self.liststore_songs)))
 
         self.app.playlist.advise_new_playlist_name(self.keyword)
-        Net.async_call(Net.search_songs, _append_songs, self.keyword,
-                       self.songs_page)
+        Net.async_call(Net.search_songs, self.keyword, self.songs_page,
+                       callback=_append_songs)
 
     def show_artists(self):
         def _append_artists(artists_args, error=None):
@@ -197,8 +197,8 @@ class Search(Gtk.Box):
         # timestamp is used to mark Liststore ID
         if self.artists_page == 0:
             self.liststore_artists.timestamp = time.time()
-        Net.async_call(Net.search_artists, _append_artists,
-                       self.keyword, self.artists_page)
+        Net.async_call(Net.search_artists, self.keyword, self.artists_page,
+                       callback=_append_artists)
 
     def show_albums(self):
         def _append_albums(albums_args, error=None):
@@ -229,8 +229,8 @@ class Search(Gtk.Box):
 
         if self.albums_page == 0:
             self.liststore_albums.timestamp = time.time()
-        Net.async_call(Net.search_albums, _append_albums,
-                       self.keyword, self.albums_page)
+        Net.async_call(Net.search_albums, self.keyword, self.albums_page,
+                       callback=_append_albums)
 
     def reset_search_status(self):
         self.songs_button.set_label(_('Songs'))

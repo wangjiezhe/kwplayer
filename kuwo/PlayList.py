@@ -614,7 +614,7 @@ class PlayList(Gtk.Box):
 
         liststore = self.tabs[list_name].liststore
         tree = self.tabs[list_name].treeview
-        Net.async_call(start, stop)
+        Net.async_call(start, callback=stop)
 
     # Open API
     def cache_song(self, song):

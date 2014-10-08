@@ -82,7 +82,8 @@ class MV(Gtk.Box):
             tree_iters.append(tree_iter)
             urls.append(node['pic'])
         self.liststore_nodes.timestamp = time.time()
-        Net.update_liststore_images(self.liststore_nodes, 0, tree_iters, urls)
+        Net.async_call(Net.update_liststore_images, self.liststore_nodes, 0,
+                       tree_iters, urls)
 
     def on_iconview_nodes_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -126,8 +127,8 @@ class MV(Gtk.Box):
             self.liststore_songs.clear()
         if init or not hasattr(self.liststore_songs, 'timestamp'):
             self.liststore_songs.timestamp = time.time()
-        Net.async_call(Net.get_mv_songs, _append_songs, 
-                       self.curr_node_id, self.songs_page)
+        Net.async_call(Net.get_mv_songs, self.curr_node_id, self.songs_page,
+                       callback=_append_songs)
 
     def on_iconview_songs_item_activated(self, iconview, path):
         model = iconview.get_model()

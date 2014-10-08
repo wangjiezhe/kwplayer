@@ -79,23 +79,24 @@ if ldb_imported:
         logger.debug(traceback.format_exc())
         ldb_imported = False
 
-def empty_func(*args, **kwds):
-    pass
+def async_call(func, *args, callback=None):
+    '''Call `func` in background thread, and then call `callback` in Gtk main thread.
 
-# calls f on another thread
-def async_call(func, func_done, *args):
-    def do_call(*args):
+    If error occurs in `func`, error will keep the traceback and passed to
+    `callback` as second parameter. Always check `error` is not None.
+    '''
+    def do_call():
         result = None
         error = None
 
         try:
             result = func(*args)
-        except Exception:
-            error = traceback.format_exc()
-            logger.warn(error)
-        GLib.idle_add(lambda: func_done(result, error))
+        except Exception as e:
+            error = e
+        if callback:
+            GLib.idle_add(callback, result, error)
 
-    thread = threading.Thread(target=do_call, args=args)
+    thread = threading.Thread(target=do_call)
     thread.daemon = True
     thread.start()
 
@@ -182,7 +183,7 @@ def get_image(url, filepath=None):
         return None
 
 def get_album(albumid):
-    url = '{0}type=albuminfo&albumid={1}'.format(SEARCH, albumid)
+    url = '{0}stype=albuminfo&albumid={1}'.format(SEARCH, albumid)
     req_content = urlopen(url)
     if not req_content:
         return None
@@ -196,7 +197,7 @@ def update_liststore_images(liststore,  col, tree_iters, urls,
                             url_proxy=None, resize=IMG_SIZE):
     '''Update a banch of thumbnails consequently.
 
-    liststore - the tree model, which has timestmap property
+    liststore - the tree model, which has timestamp property
     col       - column index
     tree_iters - a list of tree_iters
     urls      - a list of image urls
@@ -214,21 +215,17 @@ def update_liststore_images(liststore,  col, tree_iters, urls,
         except GLib.GError:
             logger.error(traceback.format_exc())
 
-    def get_images():
-        for tree_iter, url in zip(tree_iters, urls):
-            # First, check timestamp matches
-            if liststore.timestamp != timestamp:
-                break
-            if url_proxy:
-                url = url_proxy(url)
-            filepath = get_image(url)
-            if filepath:
-                GLib.idle_add(update_image, filepath, tree_iter)
-
     timestamp = liststore.timestamp
-    thread = threading.Thread(target=get_images, args=[])
-    thread.daemon = True
-    thread.start()
+    for tree_iter, url in zip(tree_iters, urls):
+        # First, check timestamp matches
+        if liststore.timestamp != timestamp:
+            break
+        if url_proxy:
+            url = url_proxy(url)
+        filepath = get_image(url)
+        if filepath:
+            GLib.idle_add(update_image, filepath, tree_iter)
+
 
 def update_album_covers(liststore, col, tree_iters, urls):
     def url_proxy(url):
@@ -804,7 +801,7 @@ class AsyncSong(GObject.GObject):
 
         If higher quality of that music unavailable, a lower one is used.
         '''
-        async_call(self._download_song, empty_func, song, use_mv)
+        async_call(self._download_song, song, use_mv)
 
     def _download_song(self, song, use_mv):
         cached, song_link, song_path = get_song_link(song, self.app.conf,

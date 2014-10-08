@@ -98,8 +98,8 @@ class Themes(Gtk.Box):
             urls.append(node['pic'])
             tree_iters.append(tree_iter)
         self.liststore_main.timestamp = time.time()
-        Net.update_liststore_images(
-                self.liststore_main, 0, tree_iters, urls)
+        Net.async_call(Net.update_liststore_images, self.liststore_main, 0,
+                       tree_iters, urls)
 
     def on_iconview_main_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -128,8 +128,8 @@ class Themes(Gtk.Box):
                 ])
                 tree_iters.append(tree_iter)
                 urls.append(node['pic'])
-            Net.update_liststore_images(self.liststore_sub, 0,
-                                        tree_iters, urls)
+            Net.async_call(Net.update_liststore_images, self.liststore_sub, 0,
+                           tree_iters, urls)
         if init:
             self.scrolled_main.hide()
             self.scrolled_songs.hide()
@@ -142,8 +142,8 @@ class Themes(Gtk.Box):
             self.liststore_sub.clear()
         if init or not hasattr(self.liststore_sub, 'timestamp'):
             self.liststore_sub.timestamp = time.time()
-        Net.async_call(Net.get_nodes, on_show_sub, self.curr_sub_id,
-                       self.nodes_page)
+        Net.async_call(Net.get_nodes, self.curr_sub_id, self.nodes_page,
+                       callback=on_show_sub)
 
     def on_iconview_sub_item_activated(self, iconview, path):
         model = iconview.get_model()

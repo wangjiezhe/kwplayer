@@ -414,8 +414,8 @@ class Artists(Gtk.Box):
         pref_index = self.pref_combo.get_active()
         catid = model[_iter][1]
         prefix = self.pref_liststore[pref_index][1]
-        Net.async_call(Net.get_artists, on_append_artists, catid,
-                       self.artists_page, prefix)
+        Net.async_call(Net.get_artists, catid, self.artists_page, prefix,
+                       callback=on_append_artists)
 
     def on_artists_iconview_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -503,8 +503,8 @@ class Artists(Gtk.Box):
         if init:
             self.artist_songs_liststore.clear()
             self.artist_songs_page = 0
-        Net.async_call(Net.get_artist_songs_by_id, _append_artist_songs, 
-                       self.curr_artist_id, self.artist_songs_page)
+        Net.async_call(Net.get_artist_songs_by_id, self.curr_artist_id,
+                       self.artist_songs_page, callback=_append_artist_songs)
 
     def show_artist_albums(self):
         self.artist_control_box.hide()
@@ -546,8 +546,8 @@ class Artists(Gtk.Box):
             self.artist_albums_page = 0
         if init or not hasattr(self.artist_albums, 'timestamp'):
             self.artist_albums_liststore.timestamp = time.time()
-        Net.async_call(Net.get_artist_albums, _append_artist_albums,
-                       self.curr_artist_id, self.artist_albums_page)
+        Net.async_call(Net.get_artist_albums, self.curr_artist_id,
+                       self.artist_albums_page, callback=_append_artist_albums)
 
     def show_artist_mv(self):
         self.artist_control_box.hide()
@@ -590,8 +590,8 @@ class Artists(Gtk.Box):
             self.artist_mv_page = 0
         if init or not hasattr(self.artist_mv_liststore, 'timestamp'):
             self.artist_mv_liststore.timestamp = time.time()
-        Net.async_call(Net.get_artist_mv, _append_artist_mv,
-                       self.curr_artist_id, self.artist_mv_page)
+        Net.async_call(Net.get_artist_mv, self.curr_artist_id,
+                       self.artist_mv_page, callback=_append_artist_mv)
 
     def show_artist_similar(self):
         self.artist_control_box.hide()
@@ -634,8 +634,9 @@ class Artists(Gtk.Box):
             self.artist_similar_page = 0
         if init or not hasattr(self.artist_similar_liststore, 'timestamp'):
             self.artist_similar_liststore.timestamp = time.time()
-        Net.async_call(Net.get_artist_similar, _append_artist_similar,
-                       self.curr_artist_id, self.artist_similar_page)
+        Net.async_call(Net.get_artist_similar, self.curr_artist_id,
+                       self.artist_similar_page,
+                       callback=_append_artist_similar)
 
     def show_artist_info(self):
         self.artist_control_box.hide()
@@ -668,8 +669,8 @@ class Artists(Gtk.Box):
             else:
                 self.artist_info_textbuffer.set_text('')
 
-        Net.async_call(Net.get_artist_info, _append_artist_info,
-                       self.curr_artist_id)
+        Net.async_call(Net.get_artist_info, self.curr_artist_id,
+                       callback=_append_artist_info)
 
 
     def on_artist_albums_iconview_item_activated(self, iconview, path):
@@ -726,8 +727,8 @@ class Artists(Gtk.Box):
                     song['formats'],
                 ])
         self.album_songs_liststore.clear()
-        Net.async_call(Net.get_album, _append_album_songs,
-                       self.curr_album_id)
+        Net.async_call(Net.get_album, self.curr_album_id,
+                       callback=_append_album_songs)
 
     def on_artist_button_clicked(self, button):
         self.show_artist(self.curr_artist_name, self.curr_artist_id)
@@ -749,7 +750,8 @@ class Artists(Gtk.Box):
 
         if init is False and self.check_artist_favorited(artist_id):
             return
-        Net.async_call(Net.get_artist_info, _append_fav_artist, artist_id)
+        Net.async_call(Net.get_artist_info, artist_id,
+                       callback=_append_fav_artist)
 
     def remove_from_fav_artists(self, artist_id):
         '''Remove an artist from fav_artists_liststore.'''

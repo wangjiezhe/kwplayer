@@ -80,7 +80,8 @@ class TopList(Gtk.Box):
             urls.append(node['pic'])
             tree_iters.append(tree_iter)
         self.liststore_nodes.timestamp = time.time()
-        Net.update_liststore_images(self.liststore_nodes, 0, tree_iters, urls)
+        Net.async_call(Net.update_liststore_images, self.liststore_nodes, 0,
+                       tree_iters, urls)
 
     def on_button_home_clicked(self, btn):
         self.scrolled_nodes.show_all()

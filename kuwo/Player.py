@@ -449,8 +449,8 @@ class Player(Gtk.Box):
         self.label.set_label(label)
         self.app.window.set_title(name)
         self.artist_pic.set_from_pixbuf(self.app.theme['anonymous'])
-        Net.async_call(Net.get_artist_info, _update_pic, 
-                       song['artistid'], song['artist'])
+        Net.async_call(Net.get_artist_info, song['artistid'], song['artist'],
+                       callback=_update_pic)
 
     def get_lrc(self):
         def _update_lrc(lrc_text, error=None):
@@ -458,7 +458,7 @@ class Player(Gtk.Box):
                 logger.error('get_lrc(), error: %s', error)
             self.app.lrc.set_lrc(lrc_text)
 
-        Net.async_call(Net.get_lrc, _update_lrc, self.curr_song)
+        Net.async_call(Net.get_lrc, self.curr_song, callback=_update_lrc)
 
     def get_recommend_lists(self):
         self.recommend_imgs = None
@@ -469,8 +469,8 @@ class Player(Gtk.Box):
             else:
                 self.recommend_imgs = imgs.splitlines()
 
-        Net.async_call(Net.get_recommend_lists, _on_list_received, 
-                       self.curr_song['artist'])
+        Net.async_call(Net.get_recommend_lists, self.curr_song['artist'],
+                       callback=_on_list_received)
 
     def update_lrc_background(self, url):
         def _update_background(filepath, error=None):
@@ -479,7 +479,8 @@ class Player(Gtk.Box):
                 return
             self.app.lrc.update_background(filepath)
 
-        Net.async_call(Net.get_recommend_image, _update_background, url)
+        Net.async_call(Net.get_recommend_image, url,
+                       callback=_update_background)
 
     # Radio part
     def load_radio(self, song, radio_item):
@@ -529,8 +530,8 @@ class Player(Gtk.Box):
                     self.use_mtv_btn.set_sensitive(True)
                 else:
                     self.use_mtv_btn.set_sensitive(False)
-        Net.async_call(Net.get_song_link, _update_mv_link,
-                       self.curr_song, self.app.conf, True)
+        Net.async_call(Net.get_song_link, self.curr_song, self.app.conf, True,
+                       callback=_update_mv_link)
 
     # Fullscreen
     def toggle_fullscreen(self):
