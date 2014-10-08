@@ -63,27 +63,30 @@ class MV(Gtk.Box):
         self.buttonbox.hide()
         self.scrolled_songs.hide()
 
+        def _on_get_index_nodes(nodes_wrap, error=None):
+            if not nodes_wrap or error:
+                logger.error('MV._on_get_inex_nodes(): %s, %s' %
+                             (nodes_wrap, error))
+                return
+            nodes = nodes_wrap['child']
+            self.liststore_nodes.clear()
+            urls = []
+            tree_iters = []
+            for node in nodes:
+                tree_iter = self.liststore_nodes.append([
+                    self.app.theme['anonymous'],
+                    Widgets.unescape(node['disname']),
+                    int(node['sourceid']),
+                    Widgets.unescape(node['info']),
+                    Widgets.set_tooltip(node['disname'], node['info']),
+                ])
+                tree_iters.append(tree_iter)
+                urls.append(node['pic'])
+            self.liststore_nodes.timestamp = time.time()
+            Net.async_call(Net.update_liststore_images, self.liststore_nodes, 0,
+                           tree_iters, urls)
         nid = 3
-        nodes_wrap = Net.get_index_nodes(nid)
-        if not nodes_wrap:
-            return
-        nodes = nodes_wrap['child']
-        self.liststore_nodes.clear()
-        urls = []
-        tree_iters = []
-        for node in nodes:
-            tree_iter = self.liststore_nodes.append([
-                self.app.theme['anonymous'],
-                Widgets.unescape(node['disname']),
-                int(node['sourceid']),
-                Widgets.unescape(node['info']),
-                Widgets.set_tooltip(node['disname'], node['info']),
-            ])
-            tree_iters.append(tree_iter)
-            urls.append(node['pic'])
-        self.liststore_nodes.timestamp = time.time()
-        Net.async_call(Net.update_liststore_images, self.liststore_nodes, 0,
-                       tree_iters, urls)
+        Net.async_call(Net.get_index_nodes, nid, callback=_on_get_index_nodes)
 
     def on_iconview_nodes_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -95,11 +98,11 @@ class MV(Gtk.Box):
         self.append_songs(init=True)
 
     def append_songs(self, init=False):
-        def _append_songs(songs_args, error=None):
+        def _on_append_songs(songs_args, error=None):
             songs, self.songs_total = songs_args
             if error or not self.songs_total:
-                logger.error('songs_total: %s, error: %s' %
-                        (self.songs_total, error))
+                logger.error('append_songs(): %s, %s' %
+                             (self.songs_total, error))
                 return
             urls = []
             tree_iters = []
@@ -116,7 +119,8 @@ class MV(Gtk.Box):
                 ])
                 tree_iters.append(tree_iter)
                 urls.append(song['mvpic'])
-            Net.update_mv_images(self.liststore_songs, 0, tree_iters, urls)
+            Net.async_call(Net.update_mv_images, self.liststore_songs, 0,
+                           tree_iters, urls)
             self.songs_page += 1
             if self.songs_page < self.songs_total - 1:
                 self.append_songs()
@@ -128,7 +132,7 @@ class MV(Gtk.Box):
         if init or not hasattr(self.liststore_songs, 'timestamp'):
             self.liststore_songs.timestamp = time.time()
         Net.async_call(Net.get_mv_songs, self.curr_node_id, self.songs_page,
-                       callback=_append_songs)
+                       callback=_on_append_songs)
 
     def on_iconview_songs_item_activated(self, iconview, path):
         model = iconview.get_model()
