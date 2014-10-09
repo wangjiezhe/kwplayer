@@ -397,8 +397,8 @@ class Artists(Gtk.Box):
                 ])
                 urls.append(artist['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_artist_logos(self.artists_liststore, 0,
-                                    tree_iters, urls)
+            Net.async_call(Net.update_artist_logos, self.artists_liststore, 0,
+                           tree_iters, urls)
 
         if init:
             self.artists_liststore.clear()
@@ -535,8 +535,8 @@ class Artists(Gtk.Box):
                 ])
                 urls.append(album['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_album_covers(self.artist_albums_liststore, 0,
-                                    tree_iters, urls)
+            Net.async_call(Net.update_album_covers,
+                           self.artist_albums_liststore, 0, tree_iters, urls)
             self.artist_albums_page += 1
             if self.artist_albums_page < self.artist_albums_total - 1:
                 self.append_artist_albums()
@@ -580,7 +580,8 @@ class Artists(Gtk.Box):
                 ])
                 tree_iters.append(tree_iter)
                 urls.append(mv['pic'])
-            Net.update_mv_images(self.artist_mv_liststore, 0, tree_iters, urls)
+            Net.async_call(Net.update_mv_images, self.artist_mv_liststore, 0,
+                           tree_iters, urls)
             self.artist_mv_page += 1
             if self.artist_mv_page < self.artist_mv_total - 1:
                 self.append_artist_mv()
@@ -623,8 +624,8 @@ class Artists(Gtk.Box):
                 ])
                 urls.append(artist['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_artist_logos(self.artist_similar_liststore, 0,
-                                    tree_iters, urls)
+            Net.async_call(Net.update_artist_logos,
+                           self.artist_similar_liststore, 0, tree_iters, urls)
             self.artist_similar_page += 1
             if self.artist_similar_page < self.artist_similar_total - 1:
                 self.append_artist_similar()
