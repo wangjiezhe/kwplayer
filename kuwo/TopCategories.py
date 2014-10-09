@@ -173,7 +173,7 @@ class TopCategories(Gtk.Box):
             self.button_sub1.hide()
             self.button_sub2.hide()
             self.control_box.hide()
-            self.scrolled_sub1.get_vadjustment().set_value(0)
+            self.scrolled_sub1.get_vscrollbar().set_value(0)
             self.scrolled_sub1.show_all()
             self.sub1_page = 0
             self.liststore_sub1.clear()
@@ -228,7 +228,7 @@ class TopCategories(Gtk.Box):
         if init:
             self.scrolled_sub1.hide()
             self.button_sub1.show_all()
-            self.scrolled_sub2.get_vadjustment().set_value(0)
+            self.scrolled_sub2.get_vscrollbar().set_value(0)
             self.scrolled_sub2.show_all()
             self.sub2_page = 0
             self.liststore_sub2.clear()
@@ -298,7 +298,7 @@ class TopCategories(Gtk.Box):
             if self.use_sub2:
                 self.scrolled_sub2.hide()
                 self.button_sub2.show_all()
-            self.scrolled_songs.get_vadjustment().set_value(0.0)
+            self.scrolled_songs.get_vscrollbar().set_value(0.0)
             self.scrolled_songs.show_all()
             self.liststore_songs.clear()
 

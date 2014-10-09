@@ -121,5 +121,6 @@ class TopList(Gtk.Box):
 
         self.scrolled_nodes.hide()
         self.scrolled_songs.show_all()
+        self.scrolled_songs.get_vscrollbar().set_value(0)
         Net.async_call(Net.get_toplist_songs, nid,
                        callback=_on_get_toplist_songs)

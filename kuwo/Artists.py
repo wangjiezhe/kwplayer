@@ -401,6 +401,7 @@ class Artists(Gtk.Box):
                            tree_iters, urls)
 
         if init:
+            self.artists_win.get_vscrollbar().set_value(0)
             self.artists_liststore.clear()
             self.artists_page = 0
             self.artists_win.get_vadjustment().set_value(0)
@@ -501,6 +502,7 @@ class Artists(Gtk.Box):
                 self.append_artist_songs()
 
         if init:
+            self.artist_songs_tab.get_vscrollbar().set_value(0)
             self.artist_songs_liststore.clear()
             self.artist_songs_page = 0
         Net.async_call(Net.get_artist_songs_by_id, self.curr_artist_id,
@@ -542,6 +544,7 @@ class Artists(Gtk.Box):
                 self.append_artist_albums()
 
         if init:
+            self.artist_albums_tab.get_vscrollbar().set_value(0)
             self.artist_albums_liststore.clear()
             self.artist_albums_page = 0
         if init or not hasattr(self.artist_albums, 'timestamp'):
@@ -587,6 +590,7 @@ class Artists(Gtk.Box):
                 self.append_artist_mv()
 
         if init:
+            self.artist_mv_tab.get_vscrollbar().set_value(0)
             self.artist_mv_liststore.clear()
             self.artist_mv_page = 0
         if init or not hasattr(self.artist_mv_liststore, 'timestamp'):
@@ -631,6 +635,7 @@ class Artists(Gtk.Box):
                 self.append_artist_similar()
 
         if init:
+            self.artist_similar_tab.get_vscrollbar().set_value(0)
             self.artist_similar_liststore.clear()
             self.artist_similar_page = 0
         if init or not hasattr(self.artist_similar_liststore, 'timestamp'):
@@ -749,7 +754,7 @@ class Artists(Gtk.Box):
             self.fav_artists_liststore.append([pix, info['name'],
                                                artist_id, tip])
 
-        if init is False and self.check_artist_favorited(artist_id):
+        if not init and self.check_artist_favorited(artist_id):
             return
         Net.async_call(Net.get_artist_info, artist_id,
                        callback=_append_fav_artist)

@@ -136,7 +136,7 @@ class Themes(Gtk.Box):
             self.buttonbox.show_all()
             self.button_sub.hide()
             self.control_box.hide()
-            self.scrolled_sub.get_vadjustment().set_value(0)
+            self.scrolled_sub.get_vscrollbar().set_value(0)
             self.scrolled_sub.show_all()
             self.nodes_page = 0
             self.liststore_sub.clear()
@@ -161,7 +161,7 @@ class Themes(Gtk.Box):
             self.scrolled_sub.hide()
             self.button_sub.show_all()
             self.control_box.show_all()
-            self.scrolled_songs.get_vadjustment().set_value(0.0)
+            self.scrolled_songs.get_vscrollbar().set_value(0)
             self.scrolled_songs.show_all()
 
         def _on_get_themes_songs(info, error):

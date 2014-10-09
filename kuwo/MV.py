@@ -125,6 +125,8 @@ class MV(Gtk.Box):
                 self.append_songs()
 
         if init:
+            # reset scrollbar
+            self.scrolled_songs.get_vscrollbar().set_value(0)
             self.app.playlist.advise_new_playlist_name(self.label.get_text())
             self.songs_page = 0
             self.liststore_songs.clear()
