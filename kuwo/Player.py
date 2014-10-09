@@ -300,7 +300,7 @@ class Player(Gtk.Box):
                     self.use_mtv_btn.set_sensitive(
                             'MP4' in self.curr_song['formats'])
                 else:
-                    # for v3.4.7
+                    # for v3.4.7, remove this in v3.6.1
                     self.get_mv_link()
         GLib.idle_add(_on_song_can_play)
 
@@ -420,7 +420,7 @@ class Player(Gtk.Box):
     def update_player_info(self):
         def _update_pic(info, error=None):
             if not info or error:
-                logger.error('info: %s, error: %s' % (info, error))
+                logger.error('update_player_info(): %s, %s' % (info, error))
                 return
             self.artist_pic.set_tooltip_text(
                     Widgets.short_tooltip(info['info'], length=500))
@@ -455,7 +455,7 @@ class Player(Gtk.Box):
     def get_lrc(self):
         def _update_lrc(lrc_text, error=None):
             if error:
-                logger.error('get_lrc(), error: %s', error)
+                logger.error('get_lrc(): %s', error)
             self.app.lrc.set_lrc(lrc_text)
 
         Net.async_call(Net.get_lrc, self.curr_song, callback=_update_lrc)
@@ -464,7 +464,7 @@ class Player(Gtk.Box):
         self.recommend_imgs = None
         def _on_list_received(imgs, error=None):
             if error or not imgs or len(imgs) < 10:
-                logger.warn('imgs: %s, error: %s' % (imgs, error))
+                logger.warn('get_recommend_lists(): %s, %s' % (imgs, error))
                 self.recommend_imgs = None
             else:
                 self.recommend_imgs = imgs.splitlines()
@@ -475,7 +475,8 @@ class Player(Gtk.Box):
     def update_lrc_background(self, url):
         def _update_background(filepath, error=None):
             if error or not filepath:
-                logger.error('filepath: %s, error: %s' % (filepath, error))
+                logger.error('update_lrc_background(): %s, %s' %
+                             (filepath, error))
                 return
             self.app.lrc.update_background(filepath)
 
@@ -522,7 +523,7 @@ class Player(Gtk.Box):
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
             if error or not mv_args:
-                logger.error('mv_args: %s, error: %s' % (mv_args, error))
+                logger.error('get_mv_link(): %s, %s' % (mv_args, error))
                 self.use_mtv_btn.set_sensitive(False)
             else:
                 cached, mv_link, mv_path = mv_args

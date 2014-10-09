@@ -100,7 +100,7 @@ class Artists(Gtk.Box):
         # pic, name, artist, album, rid, artistid, albumid, tooltip
         # FIXME: check formats column
         self.artist_mv_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, str,
-                str, int, int, int, str)
+                                                 str, int, int, int, str)
         self.artist_mv_control_box = Widgets.MVControlBox(
                 self.artist_mv_liststore, app)
         self.buttonbox.pack_end(self.artist_mv_control_box, False, False, 0)
@@ -108,8 +108,8 @@ class Artists(Gtk.Box):
         # control box for artist's albums
         album_songs_treeview = Widgets.TreeViewSongs(app)
         self.album_songs_liststore = album_songs_treeview.liststore
-        self.album_control_box = Widgets.ControlBox(
-                self.album_songs_liststore, app)
+        self.album_control_box = Widgets.ControlBox(self.album_songs_liststore,
+                                                    app)
         self.buttonbox.pack_end(self.album_control_box, False, False, 0)
 
         # main notebook
@@ -159,8 +159,8 @@ class Artists(Gtk.Box):
 
         # main window of artists
         self.artists_win = Gtk.ScrolledWindow()
-        self.artists_win.get_vadjustment().connect('value-changed',
-                self.on_artists_win_scrolled)
+        adjustment = self.artists_win.get_vadjustment()
+        adjustment.connect('value-changed', self.on_artists_win_scrolled)
         self.artists_tab.pack_start(self.artists_win, True, True, 0)
         # icon, artist name, artist id, num of songs, tooltip
         self.artists_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
@@ -381,8 +381,8 @@ class Artists(Gtk.Box):
         def on_append_artists(info, error=None):
             artists, self.artists_total = info
             if error or not self.artists_total or not artists:
-                logger.error('artists_total: %s, artists: %s, error: %s' %
-                        (self.artists_total, artists, error))
+                logger.error('append_artists(), %s, %s, %s' %
+                             (self.artists_total, artists, error))
                 return
             urls = []
             tree_iters = []
@@ -394,7 +394,7 @@ class Artists(Gtk.Box):
                     int(artist['id']),
                     _info,
                     Widgets.set_tooltip(artist['name'], _info),
-                    ])
+                ])
                 urls.append(artist['pic'])
                 tree_iters.append(tree_iter)
             Net.update_artist_logos(self.artists_liststore, 0,
@@ -481,8 +481,8 @@ class Artists(Gtk.Box):
         def _append_artist_songs(songs_args, error=None):
             songs, self.artist_songs_total = songs_args
             if error or self.artist_songs_total == 0:
-                logger.error('artist_songs_total: %s, error: %s' %
-                        (self.artist_songs_total, error))
+                logger.error('append_artist_songs(): %s, %s' %
+                             (self.artist_songs_total, error))
                 return
             for song in songs:
                 self.artist_songs_liststore.append([
@@ -519,8 +519,8 @@ class Artists(Gtk.Box):
         def _append_artist_albums(albums_args, error=None):
             albums, self.artist_albums_total = albums_args
             if error or self.artist_albums_total == 0:
-                logger.error('artist_albums_total: %s, error: %s' %
-                        (self.artist_albums_taotal, error))
+                logger.error('append_arttist_albums(): %s, %s' %
+                             (self.artist_albums_taotal, error))
                 return
             urls = []
             tree_iters = []
@@ -562,8 +562,8 @@ class Artists(Gtk.Box):
         def _append_artist_mv(mv_args, error=None):
             mvs, self.artist_mv_total = mv_args
             if error or self.artist_mv_total == 0:
-                logger.error('artist_mv_total: %s, error: %s' %
-                        (self.artist_mv_total, error))
+                logger.error('append_artist_mv(): %s, %s' %
+                             (self.artist_mv_total, error))
                 return
             urls = []
             tree_iters = []
@@ -607,8 +607,8 @@ class Artists(Gtk.Box):
         def _append_artist_similar(similar_args, error=None):
             artists, self.artist_similar_total = similar_args
             if error or not self.artist_similar_total:
-                logger.error('artist_similar_total: %s, error: %s' %
-                        (self.artist_similar_total, error))
+                logger.error('append_artist_similar(): %s, %s' %
+                             (self.artist_similar_total, error))
                 return
             urls = []
             tree_iters = []
@@ -650,7 +650,7 @@ class Artists(Gtk.Box):
     def append_artist_info(self):
         def _append_artist_info(info, error=None):
             if error or not info:
-                logger.error('info: %s, error: %s' % (info, error))
+                logger.error('appen_artist_info(): %s, %s' % (info, error))
                 return
             if info.get('pic', None):
                 self.artist_info_pic.set_from_file(info['pic'])
@@ -713,7 +713,7 @@ class Artists(Gtk.Box):
     def append_album_songs(self):
         def _append_album_songs(songs, error=None):
             if error or not songs:
-                logger.error('songs: %s, error: %s' % (songs, error))
+                logger.error('append_album_songs(): %s, %s' % (songs, error))
                 return
             for song in songs:
                 self.album_songs_liststore.append([
@@ -737,7 +737,7 @@ class Artists(Gtk.Box):
     def add_to_fav_artists(self, artist_id, init=False):
         def _append_fav_artist(info, error=None):
             if error or not info:
-                logger.error('info: %s, error: %s' % (info, error))
+                logger.error('add_to_fav_artists(): %s, %s' % (info, error))
                 return
             if info.get('pic', None):
                 pix = GdkPixbuf.Pixbuf.new_from_file_at_size(info['pic'],

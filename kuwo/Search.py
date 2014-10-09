@@ -165,7 +165,7 @@ class Search(Gtk.Box):
                         song['FORMATS'],
                     ])
             self.songs_button.set_label('{0} ({1})'.format(_('Songs'),
-                len(self.liststore_songs)))
+                                        len(self.liststore_songs)))
 
         self.app.playlist.advise_new_playlist_name(self.keyword)
         Net.async_call(Net.search_songs, self.keyword, self.songs_page,
@@ -188,11 +188,11 @@ class Search(Gtk.Box):
                 Net.update_artist_logos(self.liststore_artists, 0,
                                         tree_iters, urls)
             else:
-                logger.error('self.artists_total: %s, error: %s' %
-                        (self.artists_total, error))
+                logger.error('show_artists(): %s, %s' %
+                             (self.artists_total, error))
 
             self.artists_button.set_label('{0} ({1})'.format(_('Artists'),
-                    len(self.liststore_artists)))
+                                          len(self.liststore_artists)))
 
         # timestamp is used to mark Liststore ID
         if self.artists_page == 0:
@@ -221,11 +221,10 @@ class Search(Gtk.Box):
                 Net.update_album_covers(self.liststore_albums, 0,
                                         tree_iters, urls)
             else:
-                logger.error('self.albums_total: %s, error: %s' %
-                        (self.albums_total, error))
+                logger.error('show_albums: %s, %s' % (self.albums_total, error))
 
             self.albums_button.set_label('{0} ({1})'.format(_('Albums'),
-                    len(self.liststore_albums)))
+                                         len(self.liststore_albums)))
 
         if self.albums_page == 0:
             self.liststore_albums.timestamp = time.time()

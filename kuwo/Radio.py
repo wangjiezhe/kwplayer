@@ -49,8 +49,8 @@ class RadioItem(Gtk.EventBox):
         box_right = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.box.pack_start(box_right, True, True, 0)
 
-        radio_name = Gtk.Label(Widgets.short_str(
-            self.playlists[self.radio_id]['name'], 8))
+        radio_name = Gtk.Label(
+                Widgets.short_str(self.playlists[self.radio_id]['name'], 8))
         box_right.pack_start(radio_name, True, True, 0)
 
         self.label = Gtk.Label(_('song name'))
@@ -84,7 +84,7 @@ class RadioItem(Gtk.EventBox):
     def init_songs(self):
         def _update_songs(songs, error=None):
             if error or not songs:
-                logger.error('songs: %s, error: %s' % (songs, error))
+                logger.error('init_songs(): %s, %s' % (songs, error))
                 return
             self.playlists[self.radio_id]['songs'] = songs
             self.playlists[self.radio_id]['curr_song'] = 0
@@ -97,7 +97,7 @@ class RadioItem(Gtk.EventBox):
     def load_more_songs(self):
         def _on_more_songs_loaded(songs, error=None):
             if error or not songs:
-                logger.error('songs: %s, error: %s' % (songs, error))
+                logger.error('load_more_songs(): %s, %s' % (songs, error))
                 return
             self.playlists[self.radio_id]['songs'] += songs
         self.playlists[self.radio_id]['offset'] += 1

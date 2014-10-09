@@ -169,14 +169,11 @@ class FolderChooser(Gtk.Box):
             return
         dialog.destroy()
 
+
 class TreeViewColumnText(Gtk.TreeViewColumn):
 
     def __init__(self, *args, **keys):
         super().__init__(*args, **keys)
-        # This is the best option, but Gtk raises some Exceptions like:
-        # (kuwo.py:14225): Gtk-CRITICAL **: _gtk_tree_view_column_autosize: assertion `GTK_IS_TREE_VIEW (tree_view)' failed
-        # I don't know why that happens and how to fix it.  
-        #self.props.sizing = Gtk.TreeViewColumnSizing.AUTOSIZE
         self.props.sizing = Gtk.TreeViewColumnSizing.GROW_ONLY
         self.props.expand = True
         self.props.max_width = 280
@@ -385,7 +382,6 @@ def filesystem_error(parent, path):
     dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.MODAL,
                                Gtk.MessageType.ERROR,
                                Gtk.ButtonsType.CLOSE, msg)
-    dialog.format_secondary_text(
-            _('Unable to access {0}').format(path))
+    dialog.format_secondary_text(_('Unable to access {0}').format(path))
     dialog.run()
     dialog.destroy()

@@ -91,30 +91,33 @@ class TopCategories(Gtk.Box):
         self.scrolled_sub2.hide()
         self.scrolled_songs.hide()
 
+        def _on_get_nodes(info, error):
+            if not info or not info[0] or not info[1] or error:
+                logger.error('TopCategories._on_get_nodes(): %s, %s' %
+                             (info, error))
+                return
+            urls = []
+            tree_iters = []
+            for node in nodes:
+                # skip 'xx专区'
+                if node['disname'].endswith('专区'):
+                    continue
+                tree_iter = self.liststore_main.append([
+                    self.app.theme['anonymous'],
+                    Widgets.unescape(node['disname']),
+                    int(node['id']),
+                    Widgets.unescape(node['info']),
+                    Widgets.set_tooltip(node['disname'], node['info']),
+                ])
+                tree_iters.append(tree_iter)
+                urls.append(node['pic'])
+            self.liststore_main.timestamp = time.time()
+            Net.async_call(Net.update_liststore_images, self.liststore_main, 0,
+                           tree_iters, urls)
+
         nid = 5
         page = 0
-        nodes, total_page = Net.get_nodes(nid, page)
-        if not nodes:
-            logger.warn('Failed to get nodes, do something!')
-            return
-        urls = []
-        tree_iters = []
-        for node in nodes:
-            # skip 'xx专区' categories
-            if node['disname'].endswith('专区'):
-                continue
-            tree_iter = self.liststore_main.append([
-                self.app.theme['anonymous'],
-                Widgets.unescape(node['disname']),
-                int(node['id']),
-                Widgets.unescape(node['info']),
-                Widgets.set_tooltip(node['disname'], node['info']),
-            ])
-            tree_iters.append(tree_iter)
-            urls.append(node['pic'])
-        self.liststore_main.timestamp = time.time()
-        Net.async_call(Net.update_liststore_images, self.liststore_main, 0,
-                       tree_iters, urls)
+        Net.async_call(Net.get_nodes, nid, page, callback=_on_get_nodes)
 
     def on_iconview_main_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -133,14 +136,15 @@ class TopCategories(Gtk.Box):
         self.show_sub1(init=True)
 
     def show_sub1(self, init=False):
-        def _show_sub1(sub1_args, error=None):
-            nodes, self.sub1_total = sub1_args
-            if error or not nodes or not self.sub1_total:
+        def _on_show_sub1(info, error=None):
+            if not info or not info[0] or not info[1] or error:
+                logger.error('show_sub1(): %s, %s' % (info, error))
                 return
+            nodes, self.sub1_total = info
             urls = []
             tree_iters = []
             for node in nodes:
-                _id = 'id' if self.use_sub2 else 'sourceid'
+                id_ = 'id' if self.use_sub2 else 'sourceid'
                 if 'tips' in node and len(node['tips']) > 5:
                     tooltip = Widgets.set_tooltip_with_song_tips(node['name'],
                                                                  node['tips'])
@@ -149,7 +153,7 @@ class TopCategories(Gtk.Box):
                 tree_iter = self.liststore_sub1.append([
                     self.app.theme['anonymous'],
                     Widgets.unescape(node['name']),
-                    int(node[_id]),
+                    int(node[id_]),
                     Widgets.unescape(node['info']),
                     tooltip,
                 ])
@@ -175,7 +179,7 @@ class TopCategories(Gtk.Box):
         if init or not hasattr(self.liststore_sub1, 'timestamp'):
             self.liststore_sub1.timestamp = time.time()
         Net.async_call(Net.get_nodes, self.curr_sub1_id, self.sub1_page,
-                       callback=_show_sub1)
+                       callback=_on_show_sub1)
 
     def on_iconview_sub1_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -194,7 +198,7 @@ class TopCategories(Gtk.Box):
             self.append_songs(init=True)
 
     def show_sub2(self, init=False):
-        def _show_sub2(sub2_args, error=None):
+        def _on_show_sub2(sub2_args, error=None):
             nodes, self.sub2_total = sub2_args
             if error or not nodes or not self.sub2_total:
                 logger.error('nodes: %s, self.sub2_total: %s, error: %s' %
@@ -230,7 +234,7 @@ class TopCategories(Gtk.Box):
         if init or not hasattr(self.liststore_sub2, 'timestamp'):
             self.liststore_sub2.timestamp = time.time()
         Net.async_call(Net.get_nodes, self.curr_sub2_id, self.sub2_page,
-                       callback=_show_sub2)
+                       callback=_on_show_sub2)
 
     def on_iconview_sub2_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -241,25 +245,33 @@ class TopCategories(Gtk.Box):
         self.append_songs(init=True)
 
     def append_songs(self, init=False):
-        def _append_songs(songs_args, error=None):
+        def _on_get_album(songs, error=None):
+            self.songs_total = 1
+            if not songs or error:
+                logger.error('TopCategories._on_get_album: %s, %s' %
+                             (songs, error))
+                return
+            for song in songs:
+                self.liststore_songs.append([
+                    True,
+                    Widgets.unescape(song['name']),
+                    Widgets.unescape(song['artist']),
+                    Widgets.unescape(self.curr_list_name),
+                    int(song['id']),
+                    int(song['artistid']),
+                    int(self.curr_list_id),
+                    song['formats'],
+                ])
+
+        def _on_append_songs(info, error=None):
+            if not info or error:
+                logger.error('TopCategories.append_songs(): %s, %s' %
+                             (info, error))
+                return
             songs, self.songs_total = songs_args
             if not songs or self.songs_total == 0 or self.use_album:
-                songs = Net.get_album(self.curr_list_id)
-                self.songs_total = 1
-                if not songs:
-                    return
-                for song in songs:
-                    self.liststore_songs.append([
-                        True,
-                        Widgets.unescape(song['name']), 
-                        Widgets.unescape(song['artist']),
-                        Widgets.unescape(self.curr_list_name), 
-                        int(song['id']),
-                        int(song['artistid']), 
-                        int(self.curr_list_id),
-                        song['formats'],
-                    ])
-                return
+                Net.async_call(Net.get_album, self.curr_list_id,
+                               callback=_on_get_album)
 
             for song in songs:
                 self.liststore_songs.append([
@@ -290,7 +302,7 @@ class TopCategories(Gtk.Box):
             self.liststore_songs.clear()
 
         Net.async_call(Net.get_themes_songs, self.curr_list_id,
-                       self.songs_page, callback=_append_songs)
+                       self.songs_page, callback=_on_append_songs)
 
     # buttonbox
     def on_button_main_clicked(self, btn):

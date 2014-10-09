@@ -817,7 +817,7 @@ class AsyncSong(GObject.GObject):
 
         # this song has no link to download
         if not song_link:
-            logger.debug('%s does not allowed to download.' % song)
+            logger.debug('download_song(): %s.' % song)
             self.emit('network-error', song_link)
             return
 

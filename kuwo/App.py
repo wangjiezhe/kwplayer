@@ -151,7 +151,7 @@ class App:
 
     def apply_css(self, widget, css, old_provider=None, overall=False):
         '''Update CssProvider of this widget.'''
-        # CssProvider needs bytecode
+        # CssProvider requires bytecode
         style_provider = Gtk.CssProvider()
         css_encoded = css.encode()
         style_provider.load_from_data(css_encoded)
