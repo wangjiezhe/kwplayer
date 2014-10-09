@@ -96,6 +96,7 @@ class TopCategories(Gtk.Box):
                 logger.error('TopCategories._on_get_nodes(): %s, %s' %
                              (info, error))
                 return
+            nodes, total_pages = info
             urls = []
             tree_iters = []
             for node in nodes:
@@ -268,7 +269,7 @@ class TopCategories(Gtk.Box):
                 logger.error('TopCategories.append_songs(): %s, %s' %
                              (info, error))
                 return
-            songs, self.songs_total = songs_args
+            songs, self.songs_total = info
             if not songs or self.songs_total == 0 or self.use_album:
                 Net.async_call(Net.get_album, self.curr_list_id,
                                callback=_on_get_album)

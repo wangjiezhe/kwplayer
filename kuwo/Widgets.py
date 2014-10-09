@@ -16,6 +16,7 @@ from gi.repository import Gtk
 
 from kuwo import Config
 _ = Config._
+from kuwo.log import logger
 
 def unescape(tooltip):
     html_parser = HTMLParser()
