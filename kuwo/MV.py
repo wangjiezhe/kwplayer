@@ -98,12 +98,11 @@ class MV(Gtk.Box):
         self.append_songs(init=True)
 
     def append_songs(self, init=False):
-        def _on_append_songs(songs_args, error=None):
-            songs, self.songs_total = songs_args
-            if error or not self.songs_total:
-                logger.error('append_songs(): %s, %s' %
-                             (self.songs_total, error))
+        def _on_append_songs(info, error=None):
+            if error or not info or not info[0] or not info[1]:
+                logger.error('append_songs():  %s, %s' % (info, error))
                 return
+            songs, self.songs_total = info
             urls = []
             tree_iters = []
             for song in songs:
