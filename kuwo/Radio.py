@@ -18,6 +18,7 @@ from kuwo import Config
 _ = Config._
 from kuwo import Net
 from kuwo import Widgets
+from kuwo.log import logger
 
 class RadioItem(Gtk.EventBox):
     def __init__(self, radio_id, app):
@@ -48,8 +49,8 @@ class RadioItem(Gtk.EventBox):
         box_right = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.box.pack_start(box_right, True, True, 0)
 
-        radio_name = Gtk.Label(Widgets.short_str(
-            self.playlists[self.radio_id]['name'], 8))
+        radio_name = Gtk.Label(
+                Widgets.short_str(self.playlists[self.radio_id]['name'], 8))
         box_right.pack_start(radio_name, True, True, 0)
 
         self.label = Gtk.Label(_('song name'))
@@ -82,25 +83,27 @@ class RadioItem(Gtk.EventBox):
     
     def init_songs(self):
         def _update_songs(songs, error=None):
-            if not songs:
+            if error or not songs:
+                logger.error('init_songs(): %s, %s' % (songs, error))
                 return
             self.playlists[self.radio_id]['songs'] = songs
             self.playlists[self.radio_id]['curr_song'] = 0
             self.update_label()
         if len(self.playlists[self.radio_id]['songs']) == 0:
-            Net.async_call(Net.get_radio_songs, _update_songs, 
-                           self.radio_id,
-                           self.playlists[self.radio_id]['offset'])
+            Net.async_call(Net.get_radio_songs, self.radio_id,
+                           self.playlists[self.radio_id]['offset'],
+                           callback=_update_songs)
     
     def load_more_songs(self):
         def _on_more_songs_loaded(songs, error=None):
             if error or not songs:
+                logger.error('load_more_songs(): %s, %s' % (songs, error))
                 return
             self.playlists[self.radio_id]['songs'] += songs
         self.playlists[self.radio_id]['offset'] += 1
-        Net.async_call(Net.get_radio_songs, _on_more_songs_loaded, 
-                       self.playlists[self.radio_id],
-                       self.playlists[self.radio_id]['offset'])
+        Net.async_call(Net.get_radio_songs, self.playlists[self.radio_id],
+                       self.playlists[self.radio_id]['offset'],
+                       callback=_on_more_songs_loaded)
 
     def expand(self):
         if self.expanded:
@@ -235,7 +238,8 @@ class Radio(Gtk.Box):
             tree_iters.append(tree_iter)
             urls.append(radio['pic'])
         self.liststore_radios.timestamp = time.time()
-        Net.update_liststore_images(self.liststore_radios, 0, tree_iters, urls)
+        Net.async_call(Net.update_liststore_images, self.liststore_radios, 0,
+                       tree_iters, urls)
 
         for radio_rid in self.playlists:
             radio_item = RadioItem(radio_rid, self.app)

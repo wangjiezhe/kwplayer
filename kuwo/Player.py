@@ -300,7 +300,7 @@ class Player(Gtk.Box):
                     self.use_mtv_btn.set_sensitive(
                             'MP4' in self.curr_song['formats'])
                 else:
-                    # for v3.4.7
+                    # for v3.4.7, remove this in v3.6.1
                     self.get_mv_link()
         GLib.idle_add(_on_song_can_play)
 
@@ -420,6 +420,7 @@ class Player(Gtk.Box):
     def update_player_info(self):
         def _update_pic(info, error=None):
             if not info or error:
+                logger.error('update_player_info(): %s, %s' % (info, error))
                 return
             self.artist_pic.set_tooltip_text(
                     Widgets.short_tooltip(info['info'], length=500))
@@ -448,33 +449,39 @@ class Player(Gtk.Box):
         self.label.set_label(label)
         self.app.window.set_title(name)
         self.artist_pic.set_from_pixbuf(self.app.theme['anonymous'])
-        Net.async_call(Net.get_artist_info, _update_pic, 
-                       song['artistid'], song['artist'])
+        Net.async_call(Net.get_artist_info, song['artistid'], song['artist'],
+                       callback=_update_pic)
 
     def get_lrc(self):
         def _update_lrc(lrc_text, error=None):
+            if error:
+                logger.error('get_lrc(): %s', error)
             self.app.lrc.set_lrc(lrc_text)
 
-        Net.async_call(Net.get_lrc, _update_lrc, self.curr_song)
+        Net.async_call(Net.get_lrc, self.curr_song, callback=_update_lrc)
 
     def get_recommend_lists(self):
         self.recommend_imgs = None
         def _on_list_received(imgs, error=None):
-            if not imgs or len(imgs) < 10:
+            if error or not imgs or len(imgs) < 10:
+                logger.warn('get_recommend_lists(): %s, %s' % (imgs, error))
                 self.recommend_imgs = None
             else:
                 self.recommend_imgs = imgs.splitlines()
 
-        Net.async_call(Net.get_recommend_lists, _on_list_received, 
-                       self.curr_song['artist'])
+        Net.async_call(Net.get_recommend_lists, self.curr_song['artist'],
+                       callback=_on_list_received)
 
     def update_lrc_background(self, url):
         def _update_background(filepath, error=None):
             if error or not filepath:
+                logger.error('update_lrc_background(): %s, %s' %
+                             (filepath, error))
                 return
             self.app.lrc.update_background(filepath)
 
-        Net.async_call(Net.get_recommend_image, _update_background, url)
+        Net.async_call(Net.get_recommend_image, url,
+                       callback=_update_background)
 
     # Radio part
     def load_radio(self, song, radio_item):
@@ -516,6 +523,7 @@ class Player(Gtk.Box):
     def get_mv_link(self):
         def _update_mv_link(mv_args, error=None):
             if error or not mv_args:
+                logger.error('get_mv_link(): %s, %s' % (mv_args, error))
                 self.use_mtv_btn.set_sensitive(False)
             else:
                 cached, mv_link, mv_path = mv_args
@@ -523,8 +531,8 @@ class Player(Gtk.Box):
                     self.use_mtv_btn.set_sensitive(True)
                 else:
                     self.use_mtv_btn.set_sensitive(False)
-        Net.async_call(Net.get_song_link, _update_mv_link,
-                       self.curr_song, self.app.conf, True)
+        Net.async_call(Net.get_song_link, self.curr_song, self.app.conf, True,
+                       callback=_update_mv_link)
 
     # Fullscreen
     def toggle_fullscreen(self):

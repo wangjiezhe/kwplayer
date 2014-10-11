@@ -45,9 +45,7 @@ class PlayerBin(GObject.GObject):
         self.fullscreen_rect = (0, 0, screen.width(), screen.height())
         
         if not self.playbin:
-            e = 'Gst Error: playbin failed to be inited, abort!'
-            print(e)
-            logger.error(e)
+            logger.critical('Gst Error: playbin failed to be inited, abort!')
             sys.exit(1)
 
         self.bus = self.playbin.get_bus()

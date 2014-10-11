@@ -18,8 +18,7 @@ try:
 except ImportError:
     logger.warn(traceback.format_exc())
     keybinder_imported = False
-    logger.warn('Warning: no python3-keybinder module found,',
-                'global keyboard shortcut will be disabled!')
+    logger.warn('No python3-keybinder module found.')
 
 
 class Shortcut:

@@ -1,3 +1,16 @@
+3.4.3 - 2014.10.11
+* Fixed: reset vscrollbar in ScrolledWindows
+* Fixed: NoneType is not iterable in MV tab
+* Fixed: call update_liststore_images in background thread
+* Fixed: Catch UnicodeDecodeError in json_loads_single
+* Fixed: range() arg 3 must not be zero in Lrc tab
+* Fixed: check tree_iter type in PlayList tab
+* Feature: add log module
+* Feature: add caching monitor
+* Feature: display caching speed
+* GtkAdjustment removed in Preferences dialog
+* Change default audio type from 128k to 320k
+
 3.4.2 - 2014.10.1
 * Fixed: replace aac format with 128k mp3
 * Fixed: emit can-play signal

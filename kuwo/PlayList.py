@@ -10,6 +10,7 @@ import random
 import shutil
 import threading
 import time
+import traceback
 
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
@@ -495,7 +496,7 @@ class PlayList(Gtk.Box):
     def init_tab(self, list_name, songs):
         scrolled_win = NormalSongTab(self.app, list_name)
         for song in songs:
-            # TODO: be compatible with v3.4.7
+            # TODO: be compatible with v3.4.7, remove it in v3.6.1
             if len(song) == 6:
                 song.append('')
             scrolled_win.liststore.append(song)
@@ -614,7 +615,7 @@ class PlayList(Gtk.Box):
 
         liststore = self.tabs[list_name].liststore
         tree = self.tabs[list_name].treeview
-        Net.async_call(start, stop)
+        Net.async_call(start, callback=stop)
 
     # Open API
     def cache_song(self, song):
@@ -677,7 +678,7 @@ class PlayList(Gtk.Box):
             try:
                 liststore.remove(liststore[path].iter)
             except IndexError:
-                pass
+                logger.error(traceback.format_exc())
             Gdk.Window.process_all_updates()
 
         def _on_disk_error(widget, song_path, eror=None):
@@ -713,7 +714,6 @@ class PlayList(Gtk.Box):
         if len(liststore) == 0:
             logger.info('Caching playlist is empty, please add some songs')
             self.stop_caching_daemon()
-            # FIXME: check Notify class available
             Notify.init('kwplayer-cache')
             notify = Notify.Notification.new('Kwplayer',
                     _('All songs in caching list have been downloaded.'),
@@ -844,8 +844,8 @@ class PlayList(Gtk.Box):
         disname = _('Playlist')
         editable = True
         tooltip = Widgets.escape(disname)
-        _iter = self.liststore_left.append(
-                [disname, list_name, editable, tooltip])
+        _iter = self.liststore_left.append([disname, list_name, editable,
+                                            tooltip])
         selection = self.treeview_left.get_selection()
         selection.select_iter(_iter)
         self.init_tab(list_name, [])

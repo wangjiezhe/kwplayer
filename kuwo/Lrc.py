@@ -45,7 +45,7 @@ def lrc_parser(lrc_txt):
             lrc_obj.append((tag, content))
     last_time = lrc_obj[-1][0]
     if last_time <= 0:
-        logger.error('last_time <= 0, %s.' % last_time)
+        logger.error('lrc_parser(): %s.' % last_time)
         return None
     for i in range(last_time, last_time * 2 + 5, last_time // 4 + 1):
         lrc_obj.append((i, '', ))
@@ -123,6 +123,7 @@ class Lrc(Gtk.Notebook):
             return
         self.lrc_obj = lrc_parser(lrc_txt)
         if not self.lrc_obj:
+            logger.warn('set_lrc(): failed to parse lrc.')
             self.lrc_buf.set_text(_('No lrc available'))
             return
         lrc_content = [l[1] for l in self.lrc_obj]

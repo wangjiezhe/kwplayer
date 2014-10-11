@@ -12,10 +12,10 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from kuwo import Config
+_ = Config._
 from kuwo import Net
 from kuwo import Widgets
-
-_ = Config._
+from kuwo.log import logger
 
 
 class InfoLabel(Gtk.Label):
@@ -100,7 +100,7 @@ class Artists(Gtk.Box):
         # pic, name, artist, album, rid, artistid, albumid, tooltip
         # FIXME: check formats column
         self.artist_mv_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, str,
-                str, int, int, int, str)
+                                                 str, int, int, int, str)
         self.artist_mv_control_box = Widgets.MVControlBox(
                 self.artist_mv_liststore, app)
         self.buttonbox.pack_end(self.artist_mv_control_box, False, False, 0)
@@ -108,8 +108,8 @@ class Artists(Gtk.Box):
         # control box for artist's albums
         album_songs_treeview = Widgets.TreeViewSongs(app)
         self.album_songs_liststore = album_songs_treeview.liststore
-        self.album_control_box = Widgets.ControlBox(
-                self.album_songs_liststore, app)
+        self.album_control_box = Widgets.ControlBox(self.album_songs_liststore,
+                                                    app)
         self.buttonbox.pack_end(self.album_control_box, False, False, 0)
 
         # main notebook
@@ -159,8 +159,8 @@ class Artists(Gtk.Box):
 
         # main window of artists
         self.artists_win = Gtk.ScrolledWindow()
-        self.artists_win.get_vadjustment().connect('value-changed',
-                self.on_artists_win_scrolled)
+        adjustment = self.artists_win.get_vadjustment()
+        adjustment.connect('value-changed', self.on_artists_win_scrolled)
         self.artists_tab.pack_start(self.artists_win, True, True, 0)
         # icon, artist name, artist id, num of songs, tooltip
         self.artists_liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str, int,
@@ -381,6 +381,8 @@ class Artists(Gtk.Box):
         def on_append_artists(info, error=None):
             artists, self.artists_total = info
             if error or not self.artists_total or not artists:
+                logger.error('append_artists(), %s, %s, %s' %
+                             (self.artists_total, artists, error))
                 return
             urls = []
             tree_iters = []
@@ -392,13 +394,14 @@ class Artists(Gtk.Box):
                     int(artist['id']),
                     _info,
                     Widgets.set_tooltip(artist['name'], _info),
-                    ])
+                ])
                 urls.append(artist['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_artist_logos(self.artists_liststore, 0,
-                                    tree_iters, urls)
+            Net.async_call(Net.update_artist_logos, self.artists_liststore, 0,
+                           tree_iters, urls)
 
         if init:
+            self.artists_win.get_vscrollbar().set_value(0)
             self.artists_liststore.clear()
             self.artists_page = 0
             self.artists_win.get_vadjustment().set_value(0)
@@ -412,8 +415,8 @@ class Artists(Gtk.Box):
         pref_index = self.pref_combo.get_active()
         catid = model[_iter][1]
         prefix = self.pref_liststore[pref_index][1]
-        Net.async_call(Net.get_artists, on_append_artists, catid,
-                       self.artists_page, prefix)
+        Net.async_call(Net.get_artists, catid, self.artists_page, prefix,
+                       callback=on_append_artists)
 
     def on_artists_iconview_item_activated(self, iconview, path):
         model = iconview.get_model()
@@ -479,6 +482,8 @@ class Artists(Gtk.Box):
         def _append_artist_songs(songs_args, error=None):
             songs, self.artist_songs_total = songs_args
             if error or self.artist_songs_total == 0:
+                logger.error('append_artist_songs(): %s, %s' %
+                             (self.artist_songs_total, error))
                 return
             for song in songs:
                 self.artist_songs_liststore.append([
@@ -497,10 +502,11 @@ class Artists(Gtk.Box):
                 self.append_artist_songs()
 
         if init:
+            self.artist_songs_tab.get_vscrollbar().set_value(0)
             self.artist_songs_liststore.clear()
             self.artist_songs_page = 0
-        Net.async_call(Net.get_artist_songs_by_id, _append_artist_songs, 
-                       self.curr_artist_id, self.artist_songs_page)
+        Net.async_call(Net.get_artist_songs_by_id, self.curr_artist_id,
+                       self.artist_songs_page, callback=_append_artist_songs)
 
     def show_artist_albums(self):
         self.artist_control_box.hide()
@@ -515,6 +521,8 @@ class Artists(Gtk.Box):
         def _append_artist_albums(albums_args, error=None):
             albums, self.artist_albums_total = albums_args
             if error or self.artist_albums_total == 0:
+                logger.error('append_arttist_albums(): %s, %s' %
+                             (self.artist_albums_taotal, error))
                 return
             urls = []
             tree_iters = []
@@ -529,19 +537,20 @@ class Artists(Gtk.Box):
                 ])
                 urls.append(album['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_album_covers(self.artist_albums_liststore, 0,
-                                    tree_iters, urls)
+            Net.async_call(Net.update_album_covers,
+                           self.artist_albums_liststore, 0, tree_iters, urls)
             self.artist_albums_page += 1
             if self.artist_albums_page < self.artist_albums_total - 1:
                 self.append_artist_albums()
 
         if init:
+            self.artist_albums_tab.get_vscrollbar().set_value(0)
             self.artist_albums_liststore.clear()
             self.artist_albums_page = 0
         if init or not hasattr(self.artist_albums, 'timestamp'):
             self.artist_albums_liststore.timestamp = time.time()
-        Net.async_call(Net.get_artist_albums, _append_artist_albums,
-                       self.curr_artist_id, self.artist_albums_page)
+        Net.async_call(Net.get_artist_albums, self.curr_artist_id,
+                       self.artist_albums_page, callback=_append_artist_albums)
 
     def show_artist_mv(self):
         self.artist_control_box.hide()
@@ -556,6 +565,8 @@ class Artists(Gtk.Box):
         def _append_artist_mv(mv_args, error=None):
             mvs, self.artist_mv_total = mv_args
             if error or self.artist_mv_total == 0:
+                logger.error('append_artist_mv(): %s, %s' %
+                             (self.artist_mv_total, error))
                 return
             urls = []
             tree_iters = []
@@ -572,18 +583,20 @@ class Artists(Gtk.Box):
                 ])
                 tree_iters.append(tree_iter)
                 urls.append(mv['pic'])
-            Net.update_mv_images(self.artist_mv_liststore, 0, tree_iters, urls)
+            Net.async_call(Net.update_mv_images, self.artist_mv_liststore, 0,
+                           tree_iters, urls)
             self.artist_mv_page += 1
             if self.artist_mv_page < self.artist_mv_total - 1:
                 self.append_artist_mv()
 
         if init:
+            self.artist_mv_tab.get_vscrollbar().set_value(0)
             self.artist_mv_liststore.clear()
             self.artist_mv_page = 0
         if init or not hasattr(self.artist_mv_liststore, 'timestamp'):
             self.artist_mv_liststore.timestamp = time.time()
-        Net.async_call(Net.get_artist_mv, _append_artist_mv,
-                       self.curr_artist_id, self.artist_mv_page)
+        Net.async_call(Net.get_artist_mv, self.curr_artist_id,
+                       self.artist_mv_page, callback=_append_artist_mv)
 
     def show_artist_similar(self):
         self.artist_control_box.hide()
@@ -599,6 +612,8 @@ class Artists(Gtk.Box):
         def _append_artist_similar(similar_args, error=None):
             artists, self.artist_similar_total = similar_args
             if error or not self.artist_similar_total:
+                logger.error('append_artist_similar(): %s, %s' %
+                             (self.artist_similar_total, error))
                 return
             urls = []
             tree_iters = []
@@ -613,19 +628,21 @@ class Artists(Gtk.Box):
                 ])
                 urls.append(artist['pic'])
                 tree_iters.append(tree_iter)
-            Net.update_artist_logos(self.artist_similar_liststore, 0,
-                                    tree_iters, urls)
+            Net.async_call(Net.update_artist_logos,
+                           self.artist_similar_liststore, 0, tree_iters, urls)
             self.artist_similar_page += 1
             if self.artist_similar_page < self.artist_similar_total - 1:
                 self.append_artist_similar()
 
         if init:
+            self.artist_similar_tab.get_vscrollbar().set_value(0)
             self.artist_similar_liststore.clear()
             self.artist_similar_page = 0
         if init or not hasattr(self.artist_similar_liststore, 'timestamp'):
             self.artist_similar_liststore.timestamp = time.time()
-        Net.async_call(Net.get_artist_similar, _append_artist_similar,
-                       self.curr_artist_id, self.artist_similar_page)
+        Net.async_call(Net.get_artist_similar, self.curr_artist_id,
+                       self.artist_similar_page,
+                       callback=_append_artist_similar)
 
     def show_artist_info(self):
         self.artist_control_box.hide()
@@ -639,6 +656,7 @@ class Artists(Gtk.Box):
     def append_artist_info(self):
         def _append_artist_info(info, error=None):
             if error or not info:
+                logger.error('appen_artist_info(): %s, %s' % (info, error))
                 return
             if info.get('pic', None):
                 self.artist_info_pic.set_from_file(info['pic'])
@@ -657,8 +675,8 @@ class Artists(Gtk.Box):
             else:
                 self.artist_info_textbuffer.set_text('')
 
-        Net.async_call(Net.get_artist_info, _append_artist_info,
-                       self.curr_artist_id)
+        Net.async_call(Net.get_artist_info, self.curr_artist_id,
+                       callback=_append_artist_info)
 
 
     def on_artist_albums_iconview_item_activated(self, iconview, path):
@@ -701,6 +719,7 @@ class Artists(Gtk.Box):
     def append_album_songs(self):
         def _append_album_songs(songs, error=None):
             if error or not songs:
+                logger.error('append_album_songs(): %s, %s' % (songs, error))
                 return
             for song in songs:
                 self.album_songs_liststore.append([
@@ -714,8 +733,8 @@ class Artists(Gtk.Box):
                     song['formats'],
                 ])
         self.album_songs_liststore.clear()
-        Net.async_call(Net.get_album, _append_album_songs,
-                       self.curr_album_id)
+        Net.async_call(Net.get_album, self.curr_album_id,
+                       callback=_append_album_songs)
 
     def on_artist_button_clicked(self, button):
         self.show_artist(self.curr_artist_name, self.curr_artist_id)
@@ -724,6 +743,7 @@ class Artists(Gtk.Box):
     def add_to_fav_artists(self, artist_id, init=False):
         def _append_fav_artist(info, error=None):
             if error or not info:
+                logger.error('add_to_fav_artists(): %s, %s' % (info, error))
                 return
             if info.get('pic', None):
                 pix = GdkPixbuf.Pixbuf.new_from_file_at_size(info['pic'],
@@ -734,9 +754,10 @@ class Artists(Gtk.Box):
             self.fav_artists_liststore.append([pix, info['name'],
                                                artist_id, tip])
 
-        if init is False and self.check_artist_favorited(artist_id):
+        if not init and self.check_artist_favorited(artist_id):
             return
-        Net.async_call(Net.get_artist_info, _append_fav_artist, artist_id)
+        Net.async_call(Net.get_artist_info, artist_id,
+                       callback=_append_fav_artist)
 
     def remove_from_fav_artists(self, artist_id):
         '''Remove an artist from fav_artists_liststore.'''

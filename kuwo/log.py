@@ -15,13 +15,13 @@ def _init_logger(log_level, maxBytes=5*1024*1024, backupCount=5):
             os.makedirs(dir_name)
         except Exception:
             sys.exit(1)
-    fivoo_log = logging.getLogger('kuwo')
+    logger = logging.getLogger('kuwo')
     file_handler = RotatingFileHandler(log_file, maxBytes=maxBytes,
                                        backupCount=backupCount)
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     file_handler.setFormatter(formatter)
-    fivoo_log.addHandler(file_handler)
-    fivoo_log.setLevel(log_level)
-    return fivoo_log
+    logger.addHandler(file_handler)
+    logger.setLevel(log_level)
+    return logger
 
 logger = _init_logger(logging.INFO)
