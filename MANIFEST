@@ -23,6 +23,7 @@ kuwo/TopList.py
 kuwo/Utils.py
 kuwo/Widgets.py
 kuwo/__init__.py
+kuwo/log.py
 share/applications/kwplayer.desktop
 share/icons/hicolor/128x128/apps/kwplayer.png
 share/icons/hicolor/16x16/actions/favorite.png
