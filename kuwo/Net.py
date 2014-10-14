@@ -29,6 +29,7 @@ from kuwo import Utils
 from kuwo.log import logger
 
 IMG_CDN = 'http://img4.kwcdn.kuwo.cn/'
+ARTIST_IMG_CDN = 'http://img1.kuwo.cn/'
 ARTIST = 'http://artistlistinfo.kuwo.cn/mb.slist?'
 QUKU = 'http://qukudata.kuwo.cn/q.k?'
 QUKU_SONG = 'http://nplserver.kuwo.cn/pl.svc?'
@@ -56,6 +57,7 @@ try:
     from leveldb import LevelDB
     ldb_imported = True
 except ImportError:
+    logger.debug(traceback.format_exc())
     try:
         # Fedora: https://github.com/wbolster/plyvel
         from plyvel import DB as LevelDB
@@ -119,9 +121,9 @@ def urlopen(_url, use_cache=True, retries=RETRIES):
                     if (time.time() - timestamp) < CACHE_TIMEOUT:
                         return content[10:]
                 except (ValueError, UnicodeDecodeError):
-                    logger.info(traceback.format_exc())
+                    logger.debug(traceback.format_exc())
         except KeyError:
-            logger.error(traceback.format_exc())
+            logger.debug(traceback.format_exc())
     for i in range(retries):
         try:
             req = request.urlopen(url, timeout=TIMEOUT)
@@ -131,6 +133,7 @@ def urlopen(_url, use_cache=True, retries=RETRIES):
             return req_content
         except URLError:
             logger.warn(traceback.format_exc())
+            logger.warn('Net.urlopen, url: %s' % url)
     return None
 
 def get_nodes(nid, page):
@@ -158,6 +161,7 @@ def get_nodes(nid, page):
 
 def get_image(url, filepath=None):
     if not url or len(url) < 10:
+        logger.error('Net.get_image: url is invalid, %s' % url)
         return None
     if not filepath:
         filename = os.path.split(url)[1]
@@ -167,6 +171,7 @@ def get_image(url, filepath=None):
 
     image = urlopen(url, use_cache=False)
     if not image:
+        logger.debug('Net.get_image: failed to get image, %s' % image)
         return None
 
     with open(filepath, 'wb') as fh:
@@ -212,7 +217,7 @@ def update_liststore_images(liststore,  col, tree_iters, urls,
             tree_path = liststore.get_path(tree_iter)
             if tree_path is not None:
                 liststore[tree_path][col] = pix
-        except GLib.GError:
+        except Exception:
             logger.error(traceback.format_exc())
 
     timestamp = liststore.timestamp
@@ -222,7 +227,11 @@ def update_liststore_images(liststore,  col, tree_iters, urls,
             break
         if url_proxy:
             url = url_proxy(url)
-        filepath = get_image(url)
+        try:
+            filepath = get_image(url)
+        except Exception:
+            logger.error(traceback.format_exc())
+            continue
         if filepath:
             GLib.idle_add(update_image, filepath, tree_iter)
 
@@ -291,8 +300,8 @@ def get_artist_pic_url(pic_path):
     if len(pic_path) < 5:
         return None
     if pic_path[:2] in ('55', '90',):
-        pic_path = '100/' + pic_path[2:]
-    url = '{0}start/starheads/{1}'.format(IMG_CDN, pic_path)
+        pic_path = '/100' + pic_path[2:]
+    url = '{0}star/starheads{1}'.format(ARTIST_IMG_CDN, pic_path)
     return url
 
 def update_artist_logos(liststore, col, tree_iters, urls):
@@ -836,7 +845,8 @@ class AsyncSong(GObject.GObject):
 
                 while True:
                     if self.force_quit:
-                        fh.close()
+                        if not fh.closed:
+                            fh.close()
                         if os.path.exists(song_path):
                             os.remove(song_path)
                         return
@@ -861,9 +871,12 @@ class AsyncSong(GObject.GObject):
                     self.emit('downloaded', song_path)
                     Utils.iconvtag(song_path, song)
                     return
+                else:
+                    self.emit('network-error', song_link)
                 # remove temp file
-                elif os.path.exists(tmp_song_path):
+                if os.path.exists(tmp_song_path):
                     os.remove(tmp_song_path)
+                break
 
             except URLError:
                 logger.error(traceback.format_exc())
