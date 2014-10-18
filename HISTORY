@@ -1,3 +1,6 @@
+3.4.4 - 2014.10.18
+* Fixed: failed to load images in Artist tab; https://github.com/LiuLang/kwplayer/issues/53 and https://github.com/LiuLang/kwplayer-packages/issues/50
+
 3.4.3 - 2014.10.11
 * Fixed: reset vscrollbar in ScrolledWindows
 * Fixed: NoneType is not iterable in MV tab
