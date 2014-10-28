@@ -90,7 +90,6 @@ _default_conf = {
     'use-status-icon': True,
     'use-notify': False,
     'use-dark-theme': True,
-    'show-pls': False,
     'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
     'lrc-back-color': 'rgba(237, 221, 221, 0.28)',
     'lrc-text-size': 22,
