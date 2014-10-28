@@ -449,8 +449,7 @@ class PlayList(Gtk.Box):
         self.load_playlists()
         # dump playlists to dist every 5 minites
         GLib.timeout_add(300000, self.dump_playlists)
-        if self.app.conf['show-pls']:
-            self.app.popup_page(self.app_page)
+        self.app.popup_page(self.app_page)
         return False
 
     def dump_playlists(self):

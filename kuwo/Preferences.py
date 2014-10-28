@@ -156,11 +156,6 @@ class Preferences(Gtk.Dialog):
         notify_button.connect('toggled', self.on_notify_button_toggled)
         generic_box.pack_start(notify_button, False, False, 0)
 
-        show_pls_button = Gtk.CheckButton(_('Show playlist tab on startup'))
-        show_pls_button.set_active(app.conf['show-pls'])
-        show_pls_button.connect('toggled', self.on_show_pls_button_toggled)
-        generic_box.pack_start(show_pls_button, False, False, 0)
-
         dark_theme_button = Gtk.CheckButton(_('Use dark theme'))
         dark_theme_button.set_active(app.conf['use-dark-theme'])
         dark_theme_button.connect('toggled', self.on_dark_theme_button_toggled)
@@ -336,9 +331,6 @@ class Preferences(Gtk.Dialog):
 
     def on_notify_button_toggled(self, button):
         self.app.conf['use-notify'] = button.get_active()
-
-    def on_show_pls_button_toggled(self, button):
-        self.app.conf['show-pls'] = button.get_active()
 
     def on_dark_theme_button_toggled(self, button):
         self.app.conf['use-dark-theme'] = button.get_active()
