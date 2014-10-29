@@ -28,21 +28,13 @@ class OSDLrc(Gtk.Window):
         self.props.decorated = False
         self.props.opacity = 0
         self.props.resizable = False
-        #self.props.type_hint = Gdk.WindowTypeHint.NORMAL
-        #self.props.type_hint = Gdk.WindowTypeHint.DOCK
         self.app = app
 
-        self.locked = False
         self.style_types = {
             'default': _('Default'),
         }
         self.set_name('default')
         self.has_shown = False
-        if app.conf['osd-locked']:
-            self.move(app.conf['osd-x'],
-                      app.conf['osd-y'] + app.conf['osd-toolbar-y'])
-        else:
-            self.move(app.conf['osd-x'], app.conf['osd-y'])
 
         # set main window opacity
         screen = self.get_screen()
@@ -149,10 +141,35 @@ class OSDLrc(Gtk.Window):
             css = fh.read()
             Widgets.apply_css(self, css)
 
+        # 切换窗口显隐动作
+        self.show_window_action = Gtk.ToggleAction('show-window-action',
+                _('Show OSD Window'), _('Show OSD lyric window'), None)
+        self.show_window_action.set_icon_name(
+                'accessories-text-editor-symbolic')
+        self.show_window_action.connect('toggled',
+                self.on_show_window_action_toggled)
+
+        # 切换窗口锁定状态
+        if self.app.conf['osd-locked']:
+            self.lock_window_action = Gtk.ToggleAction('lock-window-action',
+                    _('UnLock OSD Window'), _('UnLock OSD lyric window'), None)
+            self.lock_window_action.set_active(True)
+        else:
+            self.lock_window_action = Gtk.ToggleAction('lock-window-action',
+                    _('Lock OSD Window'), _('Lock OSD lyric window'), None)
+            self.lock_window_action.set_active(False)
+        self.lock_window_action.set_icon_name('lock')
+        self.lock_window_action.set_sensitive(self.app.conf['osd-show'])
+        self.lock_window_action.connect('toggled',
+                                        self.on_lock_window_action_toggled)
+
+    def after_init(self):
+        if self.app.conf['osd-show']:
+            self.show_window_action.set_active(True)
+
     def reload(self):
         '''重新设定属性, 然后重绘'''
-        print('reload')
-        if self.locked:
+        if self.app.conf['osd-locked']:
             self.toolbar.hide()
             region = cairo.Region()
             gdk_window = self.get_window()
@@ -160,25 +177,54 @@ class OSDLrc(Gtk.Window):
                 logger.warn('OSDLrc.reload(), gdk_window is None')
                 return
             gdk_window.input_shape_combine_region(region, 0, 0)
-            self.move(self.app.conf['osd-x'],
-                      self.app.conf['osd-y'] + self.app.conf['osd-toolbar-y'])
         else:
             self.toolbar.show_all()
-            geometry = self.toolbar.get_window().get_geometry()
-            self.app.conf['osd-toolbar-y'] = geometry[3]
-            self.move(self.app.conf['osd-x'], self.app.conf['osd-y'])
+            self.app.conf['osd-toolbar-y'] = self.toolbar.get_allocated_height()
             self.input_shape_combine_region(None)
+        self.resize_window()
 
-    def toggle_status(self, show):
+    def show_window(self, show):
         '''是否显示歌词窗口'''
+        self.app.conf['osd-show'] = show
         if show:
             if self.has_shown:
                 self.present()
             else:
                 self.has_shown = True
                 self.show_all()
+                if self.app.conf['osd-locked']:
+                    self.toolbar.hide()
+            self.reload()
         else:
             self.hide()
+
+    def resize_window(self):
+        if self.app.conf['osd-locked']:
+            self.move(self.app.conf['osd-x'],
+                      self.app.conf['osd-y'] + self.app.conf['osd-toolbar-y'])
+        else:
+            self.move(self.app.conf['osd-x'], self.app.conf['osd-y'])
+
+    def lock_window(self, locked):
+        if not self.app.conf['osd-show']:
+            return
+        self.app.conf['osd-locked'] = locked
+        mapped = self.get_mapped()
+        realized = self.get_realized()
+        if mapped:
+            self.unmap()
+        if realized:
+            self.unrealize()
+        if locked:
+            self.props.type_hint = Gdk.WindowTypeHint.DOCK
+        else:
+            self.props.type_hint = Gdk.WindowTypeHint.NORMAL
+        if realized:
+            self.realize()
+        if mapped:
+            self.map()
+            self.queue_resize()
+        self.reload()
 
     def on_prev_button_clicked(self, button):
         pass
@@ -203,27 +249,30 @@ class OSDLrc(Gtk.Window):
                               Gtk.get_current_event_time())
 
     def on_lock_button_clicked(self, button):
-        self.locked = True
-        mapped = self.get_mapped()
-        realized = self.get_realized()
-        if mapped:
-            self.unmap()
-        if realized:
-            self.unrealize()
-        if self.locked:
-            self.props.type_hint = Gdk.WindowTypeHint.DOCK
-        else:
-            self.props.type_hint = Gdk.WindowTypeHint.NORMAL
-        if realized:
-            self.realize()
-        if mapped:
-            self.map()
-            self.queue_resize()
-        self.reload()
+        self.lock_window_action.set_active(True)
 
     def on_close_button_clicked(self, button):
-        self.hide()
+        self.show_window_action.set_active(False)
 
+    def on_show_window_action_toggled(self, action):
+        status = action.get_active()
+        self.show_window(status)
+        self.lock_window_action.set_sensitive(status)
+        if status:
+            action.set_label(_('Hide OSD Window'))
+        else:
+            action.set_label(_('Show OSD Window'))
+
+    def on_lock_window_action_toggled(self, action):
+        if not self.app.conf['osd-show']:
+            return
+        self.lock_window(action.get_active())
+        if action.get_active():
+            action.set_label(_('UnLock OSD Window'))
+        else:
+            action.set_label(_('Lock OSD Window'))
+
+    # 以下三个事件用于处理窗口拖放移动
     def do_button_press_event(self, event):
         self.start_x, self.start_y = event.x, event.y
         self.mouse_pressed = True
@@ -231,10 +280,11 @@ class OSDLrc(Gtk.Window):
         self.root_window.set_cursor(cursor)
 
     def do_button_release_event(self, event):
-        self.mouse_pressed = False
         cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
         self.root_window.set_cursor(cursor)
-        self.app.conf['osd-x'], self.app.conf['osd-y'] = self.get_position()
+        if self.mouse_pressed:
+            self.app.conf['osd-x'], self.app.conf['osd-y'] = self.get_position()
+            self.mouse_pressed = False
 
     def do_motion_notify_event(self, event):
         if not self.mouse_pressed:

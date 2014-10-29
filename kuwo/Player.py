@@ -153,7 +153,8 @@ class Player(Gtk.Box):
         osd_lrc_btn.set_label(_('OSDLrc'))
         osd_lrc_btn.set_active(False)
         osd_lrc_btn.set_icon_name('accessories-text-editor-symbolic')
-        osd_lrc_btn.connect('toggled', self.on_osd_lrc_btn_toggled)
+        #osd_lrc_btn.connect('toggled', self.on_osd_lrc_btn_toggled)
+        osd_lrc_btn.props.related_action = self.app.osdlrc.show_window_action
         toolbar.insert(osd_lrc_btn, 9)
 
         # control menu
@@ -602,9 +603,6 @@ class Player(Gtk.Box):
         else:
             self.app.playlist.add_song_to_playlist(self.curr_song, 'Favorite')
             self.favorite_btn.set_icon_name('favorite')
-
-    def on_osd_lrc_btn_toggled(self, button):
-        self.app.osdlrc.toggle_status(button.get_active())
 
     # menu button
     def on_main_menu_button_clicked(self, button, main_menu):

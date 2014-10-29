@@ -66,6 +66,8 @@ class App:
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.window.add(box)
 
+        self.osdlrc = OSDLrc(self)
+
         self.player = Player(self)
         box.pack_start(self.player, False, False, 0)
 
@@ -76,8 +78,6 @@ class App:
         self.init_notebook()
         self.notebook.connect('switch-page', self.on_notebook_switch_page)
         self.init_status_icon()
-
-        self.osdlrc = OSDLrc(self)
 
         # load default styles when all widgets have been constructed.
         self.load_styles()
@@ -91,6 +91,7 @@ class App:
         self.player.after_init()
         self.search.after_init()
         self.shortcut = Shortcut(self.player)
+        self.osdlrc.after_init()
 
     def on_app_shutdown(self, app):
         Config.dump_conf(self.conf)
@@ -235,9 +236,13 @@ class App:
     def on_status_icon_popup_menu(self, status_icon, event_button, 
                                   event_time):
         menu = Gtk.Menu()
+
         show_item = Gtk.MenuItem(label=_('Show App') )
         show_item.connect('activate', self.on_status_icon_show_app_activate)
         menu.append(show_item)
+
+        sep_item = Gtk.SeparatorMenuItem()
+        menu.append(sep_item)
 
         pause_item = Gtk.MenuItem(label=_('Pause/Resume'))
         pause_item.connect('activate', self.on_status_icon_pause_activate)
@@ -246,6 +251,17 @@ class App:
         next_item = Gtk.MenuItem(label=_('Next Song'))
         next_item.connect('activate', self.on_status_icon_next_activate)
         menu.append(next_item)
+
+        sep_item = Gtk.SeparatorMenuItem()
+        menu.append(sep_item)
+
+        show_osd_item = Gtk.MenuItem()
+        show_osd_item.props.related_action = self.osdlrc.show_window_action
+        menu.append(show_osd_item)
+
+        lock_osd_item = Gtk.MenuItem()
+        lock_osd_item.props.related_action = self.osdlrc.lock_window_action
+        menu.append(lock_osd_item)
 
         sep_item = Gtk.SeparatorMenuItem()
         menu.append(sep_item)
@@ -267,6 +283,9 @@ class App:
 
     def on_status_icon_next_activate(self, menuitem):
         self.player.load_next()
+
+    def on_status_icon_lock_osd_activate(self, menuitem):
+        self.osdlrc.toggle_lock()
 
     def on_status_icon_quit_activate(self, menuitem):
         self.quit()

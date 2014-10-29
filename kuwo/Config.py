@@ -123,6 +123,7 @@ _default_conf = {
     'osd-x': 100,
     'osd-y': 100,
     'osd-toolbar-y': 20,
+    'osd-show': False,
     'osd-locked': False,
     'osd-style': 'default',
 }
