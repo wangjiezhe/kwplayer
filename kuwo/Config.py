@@ -126,7 +126,6 @@ _default_conf = {
 
     'osd-x': 200,
     'osd-y': 200,
-    'osd-toolbar-y': 36,
     'osd-show': False,
     'osd-locked': False,
     'osd-style': 'default',

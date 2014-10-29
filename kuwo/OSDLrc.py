@@ -10,9 +10,11 @@
 import json
 import os
 import sys
+import time
 
 import cairo
 from gi.repository import Gdk
+from gi.repository import GLib
 from gi.repository import Gtk
 
 from kuwo import Config
@@ -23,6 +25,7 @@ from kuwo.log import logger
 ACTIVATE = 'activated'
 SIZE_MAX = 72
 SIZE_MIN = 4
+HIDE_TOOLBAR_AFTER = 2000  # 2 secs
 
 class RightLabel(Gtk.Label):
 
@@ -65,7 +68,7 @@ class OSDLrc(Gtk.Window):
         self.toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_MENUBAR)
         self.toolbar.set_show_arrow(False)
         self.toolbar.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
-        box.pack_start(self.toolbar, False, False, 0)
+        box.pack_end(self.toolbar, False, False, 0)
 
         prev_button = Gtk.ToolButton()
         prev_button.set_label(_('Previous'))
@@ -157,6 +160,7 @@ class OSDLrc(Gtk.Window):
         if self.app.conf['osd-show']:
             self.show_window_action.set_active(True)
         self.play_button.props.related_action = self.app.player.playback_action
+        self.toolbar.timestamp = time.time()
 
     def update_style(self):
         conf = self.app.conf
@@ -198,14 +202,13 @@ class OSDLrc(Gtk.Window):
                 old_provider=self.da2.old_provider)
 
     def set_lrc(self, lrc_obj):
-        self.line_num = 0
         self.lrc_obj = lrc_obj
         if not lrc_obj:
             self.da.set_text('No lyric available')
 
     def sync_lrc(self, line_num):
         '''同步歌词'''
-        if line_num >= len(self.lrc_obj):
+        if line_num >= len(self.lrc_obj) + 1:
             return
         elif line_num == 0:
             self.da.set_text(self.lrc_obj[line_num][1])
@@ -232,9 +235,20 @@ class OSDLrc(Gtk.Window):
             gdk_window.input_shape_combine_region(region, 0, 0)
         else:
             self.toolbar.show_all()
-            self.app.conf['osd-toolbar-y'] = self.toolbar.get_allocated_height()
+            self.auto_hide_toolbar()
             self.input_shape_combine_region(None)
-        self.resize_window()
+        self.move(self.app.conf['osd-x'], self.app.conf['osd-y'])
+
+    def auto_hide_toolbar(self):
+        def hide_toolbar(timestamp):
+            if timestamp == self.toolbar.timestamp:
+                self.toolbar.timestamp = 0
+                self.toolbar.hide()
+
+        if self.toolbar.get_visible():
+            timestamp = time.time()
+            self.toolbar.timestamp = timestamp
+            GLib.timeout_add(HIDE_TOOLBAR_AFTER, hide_toolbar, timestamp)
 
     def show_window(self, show):
         '''是否显示歌词窗口'''
@@ -250,13 +264,6 @@ class OSDLrc(Gtk.Window):
             self.reload()
         else:
             self.hide()
-
-    def resize_window(self):
-        if self.app.conf['osd-locked']:
-            self.move(self.app.conf['osd-x'],
-                      self.app.conf['osd-y'] + self.app.conf['osd-toolbar-y'])
-        else:
-            self.move(self.app.conf['osd-x'], self.app.conf['osd-y'])
 
     def lock_window(self, locked):
         if not self.app.conf['osd-show']:
@@ -401,6 +408,13 @@ class OSDLrc(Gtk.Window):
         else:
             action.set_label(_('Lock OSD Window'))
 
+    # 以下两个事件用于自动隐去工具栏
+    def do_enter_notify_event(self, event):
+        self.toolbar.show_all()
+
+    def do_leave_notify_event(self, event):
+        self.auto_hide_toolbar()
+
     # 以下三个事件用于处理窗口拖放移动
     def do_button_press_event(self, event):
         self.start_x, self.start_y = event.x, event.y
@@ -412,8 +426,8 @@ class OSDLrc(Gtk.Window):
         cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
         self.root_window.set_cursor(cursor)
         if self.mouse_pressed:
-            self.app.conf['osd-x'], self.app.conf['osd-y'] = self.get_position()
             self.mouse_pressed = False
+            self.app.conf['osd-x'], self.app.conf['osd-y'] = self.get_position()
 
     def do_motion_notify_event(self, event):
         if not self.mouse_pressed:
