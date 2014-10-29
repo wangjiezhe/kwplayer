@@ -1,0 +1,20 @@
+
+
+/**
+ * default
+ */
+
+#default {
+  background-color: rgba(123, 123, 123, 0.8);
+}
+
+#default .activate {
+  color: rgba(45, 0, 229, 0.9);
+  font-size: 28px;
+}
+
+#default GtkLabel{
+  color: rgba(104, 74, 186, 0.7);
+  font-size: 22px;
+}
+

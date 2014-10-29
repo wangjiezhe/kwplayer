@@ -20,6 +20,7 @@ _ = Config._
 from kuwo import Widgets
 from kuwo.log import logger
 
+ACTIVATE = 'activate'
 
 class OSDLrc(Gtk.Window):
 
@@ -127,16 +128,23 @@ class OSDLrc(Gtk.Window):
         close_button.connect('clicked', self.on_close_button_clicked)
         self.toolbar.insert(close_button, 8)
 
-        self.da = Gtk.DrawingArea()
-        self.da.set_size_request(400, 200)
+        #self.da = Gtk.DrawingArea()
+        self.da = Gtk.Label()
+        self.da.set_name('da')
+        self.da.props.xalign = 0
         box.pack_start(self.da, False, False, 0)
-
-        img = Gtk.Image.new_from_file('/tmp/fuck.png')
-        box.pack_start(img, False, False, 0)
+        self.da2 = Gtk.Label()
+        self.da2.set_name('da2')
+        self.da2.props.justify = Gtk.Justification.RIGHT
+        self.da2.props.halign = Gtk.Align.END
+        self.da2.props.xalign = 1
+        box.pack_start(self.da2, False, False, 0)
 
         with open(Config.OSD_STYLE) as fh:
             css = fh.read()
             Widgets.apply_css(self, css)
+            Widgets.apply_css(self.da, css)
+            Widgets.apply_css(self.da2, css)
 
         # 切换窗口显隐动作
         self.show_window_action = Gtk.ToggleAction('show-window-action',
@@ -164,6 +172,29 @@ class OSDLrc(Gtk.Window):
         if self.app.conf['osd-show']:
             self.show_window_action.set_active(True)
         self.play_button.props.related_action = self.app.player.playback_action
+
+    def set_lrc(self, lrc_obj):
+        self.line_num = 0
+        self.lrc_obj = lrc_obj
+        if not lrc_obj:
+            self.da.set_text('No lyric available')
+
+    def sync_lrc(self, line_num):
+        '''同步歌词'''
+        if line_num >= len(self.lrc_obj):
+            return
+        elif line_num == 0:
+            self.da.set_text(self.lrc_obj[line_num][1])
+            self.da2.set_text(self.lrc_obj[line_num+1][1])
+            self.da.get_style_context().add_class(ACTIVATE)
+        elif line_num % 2 == 1:
+            self.da.set_text(self.lrc_obj[line_num+1][1])
+            self.da.get_style_context().remove_class(ACTIVATE)
+            self.da2.get_style_context().add_class(ACTIVATE)
+        else:
+            self.da2.set_text(self.lrc_obj[line_num+1][1])
+            self.da2.get_style_context().remove_class(ACTIVATE)
+            self.da.get_style_context().add_class(ACTIVATE)
 
     def reload(self):
         '''重新设定属性, 然后重绘'''

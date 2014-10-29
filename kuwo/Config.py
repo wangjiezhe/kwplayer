@@ -29,6 +29,10 @@ gettext.bindtextdomain('kwplayer', LOCALEDIR)
 gettext.textdomain('kwplayer')
 _ = gettext.gettext
 
+# Check Gtk version <= 3.6
+GTK_LE_36 = (Gtk.MAJOR_VERSION == 3) and (Gtk.MINOR_VERSION <= 6)
+GTK_GE_312 = Gtk.MINOR_VERSION >= 12
+
 APPNAME = _('KW Player')
 VERSION = kuwo.__version__
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
@@ -56,16 +60,16 @@ FAV_ARTISTS_JSON = os.path.join(CACHE_DIR, 'fav_artists.json')
 
 THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
 LRC_BACKGROUND_IMG = os.path.join(THEME_DIR, 'lrc-background.jpg')
-OSD_STYLE = os.path.join(THEME_DIR, 'osd_styles.css')
+
+if GTK_LE_36:
+    OSD_STYLE = os.path.join(THEME_DIR, 'osd-styles-old.css')
+else:
+    OSD_STYLE = os.path.join(THEME_DIR, 'osd-styles.css')
 
 class ShortcutMode:
     NONE = 0
     DEFAULT = 1
     CUSTOM = 2
-
-# Check Gtk version <= 3.6
-GTK_LE_36 = (Gtk.MAJOR_VERSION == 3) and (Gtk.MINOR_VERSION <= 6)
-GTK_GE_312 = Gtk.MINOR_VERSION >= 12
 
 CONF_DIR = os.path.join(HOME_DIR, '.config', 'kuwo')
 _conf_file = os.path.join(CONF_DIR, 'conf.json')
@@ -126,6 +130,11 @@ _default_conf = {
     'osd-show': False,
     'osd-locked': False,
     'osd-style': 'default',
+    'osd-inactive-color': 'rgba(45, 0, 229, 0.9)',
+    'osd-active-color': 'rgba(104, 74, 186, 0.7)',
+    'osd-background-color': 'rgba(123, 123, 123, 0.8)',
+    'osd-inative-size': 22,
+    'osd-active-size': 28,
 }
 
 def check_first():
