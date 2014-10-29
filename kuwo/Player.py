@@ -157,7 +157,6 @@ class Player(Gtk.Box):
         osd_lrc_btn.set_label(_('OSDLrc'))
         osd_lrc_btn.set_active(False)
         osd_lrc_btn.set_icon_name('accessories-text-editor-symbolic')
-        #osd_lrc_btn.connect('toggled', self.on_osd_lrc_btn_toggled)
         osd_lrc_btn.props.related_action = self.app.osdlrc.show_window_action
         toolbar.insert(osd_lrc_btn, 9)
 
