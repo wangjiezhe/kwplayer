@@ -53,7 +53,7 @@ class PlayerNotify:
         try:
             notify.add_action('media-skip-backward', _('Previous'),
                               self.on_prev_action_activated, None)
-            if self.player.is_playing():
+            if self.player.playback_action.get_active():
                 notify.add_action('media-playback-pause', _('Pause'),
                                   self.on_playpause_action_activated, None)
             else:
@@ -65,7 +65,7 @@ class PlayerNotify:
             # For Fedora 19, which needs 6 parameters.
             notify.add_action('media-skip-backward', _('Previous'),
                               self.on_prev_action_activated, None, None)
-            if self.player.is_playing():
+            if self.player.playback_action.get_active():
                 notify.add_action('media-playback-pause', _('Pause'),
                                   self.on_playpause_action_activated,
                                   None, None)

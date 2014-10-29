@@ -878,6 +878,7 @@ class PlayList(Gtk.Box):
         self.playlist_advice_disname = disname
 
     def on_advice_menu_item_activated(self, advice_item):
+        '''新建一个播放列表'''
         list_name = str(time.time())
         tooltip = Widgets.escape(self.playlist_advice_disname)
         self.liststore_left.append(

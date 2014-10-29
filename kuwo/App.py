@@ -22,14 +22,15 @@ from kuwo import Widgets
 from kuwo.Artists import Artists
 from kuwo.Lrc import Lrc
 from kuwo.MV import MV
+from kuwo.OSDLrc import OSDLrc
 from kuwo.Player import Player
 from kuwo.PlayList import PlayList
 from kuwo.Radio import Radio
 from kuwo.Search import Search
+from kuwo.Shortcut import Shortcut
 from kuwo.Themes import Themes
 from kuwo.TopCategories import TopCategories
 from kuwo.TopList import TopList
-from kuwo.Shortcut import Shortcut
 
 if Gtk.MAJOR_VERSION <= 3 and Gtk.MINOR_VERSION < 10:
     GObject.threads_init()
@@ -65,6 +66,8 @@ class App:
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.window.add(box)
 
+        self.osdlrc = OSDLrc(self)
+
         self.player = Player(self)
         box.pack_start(self.player, False, False, 0)
 
@@ -88,6 +91,7 @@ class App:
         self.player.after_init()
         self.search.after_init()
         self.shortcut = Shortcut(self.player)
+        self.osdlrc.after_init()
 
     def on_app_shutdown(self, app):
         Config.dump_conf(self.conf)
@@ -232,17 +236,36 @@ class App:
     def on_status_icon_popup_menu(self, status_icon, event_button, 
                                   event_time):
         menu = Gtk.Menu()
+
         show_item = Gtk.MenuItem(label=_('Show App') )
         show_item.connect('activate', self.on_status_icon_show_app_activate)
         menu.append(show_item)
 
-        pause_item = Gtk.MenuItem(label=_('Pause/Resume'))
-        pause_item.connect('activate', self.on_status_icon_pause_activate)
-        menu.append(pause_item)
+        sep_item = Gtk.SeparatorMenuItem()
+        menu.append(sep_item)
+
+        previous_item = Gtk.MenuItem(label=_('Previous Song'))
+        previous_item.connect('activate', self.on_status_icon_prev_activate)
+        menu.append(previous_item)
+
+        play_item = Gtk.MenuItem()
+        play_item.props.related_action = self.player.playback_action
+        menu.append(play_item)
 
         next_item = Gtk.MenuItem(label=_('Next Song'))
         next_item.connect('activate', self.on_status_icon_next_activate)
         menu.append(next_item)
+
+        sep_item = Gtk.SeparatorMenuItem()
+        menu.append(sep_item)
+
+        show_osd_item = Gtk.MenuItem()
+        show_osd_item.props.related_action = self.osdlrc.show_window_action
+        menu.append(show_osd_item)
+
+        lock_osd_item = Gtk.MenuItem()
+        lock_osd_item.props.related_action = self.osdlrc.lock_window_action
+        menu.append(lock_osd_item)
 
         sep_item = Gtk.SeparatorMenuItem()
         menu.append(sep_item)
@@ -259,11 +282,17 @@ class App:
     def on_status_icon_show_app_activate(self, menuitem):
         self.window.present()
 
+    def on_status_icon_prev_activate(self, menuitem):
+        self.player.load_prev()
+
     def on_status_icon_pause_activate(self, menuitem):
         self.player.play_pause()
 
     def on_status_icon_next_activate(self, menuitem):
         self.player.load_next()
+
+    def on_status_icon_lock_osd_activate(self, menuitem):
+        self.osdlrc.toggle_lock()
 
     def on_status_icon_quit_activate(self, menuitem):
         self.quit()
