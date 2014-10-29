@@ -170,6 +170,16 @@ class Player(Gtk.Box):
         main_menu.append(pref_item)
         sep_item = Gtk.SeparatorMenuItem()
         main_menu.append(sep_item)
+
+        show_osd_item = Gtk.MenuItem()
+        show_osd_item.props.related_action = self.app.osdlrc.show_window_action
+        main_menu.append(show_osd_item)
+        lock_osd_item = Gtk.MenuItem()
+        lock_osd_item.props.related_action = self.app.osdlrc.lock_window_action
+        main_menu.append(lock_osd_item)
+
+        sep_item = Gtk.SeparatorMenuItem()
+        main_menu.append(sep_item)
         about_item = Gtk.MenuItem(label=_('About'))
         about_item.connect('activate', self.on_main_menu_about_activate)
         main_menu.append(about_item)
