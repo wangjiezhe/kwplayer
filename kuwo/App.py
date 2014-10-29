@@ -18,6 +18,7 @@ from kuwo import Config
 # ~/.config/kuwo and ~/.cache/kuwo need to be created at first time
 Config.check_first()
 _ = Config._
+from kuwo import Widgets
 from kuwo.Artists import Artists
 from kuwo.Lrc import Lrc
 from kuwo.MV import MV
@@ -149,25 +150,6 @@ class App:
         '''Switch to this widget in notebook.'''
         self.notebook.set_current_page(page)
 
-    def apply_css(self, widget, css, old_provider=None, overall=False):
-        '''Update CssProvider of this widget.'''
-        # CssProvider requires bytecode
-        style_provider = Gtk.CssProvider()
-        css_encoded = css.encode()
-        style_provider.load_from_data(css_encoded)
-        if overall:
-            Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),
-                    style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-            if old_provider:
-                Gtk.StyleContext.remove_provider_for_screen(
-                    Gdk.Screen.get_default(), style_provider)
-        else:
-            widget.get_style_context().add_provider(style_provider,
-                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-            if old_provider:
-                widget.get_style_context().remove_provider(old_provider)
-        return style_provider
-
     def load_styles(self):
         '''Load default CssStyle.'''
         if Config.GTK_LE_36:
@@ -225,7 +207,7 @@ class App:
                     '}',
                 ])
 
-        self.apply_css(self.window, css, overall=True)
+        Widgets.apply_css(self.window, css, overall=True)
 
         settings = Gtk.Settings.get_default()
         settings.props.gtk_application_prefer_dark_theme = \

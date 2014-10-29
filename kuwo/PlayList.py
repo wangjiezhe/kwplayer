@@ -892,6 +892,7 @@ class PlayList(Gtk.Box):
         self.add_songs_to_playlist(songs, list_name)
 
     def popup_playlist_menu(self, button, songs):
+        '''弹出选择播放列表的菜单'''
         menu = self.playlist_menu
         while menu.get_children():
             menu.remove(menu.get_children()[0])
