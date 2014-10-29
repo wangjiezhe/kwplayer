@@ -59,7 +59,6 @@ class Player(Gtk.Box):
         self.adj_timeout = 0
         self.recommend_imgs = None
         self.curr_song = None
-        self._is_playing = False
 
         # use this to keep Net.AsyncSong object
         self.async_song = None
@@ -88,11 +87,16 @@ class Player(Gtk.Box):
         prev_button.connect('clicked', self.on_prev_button_clicked)
         toolbar.insert(prev_button, 0)
 
-        self.play_button = Gtk.ToolButton()
-        self.play_button.set_label(_('Play'))
-        self.play_button.set_icon_name('media-playback-start-symbolic')
-        self.play_button.connect('clicked', self.on_play_button_clicked)
-        toolbar.insert(self.play_button, 1)
+        self.playback_action = Gtk.ToggleAction('playback-action', _('Play'),
+                                                _('Play'), None)
+        self.playback_action.set_icon_name('media-playback-start-symbolic')
+        self.playback_action.set_label(_('Play'))
+        self.playback_action.set_active(False)
+        self.playback_action.connect('toggled', self.on_playback_action_toggled)
+
+        play_button = Gtk.ToolButton()
+        play_button.props.related_action = self.playback_action
+        toolbar.insert(play_button, 1)
 
         next_button = Gtk.ToolButton()
         next_button.set_label(_('Next'))
@@ -303,7 +307,12 @@ class Player(Gtk.Box):
                 self.use_mtv_btn.set_sensitive(True)
                 self.app.lrc.show_mv()
                 self.playbin.load_video(uri, self.app.lrc.xid)
-            self.start_player(load=True)
+
+            self.playback_action.set_active(True)
+            self.playbin.set_volume(self.app.conf['volume'])
+            self.init_meta()
+            GLib.timeout_add(1500, self.init_adjustment)
+
             self.update_player_info()
             if self.play_type == PlayType.SONG:
                 if self.curr_song.get('formats', ''):
@@ -396,10 +405,13 @@ class Player(Gtk.Box):
     def on_prev_button_clicked(self, button):
         self.load_prev()
 
-    def on_play_button_clicked(self, button):
+    def on_playback_action_toggled(self, action):
         if self.play_type == PlayType.NONE:
             return
-        self.play_pause()
+        if action.get_active():
+            self.start_player()
+        else:
+            self.pause_player()
 
     def on_next_button_clicked(self, button):
         self.load_next()
@@ -667,19 +679,14 @@ class Player(Gtk.Box):
         GLib.idle_add(self.update_gtk_volume_value)
 
 
-    # control player, UI and dbus
-    def is_playing(self):
-        #return self.playbin.is_playing()
-        return self._is_playing
-
     def start_player(self, load=False):
         if self.play_type == PlayType.NONE:
             return
-        self._is_playing = True
 
         self.dbus.set_Playing()
 
-        self.play_button.set_icon_name('media-playback-pause-symbolic')
+        self.playback_action.set_icon_name('media-playback-pause-symbolic')
+        self.playback_action.set_label(_('Pause'))
         self.playbin.play()
         self.adj_timeout = GLib.timeout_add(250, self.sync_adjustment)
         if load:
@@ -688,15 +695,15 @@ class Player(Gtk.Box):
             GLib.timeout_add(1500, self.init_adjustment)
         self.notify.refresh()
 
-    def start_player_cb(self, load=False):
-        GLib.idle_add(self.start_player, load)
+    def start_player_cb(self):
+        GLib.idle_add(lambda: self.playback_action.set_active(True))
 
     def pause_player(self):
         if self.play_type == PlayType.NONE:
             return
-        self._is_playing = False
         self.dbus.set_Pause()
-        self.play_button.set_icon_name('media-playback-start-symbolic')
+        self.playback_action.set_icon_name('media-playback-start-symbolic')
+        self.playback_action.set_label(_('Play'))
         self.playbin.pause()
         if self.adj_timeout > 0:
             GLib.source_remove(self.adj_timeout)
@@ -704,15 +711,12 @@ class Player(Gtk.Box):
         self.notify.refresh()
 
     def pause_player_cb(self):
-        GLib.idle_add(self.pause_player)
+        GLib.idle_add(lambda: self.playback_action.set_active(False))
 
     def play_pause(self):
         if self.play_type == PlayType.NONE:
             return
-        if self.playbin.is_playing():
-            self.pause_player()
-        else:
-            self.start_player()
+        self.playback_action.set_active(not self.playback_action.get_active())
 
     def play_pause_cb(self):
         GLib.idle_add(self.play_pause)
@@ -720,8 +724,7 @@ class Player(Gtk.Box):
     def stop_player(self):
         if self.play_type == PlayType.NONE:
             return
-        self._is_playing = False
-        self.play_button.set_icon_name('media-playback-pause-symbolic')
+        self.playback_action.set_active(False)
         self.playbin.stop()
         self.scale.set_value(0)
         if self.play_type != PlayType.MV:
@@ -803,7 +806,7 @@ class Player(Gtk.Box):
     def seek(self, offset):
         if self.play_type == PlayType.NONE:
             return
-        self.pause_player()
+        self.playback_action.set_active(False)
         self.playbin.seek(offset)
         GLib.timeout_add(300, self.start_player_cb)
         self.sync_label_by_adjustment()

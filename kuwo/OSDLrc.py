@@ -67,9 +67,6 @@ class OSDLrc(Gtk.Window):
         self.toolbar.insert(prev_button, 0)
 
         self.play_button = Gtk.ToolButton()
-        self.play_button.set_label(_('Play'))
-        self.play_button.set_icon_name('media-playback-start-symbolic')
-        self.play_button.connect('clicked', self.on_play_button_clicked)
         self.toolbar.insert(self.play_button, 1)
 
         next_button = Gtk.ToolButton()
@@ -166,6 +163,7 @@ class OSDLrc(Gtk.Window):
     def after_init(self):
         if self.app.conf['osd-show']:
             self.show_window_action.set_active(True)
+        self.play_button.props.related_action = self.app.player.playback_action
 
     def reload(self):
         '''重新设定属性, 然后重绘'''
@@ -227,13 +225,10 @@ class OSDLrc(Gtk.Window):
         self.reload()
 
     def on_prev_button_clicked(self, button):
-        pass
-
-    def on_play_button_clicked(self, button):
-        pass
+        self.app.player.load_prev()
 
     def on_next_button_clicked(self, button):
-        pass
+        self.app.player.load_next()
 
     def on_zoom_in_button_clicked(self, button):
         pass

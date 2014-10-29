@@ -168,7 +168,7 @@ class PlayerDBus(dbus.service.Object):
 
     # player properties
     def get_PlaybackStatus(self):
-        if self.player.is_playing():
+        if self.player.playback_action.get_active():
             return 'Playing'
         return 'Paused'
 

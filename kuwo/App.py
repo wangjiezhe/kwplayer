@@ -244,9 +244,13 @@ class App:
         sep_item = Gtk.SeparatorMenuItem()
         menu.append(sep_item)
 
-        pause_item = Gtk.MenuItem(label=_('Pause/Resume'))
-        pause_item.connect('activate', self.on_status_icon_pause_activate)
-        menu.append(pause_item)
+        previous_item = Gtk.MenuItem(label=_('Previous Song'))
+        previous_item.connect('activate', self.on_status_icon_prev_activate)
+        menu.append(previous_item)
+
+        play_item = Gtk.MenuItem()
+        play_item.props.related_action = self.player.playback_action
+        menu.append(play_item)
 
         next_item = Gtk.MenuItem(label=_('Next Song'))
         next_item.connect('activate', self.on_status_icon_next_activate)
@@ -277,6 +281,9 @@ class App:
 
     def on_status_icon_show_app_activate(self, menuitem):
         self.window.present()
+
+    def on_status_icon_prev_activate(self, menuitem):
+        self.player.load_prev()
 
     def on_status_icon_pause_activate(self, menuitem):
         self.player.play_pause()
