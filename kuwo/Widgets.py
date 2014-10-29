@@ -386,3 +386,22 @@ def filesystem_error(parent, path):
     dialog.format_secondary_text(_('Unable to access {0}').format(path))
     dialog.run()
     dialog.destroy()
+
+def apply_css(widget, css, old_provider=None, overall=False):
+    '''Update CssProvider of this widget.'''
+    # CssProvider requires bytecode
+    style_provider = Gtk.CssProvider()
+    css_encoded = css.encode()
+    style_provider.load_from_data(css_encoded)
+    if overall:
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),
+                style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        if old_provider:
+            Gtk.StyleContext.remove_provider_for_screen(
+                Gdk.Screen.get_default(), style_provider)
+    else:
+        widget.get_style_context().add_provider(style_provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        if old_provider:
+            widget.get_style_context().remove_provider(old_provider)
+    return style_provider

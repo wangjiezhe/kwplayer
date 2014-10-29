@@ -30,7 +30,7 @@ scripts = ['kwplayer', ]
 if __name__ == '__main__':
     setup(
         name = 'kwplayer',
-        description = 'An elegant music player which can get songs from kuwo.cn',
+        description = 'Music player for linux users',
         version = kuwo.__version__,
         license = 'GPLv3',
         url = 'https://github.com/LiuLang/kwplayer',

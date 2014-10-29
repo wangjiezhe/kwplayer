@@ -15,6 +15,7 @@ from gi.repository import Gtk
 from kuwo import Config
 _ = Config._
 from kuwo.log import logger
+from kuwo import Widgets
 
 LRC_WINDOW, MV_WINDOW = 0, 1
 
@@ -187,8 +188,8 @@ class Lrc(Gtk.Notebook):
                 "background-image: url('{0}');".format(self.lrc_background),
             '}',
         ])
-        new_provider = self.app.apply_css(self.lrc_window, css,
-                                          old_provider=self.old_provider)
+        new_provider = Widgets.apply_css(self.lrc_window, css,
+                                         old_provider=self.old_provider)
         self.old_provider = new_provider
 
     def update_highlighted_tag(self):
