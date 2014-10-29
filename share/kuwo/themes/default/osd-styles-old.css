@@ -1,7 +1,0 @@
-
-/**
- * 这个主题包用于兼容gtk3.4, gtk3.6等旧的gtk版本
- */
-#default {
-  background-color: rgba(23, 23, 23, 0.4);
-}

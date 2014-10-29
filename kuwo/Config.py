@@ -94,7 +94,7 @@ _default_conf = {
     'video': 1,  # mp4 high
     'use-status-icon': True,
     'use-notify': False,
-    'use-dark-theme': True,
+    'use-dark-theme': False,
     'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
     'lrc-back-color': 'rgba(237, 221, 221, 0.28)',
     'lrc-text-size': 22,
@@ -124,17 +124,17 @@ _default_conf = {
         'Launch': 'XF86AudioMedia',
     },
 
-    'osd-x': 100,
-    'osd-y': 100,
-    'osd-toolbar-y': 20,
+    'osd-x': 200,
+    'osd-y': 200,
+    'osd-toolbar-y': 36,
     'osd-show': False,
     'osd-locked': False,
     'osd-style': 'default',
-    'osd-inactive-color': 'rgba(45, 0, 229, 0.9)',
-    'osd-active-color': 'rgba(104, 74, 186, 0.7)',
-    'osd-background-color': 'rgba(123, 123, 123, 0.8)',
-    'osd-inative-size': 22,
-    'osd-active-size': 28,
+    'osd-inactivated-color': 'rgba(196,160,0,0.999)',
+    'osd-inactivated-size': 22,
+    'osd-activated-color': 'rgba(252,233,79,0.999)',
+    'osd-activated-size': 32,
+    'osd-background-color': 'rgba(123, 123, 123, 0.9)',
 }
 
 def check_first():

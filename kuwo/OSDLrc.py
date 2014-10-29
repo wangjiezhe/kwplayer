@@ -20,7 +20,16 @@ _ = Config._
 from kuwo import Widgets
 from kuwo.log import logger
 
-ACTIVATE = 'activate'
+ACTIVATE = 'activated'
+SIZE_MAX = 72
+SIZE_MIN = 4
+
+class RightLabel(Gtk.Label):
+
+    def __init__(self, label):
+        super().__init__(label)
+        self.props.halign = Gtk.Align.END
+        self.props.xalign = 1
 
 class OSDLrc(Gtk.Window):
 
@@ -31,11 +40,8 @@ class OSDLrc(Gtk.Window):
         self.props.resizable = False
         self.app = app
 
-        self.style_types = {
-            'default': _('Default'),
-        }
-        self.set_name('default')
         self.has_shown = False
+        self.old_provider = None
 
         # set main window opacity
         screen = self.get_screen()
@@ -91,30 +97,11 @@ class OSDLrc(Gtk.Window):
         zoom_out_button.connect('clicked', self.on_zoom_out_button_clicked)
         self.toolbar.insert(zoom_out_button, 5)
 
-        self.color_menu = Gtk.Menu()
-        for name in self.style_types:
-            menu_item = Gtk.MenuItem()
-            menu_item.set_label(self.style_types[name])
-            menu_item.connect('activate', self.on_color_menu_item_activate,
-                              name)
-            self.color_menu.append(menu_item)
-
-        color_tool_item = Gtk.ToolItem()
-        self.toolbar.insert(color_tool_item, 6)
-        if Config.GTK_LE_36:
-            color_button = Gtk.Button()
-            color_button.connect('clicked', self.on_color_button_clicked)
-        else:
-            color_button = Gtk.MenuButton()
-            color_button.set_popup(self.color_menu)
-            color_button.set_always_show_image(True)
-        color_button.props.relief = Gtk.ReliefStyle.NONE
-        color_image = Gtk.Image()
-        color_image.set_from_icon_name('preferences-color-symbolic',
-                                       Gtk.IconSize.LARGE_TOOLBAR)
-        color_button.set_image(color_image)
-        self.color_menu.show_all()
-        color_tool_item.add(color_button)
+        color_button = Gtk.ToolButton()
+        color_button.set_label(_('Color'))
+        color_button.set_icon_name('preferences-color-symbolic')
+        color_button.connect('clicked', self.on_color_button_clicked)
+        self.toolbar.insert(color_button, 6)
 
         lock_button = Gtk.ToolButton()
         lock_button.set_label(_('Lock'))
@@ -128,23 +115,20 @@ class OSDLrc(Gtk.Window):
         close_button.connect('clicked', self.on_close_button_clicked)
         self.toolbar.insert(close_button, 8)
 
-        #self.da = Gtk.DrawingArea()
         self.da = Gtk.Label()
+        self.da.old_provider = None
         self.da.set_name('da')
         self.da.props.xalign = 0
         box.pack_start(self.da, False, False, 0)
         self.da2 = Gtk.Label()
+        self.da2.old_provider = None
         self.da2.set_name('da2')
         self.da2.props.justify = Gtk.Justification.RIGHT
         self.da2.props.halign = Gtk.Align.END
         self.da2.props.xalign = 1
         box.pack_start(self.da2, False, False, 0)
 
-        with open(Config.OSD_STYLE) as fh:
-            css = fh.read()
-            Widgets.apply_css(self, css)
-            Widgets.apply_css(self.da, css)
-            Widgets.apply_css(self.da2, css)
+        #Widgets.apply_css(self, css)
 
         # 切换窗口显隐动作
         self.show_window_action = Gtk.ToggleAction('show-window-action',
@@ -169,9 +153,49 @@ class OSDLrc(Gtk.Window):
                                         self.on_lock_window_action_toggled)
 
     def after_init(self):
+        self.update_style()
         if self.app.conf['osd-show']:
             self.show_window_action.set_active(True)
         self.play_button.props.related_action = self.app.player.playback_action
+
+    def update_style(self):
+        conf = self.app.conf
+        if Config.GTK_LE_36:
+            css = '\n'.join([
+                'GtkWindow {',
+                    'background-color:{0};'.format(
+                        conf['osd-background-color']),
+                '}',
+                '.activated {',
+                    'color: {0};'.format(conf['osd-activated-color']),
+                    'font-size: {0};'.format(conf['osd-activated-size']),
+                '}',
+                'GtkLabel {',
+                    'color: {0};'.format(conf['osd-inactivated-color']),
+                    'font-size: {0};'.format(conf['osd-inactivated-size']),
+                '}',
+            ])
+        else:
+            css = '\n'.join([
+                'GtkWindow {',
+                    'background-color:{0};'.format(
+                        conf['osd-background-color']),
+                '}',
+                '.activated {',
+                    'color: {0};'.format(conf['osd-activated-color']),
+                    'font-size: {0}px;'.format(conf['osd-activated-size']),
+                '}',
+                'GtkLabel {',
+                    'color: {0};'.format(conf['osd-inactivated-color']),
+                    'font-size: {0}px;'.format(conf['osd-inactivated-size']),
+                '}',
+            ])
+        self.old_provider = Widgets.apply_css(self, css,
+                old_provider=self.old_provider)
+        self.da.old_provider = Widgets.apply_css(self.da, css,
+                old_provider=self.da.old_provider)
+        self.da2.old_provider = Widgets.apply_css(self.da2, css,
+                old_provider=self.da2.old_provider)
 
     def set_lrc(self, lrc_obj):
         self.line_num = 0
@@ -262,17 +286,96 @@ class OSDLrc(Gtk.Window):
         self.app.player.load_next()
 
     def on_zoom_in_button_clicked(self, button):
-        pass
+        if self.app.conf['osd-inactivated-size'] < SIZE_MAX:
+            self.app.conf['osd-inactivated-size'] += 1
+        if self.app.conf['osd-activated-size'] < SIZE_MAX:
+            self.app.conf['osd-activated-size'] += 1
+        self.update_style()
 
     def on_zoom_out_button_clicked(self, button):
-        pass
-
-    def on_color_menu_item_activate(self, menu_item, name):
-        self.set_name(name)
+        if self.app.conf['osd-inactivated-size'] > SIZE_MIN:
+            self.app.conf['osd-inactivated-size'] -= 1
+        if self.app.conf['osd-activated-size'] > SIZE_MIN:
+            self.app.conf['osd-activated-size'] -= 1
+        self.update_style()
 
     def on_color_button_clicked(self, button):
-        self.color_menu.popup(None, None, None, None, 1,
-                              Gtk.get_current_event_time())
+        def on_background_color_set(color_button):
+            color_rgba = color_button.get_rgba()
+            if color_rgba.alpha == 1:
+                color_rgba.alpha = 0.999
+            self.app.conf['osd-background-color'] = color_rgba.to_string()
+            self.update_style()
+
+        def on_inactivated_color_set(color_button):
+            color_rgba = color_button.get_rgba()
+            if color_rgba.alpha == 1:
+                color_rgba.alpha = 0.999
+            self.app.conf['osd-inactivated-color'] = color_rgba.to_string()
+            self.update_style()
+
+        def on_activated_color_set(color_button):
+            color_rgba = color_button.get_rgba()
+            if color_rgba.alpha == 1:
+                color_rgba.alpha = 0.999
+            self.app.conf['osd-activated-color'] = color_rgba.to_string()
+            self.update_style()
+
+        def on_inactivated_size_changed(spin):
+            self.app.conf['osd-inactivated-size'] = spin.get_value()
+            self.update_style()
+
+        def on_activated_size_changed(spin):
+            self.app.conf['osd-activated-size'] = spin.get_value()
+            self.update_style()
+
+        dialog = Gtk.Dialog(_('Colors'), self, 0,
+                            (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE))
+        dialog.set_modal(False)
+        dialog.set_default_size(480, 320)
+        dialog.set_border_width(5)
+        box = dialog.get_content_area()
+
+        grid = Gtk.Grid()
+        grid.props.halign = Gtk.Align.CENTER
+        grid.props.column_spacing = 15
+        grid.props.row_spacing = 10
+        box.pack_start(grid, False, False, 0)
+
+        grid.attach(RightLabel(_('Background Color:')), 0, 0, 1, 1)
+        rgba = Gdk.RGBA()
+        rgba.parse(self.app.conf['osd-background-color'])
+        background_color = Gtk.ColorButton.new_with_rgba(rgba)
+        background_color.connect('color-set', on_background_color_set)
+        grid.attach(background_color, 1, 0, 1, 1)
+
+        grid.attach(RightLabel(_('Inativated Text Color:')), 0, 1, 1, 1)
+        rgba.parse(self.app.conf['osd-inactivated-color'])
+        inactivated_color = Gtk.ColorButton.new_with_rgba(rgba)
+        inactivated_color.connect('color-set', on_inactivated_color_set)
+        grid.attach(inactivated_color, 1, 1, 1, 1)
+
+        grid.attach(RightLabel(_('Activated Text Color:')), 0, 2, 1, 1)
+        rgba.parse(self.app.conf['osd-activated-color'])
+        activated_color = Gtk.ColorButton.new_with_rgba(rgba)
+        activated_color.connect('color-set', on_activated_color_set)
+        grid.attach(activated_color, 1, 2, 1, 1)
+
+        grid.attach(RightLabel(_('Inactivated Font Size:')), 0, 3, 1, 1)
+        inactivated_size = Gtk.SpinButton.new_with_range(SIZE_MIN, SIZE_MAX, 1)
+        inactivated_size.set_value(self.app.conf['osd-inactivated-size'])
+        inactivated_size.connect('value-changed', on_inactivated_size_changed)
+        grid.attach(inactivated_size, 1, 3, 1, 1)
+
+        grid.attach(RightLabel(_('Activated Font Size:')), 0, 4, 1, 1)
+        activated_size = Gtk.SpinButton.new_with_range(SIZE_MIN, SIZE_MAX, 1)
+        activated_size.set_value(self.app.conf['osd-activated-size'])
+        activated_size.connect('value-changed', on_activated_size_changed)
+        grid.attach(activated_size, 1, 4, 1, 1)
+
+        box.show_all()
+        dialog.run()
+        dialog.destroy()
 
     def on_lock_button_clicked(self, button):
         self.lock_window_action.set_active(True)
