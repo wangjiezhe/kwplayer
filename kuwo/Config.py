@@ -56,6 +56,7 @@ FAV_ARTISTS_JSON = os.path.join(CACHE_DIR, 'fav_artists.json')
 
 THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
 LRC_BACKGROUND_IMG = os.path.join(THEME_DIR, 'lrc-background.jpg')
+OSD_STYLE = os.path.join(THEME_DIR, 'osd_styles.css')
 
 class ShortcutMode:
     NONE = 0
@@ -118,6 +119,12 @@ _default_conf = {
         'Stop': 'XF86AudioStop',
         'Launch': 'XF86AudioMedia',
     },
+
+    'osd-x': 100,
+    'osd-y': 100,
+    'osd-toolbar-y': 20,
+    'osd-locked': False,
+    'osd-style': 'default',
 }
 
 def check_first():

@@ -49,6 +49,7 @@ def delta(nanosec_float):
         s = '%d:%02d:%02d' % (hh, mm, ss)
     return s
 
+
 class Player(Gtk.Box):
     def __init__(self, app):
         super().__init__()
@@ -148,9 +149,16 @@ class Player(Gtk.Box):
         self.favorite_btn.connect('clicked', self.on_favorite_btn_clicked)
         toolbar.insert(self.favorite_btn, 8)
 
+        osd_lrc_btn = Gtk.ToggleToolButton()
+        osd_lrc_btn.set_label(_('OSDLrc'))
+        osd_lrc_btn.set_active(False)
+        osd_lrc_btn.set_icon_name('accessories-text-editor-symbolic')
+        osd_lrc_btn.connect('toggled', self.on_osd_lrc_btn_toggled)
+        toolbar.insert(osd_lrc_btn, 9)
+
         # control menu
         menu_tool_item = Gtk.ToolItem()
-        toolbar.insert(menu_tool_item, 9)
+        toolbar.insert(menu_tool_item, 10)
         toolbar.child_set_property(menu_tool_item, 'expand', True)
         main_menu = Gtk.Menu()
         pref_item = Gtk.MenuItem(label=_('Preferences'))
@@ -179,6 +187,7 @@ class Player(Gtk.Box):
             menu_btn.set_popup(main_menu)
             menu_btn.set_always_show_image(True)
         menu_btn.props.halign = Gtk.Align.END
+        menu_btn.props.relief = Gtk.ReliefStyle.NONE
         menu_btn.set_image(menu_image)
         menu_tool_item.add(menu_btn)
 
@@ -593,6 +602,9 @@ class Player(Gtk.Box):
         else:
             self.app.playlist.add_song_to_playlist(self.curr_song, 'Favorite')
             self.favorite_btn.set_icon_name('favorite')
+
+    def on_osd_lrc_btn_toggled(self, button):
+        self.app.osdlrc.toggle_status(button.get_active())
 
     # menu button
     def on_main_menu_button_clicked(self, button, main_menu):

@@ -22,14 +22,15 @@ from kuwo import Widgets
 from kuwo.Artists import Artists
 from kuwo.Lrc import Lrc
 from kuwo.MV import MV
+from kuwo.OSDLrc import OSDLrc
 from kuwo.Player import Player
 from kuwo.PlayList import PlayList
 from kuwo.Radio import Radio
 from kuwo.Search import Search
+from kuwo.Shortcut import Shortcut
 from kuwo.Themes import Themes
 from kuwo.TopCategories import TopCategories
 from kuwo.TopList import TopList
-from kuwo.Shortcut import Shortcut
 
 if Gtk.MAJOR_VERSION <= 3 and Gtk.MINOR_VERSION < 10:
     GObject.threads_init()
@@ -75,6 +76,8 @@ class App:
         self.init_notebook()
         self.notebook.connect('switch-page', self.on_notebook_switch_page)
         self.init_status_icon()
+
+        self.osdlrc = OSDLrc(self)
 
         # load default styles when all widgets have been constructed.
         self.load_styles()
