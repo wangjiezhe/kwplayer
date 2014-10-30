@@ -53,7 +53,6 @@ class OSDLrc(Gtk.ApplicationWindow):
         visual = screen.get_rgba_visual()
         if visual and screen.is_composited():
             self.set_visual(visual)
-            #self.set_app_paintable(True)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.add(box)
@@ -159,6 +158,8 @@ class OSDLrc(Gtk.ApplicationWindow):
         if self.app.conf['osd-show']:
             self.show_window_action.set_active(True)
         self.play_button.props.related_action = self.app.player.playback_action
+        self.arrow_cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
+        self.fleur_cursor = Gdk.Cursor(Gdk.CursorType.FLEUR)
 
     def update_style(self):
         conf = self.app.conf
@@ -191,7 +192,7 @@ class OSDLrc(Gtk.ApplicationWindow):
                     'color: {0};'.format(conf['osd-inactivated-color']),
                     'font-size: {0}px;'.format(conf['osd-inactivated-size']),
                     'transition-property: font-size;',
-                    'transition: 500ms ease-in;',
+                    'transition: 200ms ease-in;',
                 '}',
             ])
         self.old_provider = Widgets.apply_css(self, css,
@@ -286,6 +287,8 @@ class OSDLrc(Gtk.ApplicationWindow):
         if realized:
             self.unrealize()
         if locked:
+            # Note that gdk_window_set_type_hint() must be set before the
+            # gdk window is mapped
             self.props.type_hint = Gdk.WindowTypeHint.DOCK
         else:
             self.props.type_hint = Gdk.WindowTypeHint.NORMAL
@@ -427,26 +430,17 @@ class OSDLrc(Gtk.ApplicationWindow):
 
     def do_leave_notify_event(self, event):
         self.auto_hide_toolbar()
-        cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
-        self.root_window.set_cursor(cursor)
 
     # 以下事件用于处理窗口拖放移动
     def do_button_press_event(self, event):
-        if event.button == Gdk.BUTTON_PRIMARY:
-            self.mouse_pressed = True
-            self.start_x, self.start_y = event.x, event.y
-            cursor = Gdk.Cursor(Gdk.CursorType.FLEUR)
-            self.root_window.set_cursor(cursor)
-        else:
-            self.mouse_pressed = False
-            cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
-            self.root_window.set_cursor(cursor)
+        self.mouse_pressed = True
+        self.start_x, self.start_y = event.x, event.y
+        self.get_window().set_cursor(self.fleur_cursor)
 
     def do_button_release_event(self, event):
         self.app.conf['osd-x'], self.app.conf['osd-y'] = self.get_position()
         self.mouse_pressed = False
-        cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
-        self.root_window.set_cursor(cursor)
+        self.get_window().set_cursor(self.arrow_cursor)
 
     def do_motion_notify_event(self, event):
         if not self.mouse_pressed:
