@@ -160,11 +160,12 @@ class Lrc(Gtk.Notebook):
                 line_num += 1
         line_num -= 1
 
+        self.app.osdlrc.sync_lrc(line_num)
+
         iter_start = self.lrc_buf.get_iter_at_line(line_num)
         iter_end = self.lrc_buf.get_iter_at_line(line_num+1)
         self.lrc_buf.apply_tag(self.highlighted_tag, iter_start, iter_end)
         self.lrc_tv.scroll_to_iter(iter_start, 0, True, 0, 0.5)
-        self.app.osdlrc.sync_lrc(line_num)
         self.old_line_iter = (iter_start, iter_end)
         self.old_line_num = line_num
         self.old_timestamp = timestamp

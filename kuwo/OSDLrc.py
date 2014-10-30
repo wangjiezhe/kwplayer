@@ -208,19 +208,25 @@ class OSDLrc(Gtk.ApplicationWindow):
 
     def sync_lrc(self, line_num):
         '''同步歌词'''
-        if line_num >= len(self.lrc_obj) + 1:
+        if not self.lrc_obj or line_num >= len(self.lrc_obj):
             return
         elif line_num == 0:
             self.da.set_text(self.lrc_obj[0][1])
             self.da2.set_text(self.lrc_obj[1][1])
             self.da.get_style_context().add_class(ACTIVATE)
         elif line_num % 2 == 1:
-            self.da.set_text(self.lrc_obj[line_num+1][1])
+            next_line = line_num + 1
+            if next_line < len(self.lrc_obj):
+                self.da.set_text(self.lrc_obj[next_line][1])
             self.da.get_style_context().remove_class(ACTIVATE)
+            self.da2.set_text(self.lrc_obj[line_num][1])
             self.da2.get_style_context().add_class(ACTIVATE)
         else:
-            self.da2.set_text(self.lrc_obj[line_num+1][1])
+            next_line = line_num + 1
+            if next_line < len(self.lrc_obj):
+                self.da2.set_text(self.lrc_obj[next_line][1])
             self.da2.get_style_context().remove_class(ACTIVATE)
+            self.da.set_text(self.lrc_obj[line_num][1])
             self.da.get_style_context().add_class(ACTIVATE)
 
     def reload(self):
