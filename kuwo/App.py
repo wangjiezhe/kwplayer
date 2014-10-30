@@ -163,7 +163,7 @@ class App:
                     'outline-offset: 0;',
                     'outline-style: none;',
                     'outline-width: 0;',
-                    '}',
+                '}',
                 'GtkTextView.lrc_tv {',
                     'font-size: {0};'.format(self.conf['lrc-text-size']),
                     'color: {0};'.format(self.conf['lrc-text-color']),
@@ -171,24 +171,24 @@ class App:
                     'border-width: 5;',
                     'background-color: {0};'.format(
                         self.conf['lrc-back-color']),
-                    '}',
+                '}',
                 '.info-label {',
                     'color: rgb(136, 139, 132);',
                     'font-size: 9;',
-                    '}',
+                '}',
                 ])
         else:
             css = '\n'.join([
                 'GtkScrolledWindow.lrc_window {',
                     'transition-property: background-image;',
                     'transition-duration: 1s;',
-                    '}',
+                '}',
                 'GtkScale {',
                     'outline-color: transparent;',
                     'outline-offset: 0;',
                     'outline-style: none;',
                     'outline-width: 0;',
-                    '}',
+                '}',
                 'GtkTextView.lrc_tv {',
                     'transition-property: font-size;',
                     'transition: 500ms ease-in-out;',
@@ -198,11 +198,11 @@ class App:
                     'border-width: 5px;',
                     'background-color: {0};'.format(
                         self.conf['lrc-back-color']),
-                    '}',
+                '}',
                 '.info-label {',
                     'color: rgb(136, 139, 132);',
                     'font-size: 9px;',
-                    '}',
+                '}',
                 ])
 
         Widgets.apply_css(self.window, css, overall=True)

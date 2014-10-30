@@ -28,6 +28,7 @@ def list_to_time(time_tags):
     return int(curr_time * 10 ** 9)
 
 def lrc_parser(lrc_txt):
+    '''将lrc格式的文本分解为一个list'''
     lines = lrc_txt.split('\n')
     lrc_obj = [(-4, ''), (-3, ''), (-2, ''), ]
 
@@ -52,6 +53,7 @@ def lrc_parser(lrc_txt):
         lrc_obj.append((i, '', ))
     return sorted(lrc_obj)
 
+
 class Lrc(Gtk.Notebook):
     '''Lyrics tab in notebook.'''
 
@@ -69,6 +71,7 @@ class Lrc(Gtk.Notebook):
         # lyrics window
         self.lrc_window = Gtk.ScrolledWindow()
         self.lrc_window.get_style_context().add_class('lrc_window')
+        self.lrc_window.props.hscrollbar_policy = Gtk.PolicyType.NEVER
         self.append_page(self.lrc_window, Gtk.Label.new('Lrc'))
 
         self.lrc_buf = Gtk.TextBuffer()
