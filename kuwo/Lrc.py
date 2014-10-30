@@ -195,9 +195,8 @@ class Lrc(Gtk.Notebook):
                 "background-image: url('{0}');".format(self.lrc_background),
             '}',
         ])
-        new_provider = Widgets.apply_css(self.lrc_window, css,
-                                         old_provider=self.old_provider)
-        self.old_provider = new_provider
+        self.old_provider = Widgets.apply_css(self.lrc_window, css,
+                                              old_provider=self.old_provider)
 
     def update_highlighted_tag(self):
         fore_rgba = Gdk.RGBA()

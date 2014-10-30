@@ -192,7 +192,7 @@ class OSDLrc(Gtk.ApplicationWindow):
                     'color: {0};'.format(conf['osd-inactivated-color']),
                     'font-size: {0}px;'.format(conf['osd-inactivated-size']),
                     'transition-property: font-size;',
-                    'transition: 500ms ease-in;',
+                    'transition: 200ms ease-in;',
                 '}',
             ])
         self.old_provider = Widgets.apply_css(self, css,
@@ -287,6 +287,8 @@ class OSDLrc(Gtk.ApplicationWindow):
         if realized:
             self.unrealize()
         if locked:
+            # Note that gdk_window_set_type_hint() must be set before the
+            # gdk window is mapped
             self.props.type_hint = Gdk.WindowTypeHint.DOCK
         else:
             self.props.type_hint = Gdk.WindowTypeHint.NORMAL
