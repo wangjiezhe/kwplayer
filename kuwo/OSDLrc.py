@@ -11,6 +11,7 @@ import json
 import os
 import sys
 import time
+import traceback
 
 import cairo
 from gi.repository import Gdk
@@ -34,12 +35,12 @@ class RightLabel(Gtk.Label):
         self.props.halign = Gtk.Align.END
         self.props.xalign = 1
 
-class OSDLrc(Gtk.Window):
+
+class OSDLrc(Gtk.ApplicationWindow):
 
     def __init__(self, app):
-        super().__init__(self, type=Gtk.WindowType.POPUP)
+        super().__init__(application=app.app, type=Gtk.WindowType.POPUP)
         self.props.decorated = False
-        self.props.opacity = 0
         self.props.resizable = False
         self.app = app
 
@@ -52,23 +53,39 @@ class OSDLrc(Gtk.Window):
         visual = screen.get_rgba_visual()
         if visual and screen.is_composited():
             self.set_visual(visual)
-            self.set_app_paintable(True)
+            #self.set_app_paintable(True)
 
-        # 鼠标点击拖放事件
-        self.add_events(Gdk.EventType.BUTTON_PRESS |
-                        Gdk.EventType.BUTTON_RELEASE |
-                        Gdk.EventType.MOTION_NOTIFY)
-        self.mouse_pressed = False
-
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.add(box)
+
+        self.da = Gtk.Label()
+        self.da.old_provider = None
+        self.da.props.xalign = 0
+        box.pack_start(self.da, False, False, 0)
+        self.da2 = Gtk.Label()
+        self.da2.old_provider = None
+        #self.da2.props.justify = Gtk.Justification.RIGHT
+        #self.da2.props.halign = Gtk.Align.END
+        #self.da2.props.xalign = 1
+        self.da2.props.xalign = 0
+        box.pack_start(self.da2, False, False, 0)
 
         self.toolbar = Gtk.Toolbar()
         self.toolbar.set_style(Gtk.ToolbarStyle.ICONS)
-        self.toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_MENUBAR)
+        #self.toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_TOOLBAR)
         self.toolbar.set_show_arrow(False)
         self.toolbar.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
-        box.pack_end(self.toolbar, False, False, 0)
+        box.pack_start(self.toolbar, False, False, 0)
+
+        # 鼠标点击拖放事件
+        self.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK |
+                        Gdk.EventMask.BUTTON_PRESS_MASK |
+                        #Gdk.EventMask.BUTTON_MOTION_MASK |
+                        #Gdk.EventMask.POINTER_MOTION_MASK |
+                        Gdk.EventMask.POINTER_MOTION_HINT_MASK |
+                        Gdk.EventMask.ENTER_NOTIFY_MASK |
+                        Gdk.EventMask.LEAVE_NOTIFY_MASK)
+        self.mouse_pressed = False
 
         prev_button = Gtk.ToolButton()
         prev_button.set_label(_('Previous'))
@@ -85,53 +102,35 @@ class OSDLrc(Gtk.Window):
         next_button.connect('clicked', self.on_next_button_clicked)
         self.toolbar.insert(next_button, 2)
 
-        sep_item = Gtk.SeparatorToolItem()
-        self.toolbar.insert(sep_item, 3)
-
         zoom_in_button = Gtk.ToolButton()
         zoom_in_button.set_label(_('Zoom In'))
         zoom_in_button.set_icon_name('zoom-in-symbolic')
         zoom_in_button.connect('clicked', self.on_zoom_in_button_clicked)
-        self.toolbar.insert(zoom_in_button, 4)
+        self.toolbar.insert(zoom_in_button, 3)
 
         zoom_out_button = Gtk.ToolButton()
         zoom_out_button.set_label(_('Zoom Out'))
         zoom_out_button.set_icon_name('zoom-out-symbolic')
         zoom_out_button.connect('clicked', self.on_zoom_out_button_clicked)
-        self.toolbar.insert(zoom_out_button, 5)
+        self.toolbar.insert(zoom_out_button, 4)
 
         color_button = Gtk.ToolButton()
         color_button.set_label(_('Color'))
-        color_button.set_icon_name('preferences-color-symbolic')
+        color_button.set_icon_name('preferences-system-symbolic')
         color_button.connect('clicked', self.on_color_button_clicked)
-        self.toolbar.insert(color_button, 6)
+        self.toolbar.insert(color_button, 5)
 
         lock_button = Gtk.ToolButton()
         lock_button.set_label(_('Lock'))
         lock_button.set_icon_name('lock')
         lock_button.connect('clicked', self.on_lock_button_clicked)
-        self.toolbar.insert(lock_button, 7)
+        self.toolbar.insert(lock_button, 6)
 
         close_button = Gtk.ToolButton()
         close_button.set_label(_('Close'))
         close_button.set_icon_name('window-close-symbolic')
         close_button.connect('clicked', self.on_close_button_clicked)
-        self.toolbar.insert(close_button, 8)
-
-        self.da = Gtk.Label()
-        self.da.old_provider = None
-        self.da.set_name('da')
-        self.da.props.xalign = 0
-        box.pack_start(self.da, False, False, 0)
-        self.da2 = Gtk.Label()
-        self.da2.old_provider = None
-        self.da2.set_name('da2')
-        self.da2.props.justify = Gtk.Justification.RIGHT
-        self.da2.props.halign = Gtk.Align.END
-        self.da2.props.xalign = 1
-        box.pack_start(self.da2, False, False, 0)
-
-        #Widgets.apply_css(self, css)
+        self.toolbar.insert(close_button, 7)
 
         # 切换窗口显隐动作
         self.show_window_action = Gtk.ToggleAction('show-window-action',
@@ -160,7 +159,6 @@ class OSDLrc(Gtk.Window):
         if self.app.conf['osd-show']:
             self.show_window_action.set_active(True)
         self.play_button.props.related_action = self.app.player.playback_action
-        self.toolbar.timestamp = time.time()
 
     def update_style(self):
         conf = self.app.conf
@@ -192,6 +190,8 @@ class OSDLrc(Gtk.Window):
                 'GtkLabel {',
                     'color: {0};'.format(conf['osd-inactivated-color']),
                     'font-size: {0}px;'.format(conf['osd-inactivated-size']),
+                    'transition-property: font-size;',
+                    'transition: 500ms ease-in;',
                 '}',
             ])
         self.old_provider = Widgets.apply_css(self, css,
@@ -208,26 +208,37 @@ class OSDLrc(Gtk.Window):
 
     def sync_lrc(self, line_num):
         '''同步歌词'''
-        if line_num >= len(self.lrc_obj) + 1:
+        if not self.lrc_obj or line_num >= len(self.lrc_obj):
             return
         elif line_num == 0:
-            self.da.set_text(self.lrc_obj[line_num][1])
-            self.da2.set_text(self.lrc_obj[line_num+1][1])
+            self.da.set_text(self.lrc_obj[0][1])
+            self.da2.set_text(self.lrc_obj[1][1])
             self.da.get_style_context().add_class(ACTIVATE)
         elif line_num % 2 == 1:
-            self.da.set_text(self.lrc_obj[line_num+1][1])
+            next_line = line_num + 1
+            if next_line < len(self.lrc_obj):
+                self.da.set_text(self.lrc_obj[next_line][1])
             self.da.get_style_context().remove_class(ACTIVATE)
+            self.da2.set_text(self.lrc_obj[line_num][1])
             self.da2.get_style_context().add_class(ACTIVATE)
         else:
-            self.da2.set_text(self.lrc_obj[line_num+1][1])
+            next_line = line_num + 1
+            if next_line < len(self.lrc_obj):
+                self.da2.set_text(self.lrc_obj[next_line][1])
             self.da2.get_style_context().remove_class(ACTIVATE)
+            self.da.set_text(self.lrc_obj[line_num][1])
             self.da.get_style_context().add_class(ACTIVATE)
 
     def reload(self):
         '''重新设定属性, 然后重绘'''
         if self.app.conf['osd-locked']:
             self.toolbar.hide()
-            region = cairo.Region()
+            try:
+                region = cairo.Region()
+            except AttributeError:
+                print('Error: cairo too old, cairo.Region missing')
+                logger.error(traceback.format_exc())
+                return
             gdk_window = self.get_window()
             if not gdk_window:
                 logger.warn('OSDLrc.reload(), gdk_window is None')
@@ -235,6 +246,7 @@ class OSDLrc(Gtk.Window):
             gdk_window.input_shape_combine_region(region, 0, 0)
         else:
             self.toolbar.show_all()
+            self.app.conf['osd-toolbar-y'] = self.toolbar.get_allocated_height()
             self.auto_hide_toolbar()
             self.input_shape_combine_region(None)
         self.move(self.app.conf['osd-x'], self.app.conf['osd-y'])
@@ -259,8 +271,6 @@ class OSDLrc(Gtk.Window):
             else:
                 self.has_shown = True
                 self.show_all()
-                if self.app.conf['osd-locked']:
-                    self.toolbar.hide()
             self.reload()
         else:
             self.hide()
@@ -336,7 +346,7 @@ class OSDLrc(Gtk.Window):
             self.app.conf['osd-activated-size'] = spin.get_value()
             self.update_style()
 
-        dialog = Gtk.Dialog(_('Colors'), self, 0,
+        dialog = Gtk.Dialog(_('OSD Styles'), self, 0,
                             (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE))
         dialog.set_modal(False)
         dialog.set_default_size(480, 320)
@@ -353,18 +363,21 @@ class OSDLrc(Gtk.Window):
         rgba = Gdk.RGBA()
         rgba.parse(self.app.conf['osd-background-color'])
         background_color = Gtk.ColorButton.new_with_rgba(rgba)
+        background_color.props.use_alpha = True
         background_color.connect('color-set', on_background_color_set)
         grid.attach(background_color, 1, 0, 1, 1)
 
         grid.attach(RightLabel(_('Inativated Text Color:')), 0, 1, 1, 1)
         rgba.parse(self.app.conf['osd-inactivated-color'])
         inactivated_color = Gtk.ColorButton.new_with_rgba(rgba)
+        inactivated_color.props.use_alpha = True
         inactivated_color.connect('color-set', on_inactivated_color_set)
         grid.attach(inactivated_color, 1, 1, 1, 1)
 
         grid.attach(RightLabel(_('Activated Text Color:')), 0, 2, 1, 1)
         rgba.parse(self.app.conf['osd-activated-color'])
         activated_color = Gtk.ColorButton.new_with_rgba(rgba)
+        activated_color.props.use_alpha = True
         activated_color.connect('color-set', on_activated_color_set)
         grid.attach(activated_color, 1, 2, 1, 1)
 
@@ -414,20 +427,26 @@ class OSDLrc(Gtk.Window):
 
     def do_leave_notify_event(self, event):
         self.auto_hide_toolbar()
-
-    # 以下三个事件用于处理窗口拖放移动
-    def do_button_press_event(self, event):
-        self.start_x, self.start_y = event.x, event.y
-        self.mouse_pressed = True
-        cursor = Gdk.Cursor(Gdk.CursorType.FLEUR)
-        self.root_window.set_cursor(cursor)
-
-    def do_button_release_event(self, event):
         cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
         self.root_window.set_cursor(cursor)
-        if self.mouse_pressed:
+
+    # 以下事件用于处理窗口拖放移动
+    def do_button_press_event(self, event):
+        if event.button == Gdk.BUTTON_PRIMARY:
+            self.mouse_pressed = True
+            self.start_x, self.start_y = event.x, event.y
+            cursor = Gdk.Cursor(Gdk.CursorType.FLEUR)
+            self.root_window.set_cursor(cursor)
+        else:
             self.mouse_pressed = False
-            self.app.conf['osd-x'], self.app.conf['osd-y'] = self.get_position()
+            cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
+            self.root_window.set_cursor(cursor)
+
+    def do_button_release_event(self, event):
+        self.app.conf['osd-x'], self.app.conf['osd-y'] = self.get_position()
+        self.mouse_pressed = False
+        cursor = Gdk.Cursor(Gdk.CursorType.ARROW)
+        self.root_window.set_cursor(cursor)
 
     def do_motion_notify_event(self, event):
         if not self.mouse_pressed:
