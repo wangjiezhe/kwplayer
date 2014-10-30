@@ -74,9 +74,11 @@ Q&A
 MV:
 <img src="screenshots/MV.jpg" title="MV" />
 
+桌面歌词:
+<img src="screenshots/OSDLrc.jpg" title="桌面歌词" />
+
 其它:
 <img src="screenshots/Theme.jpg" title="Theme" />
-
 
 版权
 ====
