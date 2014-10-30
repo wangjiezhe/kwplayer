@@ -121,6 +121,7 @@ class Lrc(Gtk.Notebook):
         if not lrc_txt:
             self.lrc_buf.set_text(_('No lrc available'))
             self.lrc_obj = None
+            self.app.osdlrc.set_lrc(self.lrc_obj)
             return
         self.lrc_obj = lrc_parser(lrc_txt)
         self.app.osdlrc.set_lrc(self.lrc_obj)

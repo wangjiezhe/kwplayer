@@ -480,11 +480,11 @@ class Artists(Gtk.Box):
 
     def append_artist_songs(self, init=False):
         def _append_artist_songs(songs_args, error=None):
-            songs, self.artist_songs_total = songs_args
-            if error or self.artist_songs_total == 0:
+            if error or not songs_args or not songs_args[1]:
                 logger.error('append_artist_songs(): %s, %s' %
                              (self.artist_songs_total, error))
                 return
+            songs, self.artist_songs_total = songs_args
             for song in songs:
                 self.artist_songs_liststore.append([
                     True,

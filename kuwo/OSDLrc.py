@@ -191,7 +191,7 @@ class OSDLrc(Gtk.ApplicationWindow):
                     'color: {0};'.format(conf['osd-inactivated-color']),
                     'font-size: {0}px;'.format(conf['osd-inactivated-size']),
                     'transition-property: font-size;',
-                    'transition-duration: 1s;',
+                    'transition: 500ms ease-in;',
                 '}',
             ])
         self.old_provider = Widgets.apply_css(self, css,

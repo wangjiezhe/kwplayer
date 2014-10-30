@@ -61,10 +61,6 @@ FAV_ARTISTS_JSON = os.path.join(CACHE_DIR, 'fav_artists.json')
 THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
 LRC_BACKGROUND_IMG = os.path.join(THEME_DIR, 'lrc-background.jpg')
 
-if GTK_LE_36:
-    OSD_STYLE = os.path.join(THEME_DIR, 'osd-styles-old.css')
-else:
-    OSD_STYLE = os.path.join(THEME_DIR, 'osd-styles.css')
 
 class ShortcutMode:
     NONE = 0
@@ -130,10 +126,10 @@ _default_conf = {
     'osd-locked': False,
     'osd-style': 'default',
     'osd-inactivated-color': 'rgba(196, 160, 0, 0.999)',
-    'osd-inactivated-size': 22,
+    'osd-inactivated-size': 30,
     'osd-activated-color': 'rgba(32, 74, 135, 0.999)',
-    'osd-activated-size': 32,
-    'osd-background-color': 'rgba(123, 123, 123, 0.9)',
+    'osd-activated-size': 40,
+    'osd-background-color': 'rgba(123, 123, 123, 0)',
 }
 
 def check_first():

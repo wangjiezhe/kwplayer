@@ -158,11 +158,6 @@ class App:
         '''Load default CssStyle.'''
         if Config.GTK_LE_36:
             css = '\n'.join([
-                # transition-property is not supported in Gtk3.4
-                #'GtkScrolledWindow.lrc_window {',
-                #    'transition-property: background-image;',
-                #    'transition-duration: 1s;',
-                #    '}',
                 'GtkScale {',
                     'outline-color: transparent;',
                     'outline-offset: 0;',
@@ -187,9 +182,6 @@ class App:
                 'GtkScrolledWindow.lrc_window {',
                     'transition-property: background-image;',
                     'transition-duration: 1s;',
-                    #'background-repeat: no-repeat;',
-                    #'background-repeat: repeat;',
-                    #'background-position: center;',
                     '}',
                 'GtkScale {',
                     'outline-color: transparent;',
@@ -198,6 +190,8 @@ class App:
                     'outline-width: 0;',
                     '}',
                 'GtkTextView.lrc_tv {',
+                    'transition-property: font-size;',
+                    'transition: 500ms ease-in-out;',
                     'font-size: {0}px;'.format(self.conf['lrc-text-size']),
                     'color: {0};'.format(self.conf['lrc-text-color']),
                     'border-radius: 0px 25px 0px 50px;',
