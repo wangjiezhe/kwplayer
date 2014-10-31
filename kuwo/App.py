@@ -86,7 +86,6 @@ class App:
         self.window.show_all()
         # Make some changes after main window is shown.
         # Like hiding some unnecessory widgets.
-        self.lrc.after_init()
         self.artists.after_init()
         self.player.after_init()
         self.search.after_init()

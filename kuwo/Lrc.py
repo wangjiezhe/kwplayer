@@ -7,6 +7,7 @@
 import os
 import re
 import time
+
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GdkX11
@@ -18,6 +19,8 @@ from kuwo.log import logger
 from kuwo import Widgets
 
 LRC_WINDOW, MV_WINDOW = 0, 1
+ADJ_LRC_DELTA = 1000000000 # 1000ms
+
 
 def list_to_time(time_tags):
     mm, ss, ml = time_tags
@@ -30,7 +33,7 @@ def list_to_time(time_tags):
 def lrc_parser(lrc_txt):
     '''将lrc格式的文本分解为一个list'''
     lines = lrc_txt.split('\n')
-    lrc_obj = [(-4, ''), (-3, ''), (-2, ''), ]
+    lrc_obj = [[-4, ''], [-3, ''], [-2, ''], ]
 
     reg_time = re.compile('\[([0-9]{2}):([0-9]{2})(\.[0-9]{1,3})?\]')
     for line in lines:
@@ -44,14 +47,14 @@ def lrc_parser(lrc_txt):
             match = reg_time.match(line, offset)
         content = line[offset:]
         for tag in tags:
-            lrc_obj.append((tag, content))
+            lrc_obj.append([tag, content])
     last_time = lrc_obj[-1][0]
     if last_time <= 0:
         logger.error('lrc_parser(): %s.' % last_time)
         return None
     for i in range(last_time, last_time * 2 + 5, last_time // 4 + 1):
-        lrc_obj.append((i, '', ))
-    return sorted(lrc_obj)
+        lrc_obj.append([i, '', ])
+    return sorted(lrc_obj, key=lambda item: item[0])
 
 
 class Lrc(Gtk.Notebook):
@@ -95,6 +98,7 @@ class Lrc(Gtk.Notebook):
         self.lrc_tv.props.pixels_above_lines = 10
         self.lrc_tv.connect('button-press-event',
                             self.on_lrc_tv_button_pressed)
+        self.lrc_tv.connect('key-press-event', self.on_lrc_tv_key_pressed)
         self.lrc_window.add(self.lrc_tv)
 
         # mv window
@@ -106,15 +110,44 @@ class Lrc(Gtk.Notebook):
 
         self.update_background(self.lrc_default_background)
 
-    def after_init(self):
-        pass
-
     def first(self):
         pass
 
-    def on_lrc_tv_button_pressed(self, widget, event):
-        if event.button == 3:
+    def on_lrc_tv_button_pressed(self, textview, event):
+        if event.button == Gdk.BUTTON_SECONDARY:
             return True
+
+    def on_lrc_tv_key_pressed(self, textview, event):
+        if event.state == Gdk.ModifierType.CONTROL_MASK:
+            state, keyval = event.get_keyval()
+            if keyval == Gdk.KEY_Up:
+                self.adj_lrc_backwad()
+                return True
+            elif keyval == Gdk.KEY_Down:
+                self.adj_lrc_forward()
+                return True
+        return False
+
+    # Open API
+    def adj_lrc_backwad(self):
+        '''前前调整歌词'''
+        if not self.lrc_obj:
+            return
+        length = len(self.lrc_obj)
+        line_num = self.old_line_num - 1
+        while line_num < length:
+            self.lrc_obj[line_num][0] -= ADJ_LRC_DELTA
+            line_num += 1
+
+    def adj_lrc_forward(self):
+        '''前后调整歌词'''
+        if not self.lrc_obj:
+            return
+        length = len(self.lrc_obj)
+        line_num = self.old_line_num
+        while line_num < length:
+            self.lrc_obj[line_num][0] += ADJ_LRC_DELTA
+            line_num += 1
 
     def set_lrc(self, lrc_txt):
         self.update_background(self.lrc_default_background)
