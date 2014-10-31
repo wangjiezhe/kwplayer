@@ -629,10 +629,12 @@ class Player(Gtk.Box):
                         Gtk.get_current_event_time())
 
     def on_main_menu_pref_activate(self, menu_item):
+        '''重新载入设置'''
         dialog = Preferences(self.app)
         dialog.run()
         dialog.destroy()
         self.app.load_styles()
+        self.app.reset_notebook_tabs()
         self.app.lrc.update_highlighted_tag()
         self.app.shortcut.rebind_keys()
 

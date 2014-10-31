@@ -295,7 +295,7 @@ class App:
             page.first()
             self.tab_first_show.append(page)
 
-        if page_num == 0:
+        if page_num == 0 and self.conf['auto-hide-tabs']:
             # fullscreen
             self.player.hide()
             self.notebook.set_show_tabs(False)
@@ -307,16 +307,22 @@ class App:
             self.notebook.set_show_tabs(True)
             self.fullscreen_sid = 0
 
+    def reset_notebook_tabs(self):
+        if not self.conf['auto-hide-tabs']:
+            self.player.show_all()
+            self.notebook.set_show_tabs(True)
+            self.fullscreen_sid = 0
+
     def on_window_motion_notified(self, window, event):
-        if self.notebook.get_current_page() != 0:
+        if (self.notebook.get_current_page() != 0 or
+                not self.conf['auto-hide-tabs']):
             return
         lower = 70
         upper = self.window.get_size()[1] - 40
         if lower < event.y < upper:
             return
-        if event.y < lower:
+        else:
             self.player.show_all()
-        elif event.y > upper:
             self.notebook.set_show_tabs(True)
         # delay 2 seconds and hide them
         self.fullscreen_timestamp = time.time()
@@ -325,8 +331,8 @@ class App:
                          self.fullscreen_timestamp)
 
     def hide_control_panel_and_label(self, timestamp):
-        if (timestamp == self.fullscreen_timestamp and 
-                self.fullscreen_sid > 0):
-            self.notebook.set_show_tabs(False)
+        if timestamp == self.fullscreen_timestamp and self.fullscreen_sid > 0:
             self.player.hide()
             GLib.timeout_add(100, self.player.playbin.expose)
+            #GLib.idle_add(self.player.playbin.expose)
+            self.notebook.set_show_tabs(False)
