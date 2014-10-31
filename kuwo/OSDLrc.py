@@ -114,7 +114,7 @@ class OSDLrc(Gtk.ApplicationWindow):
         self.toolbar.insert(zoom_out_button, 4)
 
         color_button = Gtk.ToolButton()
-        color_button.set_label(_('Color'))
+        color_button.set_label(_('Styles'))
         color_button.set_icon_name('preferences-system-symbolic')
         color_button.connect('clicked', self.on_color_button_clicked)
         self.toolbar.insert(color_button, 5)
@@ -133,7 +133,7 @@ class OSDLrc(Gtk.ApplicationWindow):
 
         # 切换窗口显隐动作
         self.show_window_action = Gtk.ToggleAction('show-window-action',
-                _('Show OSD Window'), _('Show OSD lyric window'), None)
+                _('Show OSD Window'), _('Show OSD lyric'), None)
         self.show_window_action.set_icon_name(
                 'accessories-text-editor-symbolic')
         self.show_window_action.connect('toggled',
@@ -412,8 +412,10 @@ class OSDLrc(Gtk.ApplicationWindow):
         self.lock_window_action.set_sensitive(status)
         if status:
             action.set_label(_('Hide OSD Window'))
+            action.set_tooltip(_('Hide OSD Window'))
         else:
             action.set_label(_('Show OSD Window'))
+            action.set_tooltip(_('Show OSD Window'))
 
     def on_lock_window_action_toggled(self, action):
         if not self.app.conf['osd-show']:

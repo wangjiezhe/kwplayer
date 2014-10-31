@@ -38,7 +38,7 @@ VERSION = kuwo.__version__
 HOMEPAGE = 'https://github.com/LiuLang/kwplayer'
 AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
 COPYRIGHT = 'Copyright (c) 2013-2014 LiuLang'
-DESCRIPTION = _('A simple music player on Linux desktop.')
+DESCRIPTION = _('Music player for linux users')
 
 ICON_PATH = os.path.join(PREF, 'kuwo', 'themes', 'default')
 HOME_DIR = os.path.expanduser('~')

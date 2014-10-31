@@ -8,6 +8,7 @@ kuwo/DES.py
 kuwo/Lrc.py
 kuwo/MV.py
 kuwo/Net.py
+kuwo/OSDLrc.py
 kuwo/PlayList.py
 kuwo/Player.py
 kuwo/PlayerBin.py
