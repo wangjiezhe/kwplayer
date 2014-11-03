@@ -16,45 +16,11 @@ from gi.repository import Gtk
 from kuwo import Config
 _ = Config._
 from kuwo.log import logger
+from kuwo.LrcParser import parse_lrc
 from kuwo import Widgets
 
 LRC_WINDOW, MV_WINDOW = 0, 1
 ADJ_LRC_DELTA = 1000000000 # 1000ms
-
-
-def list_to_time(time_tags):
-    mm, ss, ml = time_tags
-    if ml is None:
-        curr_time = int(mm) * 60 + int(ss)
-    else:
-        curr_time = int(mm) * 60 + int(ss) + float(ml)
-    return int(curr_time * 10 ** 9)
-
-def lrc_parser(lrc_txt):
-    '''将lrc格式的文本分解为一个list'''
-    lines = lrc_txt.split('\n')
-    lrc_obj = [[-4, ''], [-3, ''], [-2, ''], ]
-
-    reg_time = re.compile('\[([0-9]{2}):([0-9]{2})(\.[0-9]{1,3})?\]')
-    for line in lines:
-        offset = 0
-        match = reg_time.match(line)
-        tags = []
-        while match:
-            time = list_to_time(match.groups())
-            tags.append(time)
-            offset = match.end()
-            match = reg_time.match(line, offset)
-        content = line[offset:]
-        for tag in tags:
-            lrc_obj.append([tag, content])
-    last_time = lrc_obj[-1][0]
-    if last_time <= 0:
-        logger.error('lrc_parser(): %s.' % last_time)
-        return None
-    for i in range(last_time, last_time * 2 + 5, last_time // 4 + 1):
-        lrc_obj.append([i, '', ])
-    return sorted(lrc_obj, key=lambda item: item[0])
 
 
 class Lrc(Gtk.Notebook):
@@ -159,7 +125,7 @@ class Lrc(Gtk.Notebook):
             self.lrc_obj = None
             self.app.osdlrc.set_lrc(self.lrc_obj)
             return
-        self.lrc_obj = lrc_parser(lrc_txt)
+        self.lrc_obj = parse_lrc(lrc_txt)
         self.app.osdlrc.set_lrc(self.lrc_obj)
         if not self.lrc_obj:
             logger.warn('set_lrc(): failed to parse lrc.')

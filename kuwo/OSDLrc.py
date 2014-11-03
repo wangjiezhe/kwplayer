@@ -133,7 +133,7 @@ class OSDLrc(Gtk.ApplicationWindow):
 
         # 切换窗口显隐动作
         self.show_window_action = Gtk.ToggleAction('show-window-action',
-                _('Show OSD Window'), _('Show OSD lyric'), None)
+                _('Show OSD Window'), _('Show OSD Window'), None)
         self.show_window_action.set_icon_name(
                 'accessories-text-editor-symbolic')
         self.show_window_action.connect('toggled',
