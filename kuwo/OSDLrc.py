@@ -67,11 +67,12 @@ class OSDLrc(Gtk.ApplicationWindow):
         box.pack_start(self.da, False, False, 0)
         self.da2 = Gtk.Label()
         self.da2.old_provider = None
-        #self.da2.props.justify = Gtk.Justification.RIGHT
-        #self.da2.props.halign = Gtk.Align.END
-        #self.da2.props.xalign = 1
         self.da2.props.xalign = 0
         box.pack_start(self.da2, False, False, 0)
+        self.da3 = Gtk.Label()
+        self.da3.old_provider = None
+        self.da3.props.xalign = 0
+        box.pack_start(self.da3, False, False, 0)
 
         self.toolbar = Gtk.Toolbar()
         self.toolbar.set_style(Gtk.ToolbarStyle.ICONS)
@@ -225,6 +226,15 @@ class OSDLrc(Gtk.ApplicationWindow):
                 old_provider=self.da.old_provider)
         self.da2.old_provider = Widgets.apply_css(self.da2, css,
                 old_provider=self.da2.old_provider)
+        if self.app.conf['osd-three']:
+            self.da3.show_all()
+            self.da3.old_provider = Widgets.apply_css(self.da3, css,
+                    old_provider=self.da3.old_provider)
+            self.da.get_style_context().remove_class(ACTIVATE)
+            self.da2.get_style_context().add_class(ACTIVATE)
+            self.da3.get_style_context().remove_class(ACTIVATE)
+        else:
+            self.da3.hide()
 
     def set_lrc(self, lrc_obj):
         self.lrc_obj = lrc_obj
@@ -235,24 +245,37 @@ class OSDLrc(Gtk.ApplicationWindow):
         '''同步歌词'''
         if not self.lrc_obj or line_num >= len(self.lrc_obj):
             return
-        elif line_num == 0:
-            self.da.set_text(self.lrc_obj[0][1])
-            self.da2.set_text(self.lrc_obj[1][1])
-            self.da.get_style_context().add_class(ACTIVATE)
-        elif line_num % 2 == 1:
-            next_line = line_num + 1
-            if next_line < len(self.lrc_obj):
-                self.da.set_text(self.lrc_obj[next_line][1])
-            self.da.get_style_context().remove_class(ACTIVATE)
+
+        if self.app.conf['osd-three']:
+            if line_num == 0:
+                self.da.set_text('')
+                self.da3.set_text(self.lrc_obj[line_num+1][1])
+            elif line_num == len(self.lrc_obj) -1:
+                self.da.set_text(self.lrc_obj[line_num-1][1])
+                self.da3.set_text('')
+            else:
+                self.da.set_text(self.lrc_obj[line_num-1][1])
+                self.da3.set_text(self.lrc_obj[line_num+1][1])
             self.da2.set_text(self.lrc_obj[line_num][1])
-            self.da2.get_style_context().add_class(ACTIVATE)
         else:
-            next_line = line_num + 1
-            if next_line < len(self.lrc_obj):
-                self.da2.set_text(self.lrc_obj[next_line][1])
-            self.da2.get_style_context().remove_class(ACTIVATE)
-            self.da.set_text(self.lrc_obj[line_num][1])
-            self.da.get_style_context().add_class(ACTIVATE)
+            if line_num == 0:
+                self.da.set_text(self.lrc_obj[0][1])
+                self.da2.set_text(self.lrc_obj[1][1])
+                self.da.get_style_context().add_class(ACTIVATE)
+            elif line_num % 2 == 1:
+                next_line = line_num + 1
+                if next_line < len(self.lrc_obj):
+                    self.da.set_text(self.lrc_obj[next_line][1])
+                self.da.get_style_context().remove_class(ACTIVATE)
+                self.da2.set_text(self.lrc_obj[line_num][1])
+                self.da2.get_style_context().add_class(ACTIVATE)
+            else:
+                next_line = line_num + 1
+                if next_line < len(self.lrc_obj):
+                    self.da2.set_text(self.lrc_obj[next_line][1])
+                self.da2.get_style_context().remove_class(ACTIVATE)
+                self.da.set_text(self.lrc_obj[line_num][1])
+                self.da.get_style_context().add_class(ACTIVATE)
 
     def reload(self):
         '''重新设定属性, 然后重绘'''
@@ -415,6 +438,9 @@ class PreferencesDialog(Gtk.Dialog):
         box.pack_start(ColorBox(parent, _('Background color:'),
                 'osd-background-color'), False, False, 0)
 
+        box.pack_start(SwitchBox(parent, _('Display three lines:'),
+                'osd-three'), False, False, 0)
+
         # Default Label
         default_label = Gtk.Label()
         default_label.set_markup(_('<b>Default Text Styles</b>'))
@@ -453,27 +479,50 @@ class PreferencesDialog(Gtk.Dialog):
 
         box.pack_start(SpinBox(parent, _('Font size:'),
                 'osd-activated-size', SIZE_MIN, SIZE_MAX),
-                True, False, 0)
+                False, False, 0)
 
         box.pack_start(ColorBox(parent, _('Color:'),
-                'osd-activated-color'), True, False, 0)
+                'osd-activated-color'), False, False, 0)
 
         box.pack_start(SpinBox(parent, _('Shadow X:'),
                 'osd-activated-shadow-x', SHADOW_SIZE_MIN,
-                SHADOW_SIZE_MAX), True, False, 0)
+                SHADOW_SIZE_MAX), False, False, 0)
 
         box.pack_start(SpinBox(parent, _('Shadow Y:'),
                 'osd-activated-shadow-y', SHADOW_SIZE_MIN,
-                SHADOW_SIZE_MAX), True, False, 0)
+                SHADOW_SIZE_MAX), False, False, 0)
 
         box.pack_start(SpinBox(parent, _('Shadow radius:'),
                 'osd-activated-shadow-radius', SHADOW_RADIUS_MIN,
-                SHADOW_RADIUS_MAX), True, False, 0)
+                SHADOW_RADIUS_MAX), False, False, 0)
 
         box.pack_start(ColorBox(parent, _('Shadow color:'),
-                'osd-activated-shadow-color'), True, False, 0)
+                'osd-activated-shadow-color'), False, False, 0)
 
         box.show_all()
+
+
+class SwitchBox(Gtk.Box):
+
+    def __init__(self, osd, label_name, name):
+        super().__init__()
+        self.osd = osd
+        self.conf = osd.app.conf
+        self.props.margin_left = 10
+
+        label = Gtk.Label(label_name)
+        self.pack_start(label, False, False, 0)
+
+        switch_button = Gtk.Switch()
+        switch_button.set_active(self.conf[name])
+        switch_button.props.halign = Gtk.Align.END
+        switch_button.connect('notify::active',
+                              self.on_switch_button_activated, name)
+        self.pack_end(switch_button, True, True, 0)
+
+    def on_switch_button_activated(self, switch_button, event, name):
+        self.conf[name] = switch_button.get_active()
+        self.osd.update_style()
 
 
 class ColorBox(Gtk.Box):

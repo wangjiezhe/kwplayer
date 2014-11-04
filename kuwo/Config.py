@@ -125,6 +125,7 @@ _default_conf = {
     'osd-x': 200,
     'osd-y': 200,
     'osd-show': False,
+    'osd-three': False,  # 三行显示
     'osd-locked': False,
     'osd-style': 'default',
     'osd-background-color': 'rgba(123, 123, 123, 0)',
