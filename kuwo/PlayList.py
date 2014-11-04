@@ -875,7 +875,7 @@ class PlayList(Gtk.Box):
     def advise_new_playlist_name(self, disname):
         self.playlist_advice_disname = disname
 
-    def on_advice_menu_item_activated(self, advice_item):
+    def on_advice_menu_item_activated(self, advice_item, menu):
         '''新建一个播放列表'''
         list_name = str(time.time())
         tooltip = Widgets.escape(self.playlist_advice_disname)
@@ -883,11 +883,11 @@ class PlayList(Gtk.Box):
                 [self.playlist_advice_disname, list_name, True, tooltip])
         self.init_tab(list_name, [])
         advice_item.list_name = list_name
-        self.on_menu_item_activated(advice_item)
+        self.on_menu_item_activated(advice_item, menu)
 
-    def on_menu_item_activated(self, menu_item):
+    def on_menu_item_activated(self, menu_item, menu):
         list_name = menu_item.list_name
-        songs = menu_item.get_parent().songs
+        songs = menu.songs
         self.add_songs_to_playlist(songs, list_name)
 
     # Open API
@@ -896,7 +896,8 @@ class PlayList(Gtk.Box):
             sep_item = Gtk.SeparatorMenuItem()
             menu.append(sep_item)
             advice_item = Gtk.MenuItem('+ ' + self.playlist_advice_disname)
-            advice_item.connect('activate', self.on_advice_menu_item_activated)
+            advice_item.connect('activate',
+                                self.on_advice_menu_item_activated, menu)
             menu.append(advice_item)
 
     # OpenAPI
@@ -913,7 +914,7 @@ class PlayList(Gtk.Box):
                 continue
             menu_item = Gtk.MenuItem(item[0])
             menu_item.list_name = item[1]
-            menu_item.connect('activate', self.on_menu_item_activated)
+            menu_item.connect('activate', self.on_menu_item_activated, menu)
             menu.append(menu_item)
 
         self.add_advice_menu_item(menu)
