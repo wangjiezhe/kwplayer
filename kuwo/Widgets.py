@@ -207,9 +207,11 @@ class ControlBox(Gtk.Box):
         self.pack_start(button_play, False, False, 0)
 
         # GtkMenuButton is new in Gtk3.6
-        #button_add = Gtk.MenuButton(_('Add to Playlist'))
-        #button_add.set_menu_model(self.app.playlist.playlist_menu_model)
-        button_add = Gtk.Button(_('Add to Playlist'))
+        if Gtk.MINOR_VERSION > 4:
+            button_add = Gtk.MenuButton(_('Add to Playlist'))
+            button_add.props.popup = Gtk.Menu()
+        else:
+            button_add = Gtk.Button(_('Add to Playlist'))
         button_add.connect('clicked', self.on_button_add_clicked)
         self.pack_start(button_add, False, False, 0)
 
@@ -223,20 +225,28 @@ class ControlBox(Gtk.Box):
         self.button_selectall.set_active(True)
         self.button_selectall.handler_unblock(self.select_all_sid)
 
-    def on_button_selectall_toggled(self, btn):
-        toggled = btn.get_active()
+    def on_button_selectall_toggled(self, button):
+        toggled = button.get_active()
         for song in self.liststore:
             song[0] = toggled
 
-    def on_button_play_clicked(self, btn):
+    def on_button_play_clicked(self, button):
         songs = [song_row_to_dict(s) for s in self.liststore if s[0]]
         self.app.playlist.play_songs(songs)
 
-    def on_button_add_clicked(self, btn):
-        songs = [song_row_to_dict(s) for s in self.liststore if s[0]]
-        self.app.playlist.popup_playlist_menu(btn, songs)
+    def on_button_add_clicked(self, button):
+        songs = [song_row_to_dict(s) for s in self.liststore]
+        if Gtk.MINOR_VERSION > 4:
+            menu = button.props.popup
+            self.app.playlist.new_playlist_menu(menu)
+            menu.songs = songs
+        else:
+            self.menu = self.app.playlist.new_playlist_menu()
+            self.menu.songs = songs
+            self.menu.popup(None, None, None, None, 1,
+                            Gtk.get_current_event_time())
 
-    def on_button_cache_clicked(self, btn):
+    def on_button_cache_clicked(self, button):
         songs = [song_row_to_dict(s) for s in self.liststore if s[0]]
         self.app.playlist.cache_songs(songs)
 
@@ -248,13 +258,25 @@ class MVControlBox(Gtk.Box):
         self.liststore = liststore
         self.app = app
 
-        button_add = Gtk.Button(_('Add to Playlist'))
+        if Gtk.MINOR_VERSION > 4:
+            button_add = Gtk.MenuButton(_('Add to Playlist'))
+            button_add.props.popup = Gtk.Menu()
+        else:
+            button_add = Gtk.Button(_('Add to Playlist'))
         button_add.connect('clicked', self.on_button_add_clicked)
         self.pack_start(button_add, False, False, 0)
 
-    def on_button_add_clicked(self, btn):
+    def on_button_add_clicked(self, button):
         songs = [song_row_to_dict(s) for s in self.liststore]
-        self.app.playlist.popup_playlist_menu(btn, songs)
+        if Gtk.MINOR_VERSION > 4:
+            menu = button.props.popup
+            self.app.playlist.new_playlist_menu(menu)
+            menu.songs = songs
+        else:
+            self.menu = self.app.playlist.new_playlist_menu()
+            self.menu.songs = songs
+            self.menu.popup(None, None, None, None, 1,
+                            Gtk.get_current_event_time())
 
 
 class IconView(Gtk.IconView):

@@ -7,6 +7,7 @@
 import os
 import sys
 import time
+import traceback
 
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
@@ -18,6 +19,7 @@ from kuwo import Config
 # ~/.config/kuwo and ~/.cache/kuwo need to be created at first time
 Config.check_first()
 _ = Config._
+from kuwo.log import logger
 from kuwo import Widgets
 from kuwo.Artists import Artists
 from kuwo.Lrc import Lrc
@@ -31,6 +33,11 @@ from kuwo.Shortcut import Shortcut
 from kuwo.Themes import Themes
 from kuwo.TopCategories import TopCategories
 from kuwo.TopList import TopList
+try:
+    # Ubuntu Unity uses AppIndicator instead of Gtk.StatusIcon
+    from gi.repository import AppIndicator3 as AppIndicator
+except ImportError:
+    logger.debug(traceback.format_exc())
 
 if Gtk.MAJOR_VERSION <= 3 and Gtk.MINOR_VERSION < 10:
     GObject.threads_init()
@@ -211,42 +218,40 @@ class App:
                 self.conf.get('use-dark-theme', False)
 
     def init_status_icon(self):
-        # set status_icon as class property, to keep its life
-        # after function exited
-        self.status_icon = Gtk.StatusIcon()
-        self.status_icon.set_from_pixbuf(self.theme['app-logo'])
-        # left click
-        self.status_icon.connect('activate', self.on_status_icon_activate)
-        # right click
-        self.status_icon.connect('popup_menu', self.on_status_icon_popup_menu)
+        def on_status_icon_popup_menu(status_icon, event_button,
+                                      event_time):
+            menu.popup(None, None,
+                    lambda a,b: Gtk.StatusIcon.position_menu(menu, status_icon),
+                    None, event_button, event_time)
 
-    def on_status_icon_activate(self, status_icon):
-        if self.window.props.visible:
-            self.window.hide()
-        else:
-            self.window.present()
+        def on_status_icon_activate(tatus_icon):
+            if self.window.props.visible:
+                self.window.hide()
+            else:
+                self.window.present()
 
-    def on_status_icon_popup_menu(self, status_icon, event_button, 
-                                  event_time):
+        if not self.conf['use-status-icon']:
+            return
+
         menu = Gtk.Menu()
 
-        show_item = Gtk.MenuItem(label=_('Show App') )
-        show_item.connect('activate', self.on_status_icon_show_app_activate)
+        show_item = Gtk.MenuItem(_('Show App'))
+        show_item.connect('activate', lambda item: self.window.present())
         menu.append(show_item)
 
         sep_item = Gtk.SeparatorMenuItem()
         menu.append(sep_item)
 
-        previous_item = Gtk.MenuItem(label=_('Previous Song'))
-        previous_item.connect('activate', self.on_status_icon_prev_activate)
+        previous_item = Gtk.MenuItem(_('Previous Song'))
+        previous_item.connect('activate', lambda item: self.player.load_prev())
         menu.append(previous_item)
 
         play_item = Gtk.MenuItem()
         play_item.props.related_action = self.player.playback_action
         menu.append(play_item)
 
-        next_item = Gtk.MenuItem(label=_('Next Song'))
-        next_item.connect('activate', self.on_status_icon_next_activate)
+        next_item = Gtk.MenuItem(_('Next Song'))
+        next_item.connect('activate', lambda item: self.player.load_next())
         menu.append(next_item)
 
         sep_item = Gtk.SeparatorMenuItem()
@@ -263,32 +268,24 @@ class App:
         sep_item = Gtk.SeparatorMenuItem()
         menu.append(sep_item)
         
-        quit_item = Gtk.MenuItem(label=_('Quit'))
-        quit_item.connect('activate', self.on_status_icon_quit_activate)
+        quit_item = Gtk.MenuItem(_('Quit'))
+        quit_item.connect('activate', lambda item: self.quit())
         menu.append(quit_item)
 
         menu.show_all()
-        menu.popup(None, None,
-                lambda a,b: Gtk.StatusIcon.position_menu(menu, status_icon),
-                None, event_button, event_time)
+        self.status_menu = menu
 
-    def on_status_icon_show_app_activate(self, menuitem):
-        self.window.present()
-
-    def on_status_icon_prev_activate(self, menuitem):
-        self.player.load_prev()
-
-    def on_status_icon_pause_activate(self, menuitem):
-        self.player.play_pause()
-
-    def on_status_icon_next_activate(self, menuitem):
-        self.player.load_next()
-
-    def on_status_icon_lock_osd_activate(self, menuitem):
-        self.osdlrc.toggle_lock()
-
-    def on_status_icon_quit_activate(self, menuitem):
-        self.quit()
+        if hasattr(__package__, 'AppIndicator'):
+            self.status_icon = AppIndicator.Indicator.new(Config.NAME,
+                    Config.NAME,
+                    AppIndicator.IndicatorCategory.APPLICATION_STATUS)
+        else: 
+            self.status_icon = Gtk.StatusIcon()
+            self.status_icon.set_from_pixbuf(self.theme['app-logo'])
+            # left click
+            self.status_icon.connect('activate', on_status_icon_activate)
+            # right click
+            self.status_icon.connect('popup_menu', on_status_icon_popup_menu)
 
     def on_notebook_switch_page(self, notebook, page, page_num):
         if page not in self.tab_first_show:

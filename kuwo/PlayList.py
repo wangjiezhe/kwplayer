@@ -124,9 +124,9 @@ class NormalSongTab(Gtk.ScrolledWindow):
     def on_treeview_key_pressed(self, treeview, event):
         if event.keyval == Gdk.KEY_Delete:
             model, paths = self.selection.get_selected_rows()
-            # paths needs to be reversed, or else an IndexError throwed.
-            for path in reversed(paths):
-                model.remove(model[path].iter)
+            tree_iters = [model.get_iter(path) for path in paths]
+            for tree_iter in tree_iters:
+                model.remove(tree_iter)
 
     def on_treeview_button_pressed(self, treeview, event):
         if event.type != Gdk.EventType.BUTTON_PRESS:
@@ -374,7 +374,6 @@ class PlayList(Gtk.Box):
         self.cache_global_count = 0
         self.cache_local_count = 0
 
-        self.playlist_menu = Gtk.Menu()
         self.playlist_advice_disname = ''
 
         box_left = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -571,8 +570,9 @@ class PlayList(Gtk.Box):
         else:
             self.app.player.load(song)
 
+    # Open API
     def play_songs(self, songs):
-        if not songs or songs:
+        if not songs:
             return
         self.add_songs_to_playlist(songs, list_name='Default')
         self.play_song(songs[0])
@@ -786,7 +786,6 @@ class PlayList(Gtk.Box):
         if not prev_song:
             return
         self.curr_playing[1] = self.prev_playing
-        self.locate_curr_song(popup_page=False)
         if use_mv:
             self.app.player.load_mv(prev_song)
         else:
@@ -797,7 +796,6 @@ class PlayList(Gtk.Box):
         if not next_song:
             return
         self.curr_playing[1] = self.next_playing
-        self.locate_curr_song(popup_page=False)
         if use_mv:
             self.app.player.load_mv(next_song)
         else:
@@ -877,7 +875,7 @@ class PlayList(Gtk.Box):
     def advise_new_playlist_name(self, disname):
         self.playlist_advice_disname = disname
 
-    def on_advice_menu_item_activated(self, advice_item):
+    def on_advice_menu_item_activated(self, advice_item, menu):
         '''新建一个播放列表'''
         list_name = str(time.time())
         tooltip = Widgets.escape(self.playlist_advice_disname)
@@ -885,36 +883,41 @@ class PlayList(Gtk.Box):
                 [self.playlist_advice_disname, list_name, True, tooltip])
         self.init_tab(list_name, [])
         advice_item.list_name = list_name
-        self.on_menu_item_activated(advice_item)
+        self.on_menu_item_activated(advice_item, menu)
 
-    def on_menu_item_activated(self, menu_item):
+    def on_menu_item_activated(self, menu_item, menu):
         list_name = menu_item.list_name
-        songs = menu_item.get_parent().songs
+        songs = menu.songs
         self.add_songs_to_playlist(songs, list_name)
 
-    def popup_playlist_menu(self, button, songs):
-        '''弹出选择播放列表的菜单'''
-        menu = self.playlist_menu
-        while menu.get_children():
-            menu.remove(menu.get_children()[0])
+    # Open API
+    def add_advice_menu_item(self, menu):
+        if self.playlist_advice_disname:
+            sep_item = Gtk.SeparatorMenuItem()
+            menu.append(sep_item)
+            advice_item = Gtk.MenuItem('+ ' + self.playlist_advice_disname)
+            advice_item.connect('activate',
+                                self.on_advice_menu_item_activated, menu)
+            menu.append(advice_item)
+
+    # OpenAPI
+    def new_playlist_menu(self, menu=None):
+        '''根据当前的播放列表, 重新构建弹出的菜单'''
+        if menu:
+            while menu.get_children():
+                menu.remove(menu.get_children()[0])
+        else:
+            menu  = Gtk.Menu()
 
         for item in self.liststore_left:
             if item[1] in ('Caching', ):
                 continue
             menu_item = Gtk.MenuItem(item[0])
             menu_item.list_name = item[1]
-            menu_item.connect('activate', self.on_menu_item_activated)
+            menu_item.connect('activate', self.on_menu_item_activated, menu)
             menu.append(menu_item)
 
-        if self.playlist_advice_disname:
-            sep_item = Gtk.SeparatorMenuItem()
-            menu.append(sep_item)
-            advice_item = Gtk.MenuItem('+ ' + self.playlist_advice_disname)
-            advice_item.connect('activate', self.on_advice_menu_item_activated)
-            advice_item.set_tooltip_text(
-                    _('Create this playlist and add songs into it'))
-            menu.append(advice_item)
+        self.add_advice_menu_item(menu)
 
-        menu.songs = songs
         menu.show_all()
-        menu.popup(None, None, None, None, 1, Gtk.get_current_event_time())
+        return menu

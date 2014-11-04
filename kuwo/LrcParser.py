@@ -46,14 +46,14 @@ def time_tag_to_nano(time_tags):
 
 def sort_lrc_tags(lrc_obj):
     '''从小到大对时间标记进行排序'''
-#    lrc_obj = [[-4, ''], [-3, ''], [-2, ''], ]
-    return sorted(lrc_obj, key=lambda item: item[0])
+#    lrc_obj = [[-4, ''], [-3, ''], [-2, ''], ] + lrc_obj
 #    last_time = lrc_obj[-1][0]
 #    if last_time <= 0:
 #        logger.error('LrcParser.parser_re(): %s.' % last_time)
 #        return None
 #    for i in range(last_time, last_time * 2 + 5, last_time // 4 + 1):
-#        lrc_obj.append([i, '', ])
+#        lrc_obj.append([i, ''])
+    return sorted(lrc_obj, key=lambda item: item[0])
 
 def parser_lex(lrc_txt):
     tokens = (
