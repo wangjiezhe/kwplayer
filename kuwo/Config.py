@@ -24,9 +24,10 @@ elif __file__.startswith('/usr/'):
 else:
     PREF = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'share')
 
+NAME = 'kwplayer'
 LOCALEDIR = os.path.join(PREF, 'locale')
-gettext.bindtextdomain('kwplayer', LOCALEDIR)
-gettext.textdomain('kwplayer')
+gettext.bindtextdomain(NAME, LOCALEDIR)
+gettext.textdomain(NAME)
 _ = gettext.gettext
 
 # Check Gtk version <= 3.6

@@ -635,6 +635,7 @@ class Player(Gtk.Box):
         dialog.destroy()
         self.app.load_styles()
         self.app.reset_notebook_tabs()
+        self.app.init_status_icon()
         self.app.lrc.update_highlighted_tag()
         self.app.shortcut.rebind_keys()
 

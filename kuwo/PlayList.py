@@ -374,7 +374,6 @@ class PlayList(Gtk.Box):
         self.cache_global_count = 0
         self.cache_local_count = 0
 
-        self.playlist_menu = Gtk.Menu()
         self.playlist_advice_disname = ''
 
         box_left = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -892,11 +891,23 @@ class PlayList(Gtk.Box):
         songs = menu_item.get_parent().songs
         self.add_songs_to_playlist(songs, list_name)
 
-    def popup_playlist_menu(self, button, songs):
-        '''弹出选择播放列表的菜单'''
-        menu = self.playlist_menu
-        while menu.get_children():
-            menu.remove(menu.get_children()[0])
+    # Open API
+    def add_advice_menu_item(self, menu):
+        if self.playlist_advice_disname:
+            sep_item = Gtk.SeparatorMenuItem()
+            menu.append(sep_item)
+            advice_item = Gtk.MenuItem('+ ' + self.playlist_advice_disname)
+            advice_item.connect('activate', self.on_advice_menu_item_activated)
+            menu.append(advice_item)
+
+    # OpenAPI
+    def new_playlist_menu(self, menu=None):
+        '''根据当前的播放列表, 重新构建弹出的菜单'''
+        if menu:
+            while menu.get_children():
+                menu.remove(menu.get_children()[0])
+        else:
+            menu  = Gtk.Menu()
 
         for item in self.liststore_left:
             if item[1] in ('Caching', ):
@@ -906,15 +917,7 @@ class PlayList(Gtk.Box):
             menu_item.connect('activate', self.on_menu_item_activated)
             menu.append(menu_item)
 
-        if self.playlist_advice_disname:
-            sep_item = Gtk.SeparatorMenuItem()
-            menu.append(sep_item)
-            advice_item = Gtk.MenuItem('+ ' + self.playlist_advice_disname)
-            advice_item.connect('activate', self.on_advice_menu_item_activated)
-            advice_item.set_tooltip_text(
-                    _('Create this playlist and add songs into it'))
-            menu.append(advice_item)
+        self.add_advice_menu_item(menu)
 
-        menu.songs = songs
         menu.show_all()
-        menu.popup(None, None, None, None, 1, Gtk.get_current_event_time())
+        return menu
