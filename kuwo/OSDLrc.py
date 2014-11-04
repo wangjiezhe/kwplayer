@@ -26,6 +26,10 @@ from kuwo.log import logger
 ACTIVATE = 'activated'
 SIZE_MAX = 72
 SIZE_MIN = 4
+SHADOW_SIZE_MIN = 0
+SHADOW_SIZE_MAX = 10
+SHADOW_RADIUS_MIN = 0
+SHADOW_RADIUS_MAX = 20
 HIDE_TOOLBAR_AFTER = 2000  # 2 secs
 
 class RightLabel(Gtk.Label):
@@ -172,10 +176,20 @@ class OSDLrc(Gtk.ApplicationWindow):
                 '.activated {',
                     'color: {0};'.format(conf['osd-activated-color']),
                     'font-size: {0};'.format(conf['osd-activated-size']),
+                    'text-shadow: {0} {1} {2} {3};'.format(
+                        conf['osd-activated-shadow-x'],
+                        conf['osd-activated-shadow-y'],
+                        conf['osd-activated-shadow-radius'],
+                        conf['osd-activated-shadow-color']),
                 '}',
                 'GtkLabel {',
                     'color: {0};'.format(conf['osd-inactivated-color']),
                     'font-size: {0};'.format(conf['osd-inactivated-size']),
+                    'text-shadow: {0} {1} {2} {3};'.format(
+                        conf['osd-inactivated-shadow-x'],
+                        conf['osd-inactivated-shadow-y'],
+                        conf['osd-inactivated-shadow-radius'],
+                        conf['osd-inactivated-shadow-color']),
                 '}',
             ])
         else:
@@ -187,12 +201,22 @@ class OSDLrc(Gtk.ApplicationWindow):
                 '.activated {',
                     'color: {0};'.format(conf['osd-activated-color']),
                     'font-size: {0}px;'.format(conf['osd-activated-size']),
+                    'text-shadow: {0}px {1}px {2}px {3};'.format(
+                        conf['osd-activated-shadow-x'],
+                        conf['osd-activated-shadow-y'],
+                        conf['osd-activated-shadow-radius'],
+                        conf['osd-activated-shadow-color']),
                 '}',
                 'GtkLabel {',
                     'color: {0};'.format(conf['osd-inactivated-color']),
                     'font-size: {0}px;'.format(conf['osd-inactivated-size']),
                     'transition-property: font-size;',
                     'transition: 200ms ease-in;',
+                    'text-shadow: {0}px {1}px {2}px {3};'.format(
+                        conf['osd-inactivated-shadow-x'],
+                        conf['osd-inactivated-shadow-y'],
+                        conf['osd-inactivated-shadow-radius'],
+                        conf['osd-inactivated-shadow-color']),
                 '}',
             ])
         self.old_provider = Widgets.apply_css(self, css,
@@ -320,83 +344,7 @@ class OSDLrc(Gtk.ApplicationWindow):
         self.update_style()
 
     def on_color_button_clicked(self, button):
-        def on_background_color_set(color_button):
-            color_rgba = color_button.get_rgba()
-            if color_rgba.alpha == 1:
-                color_rgba.alpha = 0.999
-            self.app.conf['osd-background-color'] = color_rgba.to_string()
-            self.update_style()
-
-        def on_inactivated_color_set(color_button):
-            color_rgba = color_button.get_rgba()
-            if color_rgba.alpha == 1:
-                color_rgba.alpha = 0.999
-            self.app.conf['osd-inactivated-color'] = color_rgba.to_string()
-            self.update_style()
-
-        def on_activated_color_set(color_button):
-            color_rgba = color_button.get_rgba()
-            if color_rgba.alpha == 1:
-                color_rgba.alpha = 0.999
-            self.app.conf['osd-activated-color'] = color_rgba.to_string()
-            self.update_style()
-
-        def on_inactivated_size_changed(spin):
-            self.app.conf['osd-inactivated-size'] = spin.get_value()
-            self.update_style()
-
-        def on_activated_size_changed(spin):
-            self.app.conf['osd-activated-size'] = spin.get_value()
-            self.update_style()
-
-        dialog = Gtk.Dialog(_('OSD Styles'), self, 0,
-                            (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE))
-        dialog.set_modal(False)
-        dialog.set_default_size(480, 320)
-        dialog.set_border_width(5)
-        box = dialog.get_content_area()
-
-        grid = Gtk.Grid()
-        grid.props.halign = Gtk.Align.CENTER
-        grid.props.column_spacing = 15
-        grid.props.row_spacing = 10
-        box.pack_start(grid, False, False, 0)
-
-        grid.attach(RightLabel(_('Background Color:')), 0, 0, 1, 1)
-        rgba = Gdk.RGBA()
-        rgba.parse(self.app.conf['osd-background-color'])
-        background_color = Gtk.ColorButton.new_with_rgba(rgba)
-        background_color.props.use_alpha = True
-        background_color.connect('color-set', on_background_color_set)
-        grid.attach(background_color, 1, 0, 1, 1)
-
-        grid.attach(RightLabel(_('Inativated Text Color:')), 0, 1, 1, 1)
-        rgba.parse(self.app.conf['osd-inactivated-color'])
-        inactivated_color = Gtk.ColorButton.new_with_rgba(rgba)
-        inactivated_color.props.use_alpha = True
-        inactivated_color.connect('color-set', on_inactivated_color_set)
-        grid.attach(inactivated_color, 1, 1, 1, 1)
-
-        grid.attach(RightLabel(_('Activated Text Color:')), 0, 2, 1, 1)
-        rgba.parse(self.app.conf['osd-activated-color'])
-        activated_color = Gtk.ColorButton.new_with_rgba(rgba)
-        activated_color.props.use_alpha = True
-        activated_color.connect('color-set', on_activated_color_set)
-        grid.attach(activated_color, 1, 2, 1, 1)
-
-        grid.attach(RightLabel(_('Inactivated Font Size:')), 0, 3, 1, 1)
-        inactivated_size = Gtk.SpinButton.new_with_range(SIZE_MIN, SIZE_MAX, 1)
-        inactivated_size.set_value(self.app.conf['osd-inactivated-size'])
-        inactivated_size.connect('value-changed', on_inactivated_size_changed)
-        grid.attach(inactivated_size, 1, 3, 1, 1)
-
-        grid.attach(RightLabel(_('Activated Font Size:')), 0, 4, 1, 1)
-        activated_size = Gtk.SpinButton.new_with_range(SIZE_MIN, SIZE_MAX, 1)
-        activated_size.set_value(self.app.conf['osd-activated-size'])
-        activated_size.connect('value-changed', on_activated_size_changed)
-        grid.attach(activated_size, 1, 4, 1, 1)
-
-        box.show_all()
+        dialog = PreferencesDialog(self)
         dialog.run()
         dialog.destroy()
 
@@ -450,3 +398,128 @@ class OSDLrc(Gtk.ApplicationWindow):
         x = int(event.x_root - self.start_x)
         y = int(event.y_root - self.start_y)
         self.move(x, y)
+
+
+class PreferencesDialog(Gtk.Dialog):
+
+    def __init__(self, parent):
+        super().__init__(_('OSD Styles'), parent, 0,
+                         (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE))
+        self.parent = parent
+        self.set_modal(False)
+        self.set_default_size(480, 320)
+        self.set_border_width(15)
+        box = self.get_content_area()
+
+        # Background
+        box.pack_start(ColorBox(parent, _('Background color:'),
+                'osd-background-color'), False, False, 0)
+
+        # Default Label
+        default_label = Gtk.Label()
+        default_label.set_markup(_('<b>Default Text Styles</b>'))
+        default_label.props.xalign = 0
+        default_label.props.margin_top = 15
+        box.pack_start(default_label, False, False, 0)
+
+        box.pack_start(SpinBox(parent, _('Font size:'),
+                'osd-inactivated-size', SIZE_MIN, SIZE_MAX),
+                False, False, 0)
+
+        box.pack_start(ColorBox(parent, _('Color:'),
+                'osd-inactivated-color'), False, False, 0)
+
+        box.pack_start(SpinBox(parent, _('Shadow X:'),
+                'osd-inactivated-shadow-x', SHADOW_SIZE_MIN,
+                SHADOW_SIZE_MAX), False, False, 0)
+
+        box.pack_start(SpinBox(parent, _('Shadow Y:'),
+                'osd-inactivated-shadow-y', SHADOW_SIZE_MIN,
+                SHADOW_SIZE_MAX), False, False, 0)
+
+        box.pack_start(SpinBox(parent, _('Shadow radius:'),
+                'osd-inactivated-shadow-radius', SHADOW_RADIUS_MIN,
+                SHADOW_RADIUS_MAX), False, False, 0)
+
+        box.pack_start(ColorBox(parent, _('Shadow color:'),
+                'osd-inactivated-shadow-color'), False, False, 0)
+
+        # Activated Label
+        activated_label = Gtk.Label()
+        activated_label.set_markup(_('<b>Activated Text Styles</b>'))
+        activated_label.props.margin_top = 15
+        activated_label.props.xalign = 0
+        box.pack_start(activated_label, False, False, 0)
+
+        box.pack_start(SpinBox(parent, _('Font size:'),
+                'osd-activated-size', SIZE_MIN, SIZE_MAX),
+                True, False, 0)
+
+        box.pack_start(ColorBox(parent, _('Color:'),
+                'osd-activated-color'), True, False, 0)
+
+        box.pack_start(SpinBox(parent, _('Shadow X:'),
+                'osd-activated-shadow-x', SHADOW_SIZE_MIN,
+                SHADOW_SIZE_MAX), True, False, 0)
+
+        box.pack_start(SpinBox(parent, _('Shadow Y:'),
+                'osd-activated-shadow-y', SHADOW_SIZE_MIN,
+                SHADOW_SIZE_MAX), True, False, 0)
+
+        box.pack_start(SpinBox(parent, _('Shadow radius:'),
+                'osd-activated-shadow-radius', SHADOW_RADIUS_MIN,
+                SHADOW_RADIUS_MAX), True, False, 0)
+
+        box.pack_start(ColorBox(parent, _('Shadow color:'),
+                'osd-activated-shadow-color'), True, False, 0)
+
+        box.show_all()
+
+
+class ColorBox(Gtk.Box):
+
+    def __init__(self, osd, label_name, name):
+        super().__init__()
+        self.osd = osd
+        self.conf = osd.app.conf
+        self.props.margin_left = 10
+
+        label = Gtk.Label(label_name)
+        self.pack_start(label, False, False, 0)
+
+        rgba = Gdk.RGBA()
+        rgba.parse(self.conf[name])
+        color_button = Gtk.ColorButton.new_with_rgba(rgba)
+        color_button.props.use_alpha = True
+        color_button.props.halign = Gtk.Align.END
+        color_button.connect('color-set', self.on_color_button_set, name)
+        self.pack_end(color_button, True, True, 0)
+
+    def on_color_button_set(self, color_button, name):
+        color_rgba = color_button.get_rgba()
+        if color_rgba.alpha == 1:
+            color_rgba.alpha = 0.999
+        self.conf[name] = color_rgba.to_string()
+        self.osd.update_style()
+
+
+class SpinBox(Gtk.Box):
+
+    def __init__(self, osd, label_name, name, min_size, max_size):
+        super().__init__()
+        self.osd = osd
+        self.conf = osd.app.conf
+        self.props.margin_left = 10
+
+        label = Gtk.Label(label_name)
+        self.pack_start(label, False, False, 0)
+        spin_button = Gtk.SpinButton.new_with_range(min_size, max_size, 1)
+        spin_button.set_value(self.conf[name])
+        spin_button.props.halign = Gtk.Align.END
+        spin_button.connect('value-changed', self.on_spin_button_changed,
+                            name)
+        self.pack_end(spin_button, True, True, 0)
+
+    def on_spin_button_changed(self, spin_button, name):
+        self.conf[name] = spin_button.get_value()
+        self.osd.update_style()

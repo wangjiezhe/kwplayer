@@ -127,11 +127,19 @@ _default_conf = {
     'osd-show': False,
     'osd-locked': False,
     'osd-style': 'default',
+    'osd-background-color': 'rgba(123, 123, 123, 0)',
     'osd-inactivated-color': 'rgba(196, 160, 0, 0.999)',
     'osd-inactivated-size': 30,
+    'osd-inactivated-shadow-x': 0,
+    'osd-inactivated-shadow-y': 0,
+    'osd-inactivated-shadow-radius': 0,
+    'osd-inactivated-shadow-color': 'rgba(255, 255, 255, 0.3)',
     'osd-activated-color': 'rgba(32, 74, 135, 0.999)',
     'osd-activated-size': 40,
-    'osd-background-color': 'rgba(123, 123, 123, 0)',
+    'osd-activated-shadow-x': 0,
+    'osd-activated-shadow-y': 0,
+    'osd-activated-shadow-radius': 0,
+    'osd-activated-shadow-color': 'rgba(255, 255, 255, 0.3)',
 }
 
 def check_first():
