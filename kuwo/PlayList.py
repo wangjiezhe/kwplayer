@@ -124,9 +124,9 @@ class NormalSongTab(Gtk.ScrolledWindow):
     def on_treeview_key_pressed(self, treeview, event):
         if event.keyval == Gdk.KEY_Delete:
             model, paths = self.selection.get_selected_rows()
-            # paths needs to be reversed, or else an IndexError throwed.
-            for path in reversed(paths):
-                model.remove(model[path].iter)
+            tree_iters = [model.get_iter(path) for path in paths]
+            for tree_iter in tree_iters:
+                model.remove(tree_iter)
 
     def on_treeview_button_pressed(self, treeview, event):
         if event.type != Gdk.EventType.BUTTON_PRESS:
