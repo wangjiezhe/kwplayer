@@ -570,8 +570,9 @@ class PlayList(Gtk.Box):
         else:
             self.app.player.load(song)
 
+    # Open API
     def play_songs(self, songs):
-        if not songs or songs:
+        if not songs:
             return
         self.add_songs_to_playlist(songs, list_name='Default')
         self.play_song(songs[0])
