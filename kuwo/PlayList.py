@@ -785,7 +785,6 @@ class PlayList(Gtk.Box):
         if not prev_song:
             return
         self.curr_playing[1] = self.prev_playing
-        self.locate_curr_song(popup_page=False)
         if use_mv:
             self.app.player.load_mv(prev_song)
         else:
@@ -796,7 +795,6 @@ class PlayList(Gtk.Box):
         if not next_song:
             return
         self.curr_playing[1] = self.next_playing
-        self.locate_curr_song(popup_page=False)
         if use_mv:
             self.app.player.load_mv(next_song)
         else:
