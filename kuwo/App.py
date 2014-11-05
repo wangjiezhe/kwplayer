@@ -275,10 +275,12 @@ class App:
         menu.show_all()
         self.status_menu = menu
 
-        if hasattr(__package__, 'AppIndicator'):
+        if 'AppIndicator' in globals():
             self.status_icon = AppIndicator.Indicator.new(Config.NAME,
                     Config.NAME,
                     AppIndicator.IndicatorCategory.APPLICATION_STATUS)
+            self.status_icon.set_menu(menu)
+            self.status_icon.set_status(AppIndicator.IndicatorStatus.ACTIVE)
         else: 
             self.status_icon = Gtk.StatusIcon()
             self.status_icon.set_from_pixbuf(self.theme['app-logo'])
