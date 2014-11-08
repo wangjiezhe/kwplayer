@@ -205,8 +205,9 @@ class NormalSongTab(Gtk.ScrolledWindow):
     def on_delete_song_menu_activated(self, menu_item):
         selection = self.treeview.get_selection()
         liststore, paths = selection.get_selected_rows()
-        for path in paths:
-            liststore.remove(liststore.get_iter(path))
+        tree_iters = [liststore.get_iter(path) for path in paths]
+        for tree_iter in tree_iters:
+            liststore.remove(tree_iter)
 
     def on_delete_cache_menu_activated(self, menu_item):
         selection = self.treeview.get_selection()
@@ -589,7 +590,7 @@ class PlayList(Gtk.Box):
         path = self.get_song_path_in_liststore(liststore, rid)
         if path == -1:
             return
-        liststore.remove(liststore[path].iter)
+        liststore.remove(liststore.get_iter(path))
 
     def check_song_in_playlist(self, song, list_name):
         '''Check whether this song is in this playlist'''
@@ -675,7 +676,7 @@ class PlayList(Gtk.Box):
     def do_cache_song_pool(self):
         def _remove_song():
             try:
-                liststore.remove(liststore[path].iter)
+                liststore.remove(liststore.get_iter(path))
             except IndexError:
                 logger.error(traceback.format_exc())
             Gdk.Window.process_all_updates()

@@ -284,14 +284,10 @@ class OSDLrc(Gtk.ApplicationWindow):
             try:
                 region = cairo.Region()
             except AttributeError:
-                print('Error: cairo too old, cairo.Region missing')
+                print('cairo.Region is missing, see https://github.com/LiuLang/kwplayer#qa')
                 logger.error(traceback.format_exc())
                 return
-            gdk_window = self.get_window()
-            if not gdk_window:
-                logger.warn('OSDLrc.reload(), gdk_window is None')
-                return
-            gdk_window.input_shape_combine_region(region, 0, 0)
+            self.input_shape_combine_region(region)
         else:
             self.toolbar.show_all()
             self.app.conf['osd-toolbar-y'] = self.toolbar.get_allocated_height()

@@ -61,6 +61,22 @@ Q&A
 也可以将`xhost + >/dev/null` 这条命令加入到系统启动脚本中, 这样的话, 系统启动时
 就会自动关闭Host-based access了.
 
+问: 为什么在fedora和opensuse里面无法锁定桌面歌词?
+
+答: 因为锁定桌面歌词, 要用到cairo的cairo_region_t这个类, 而python3-cairo这个
+cairo的python3绑定已经有几年没更新了(最近一次是2011年), 所以它不太完整, 里面
+缺少了Region类, 所以导致kwplayer在尝试锁定时就报错.
+
+针对这个问题, 早在2012年就有人提交了bug并写了补丁, debian系的发行版都带有这个
+补丁的, 所有不存在这样的问题; 而其它发行版并没有打入这个补丁.
+
+要解决这个问题, 确实有些麻烦, 尤其是对一般用户来说.
+
+补丁地址及bug报告的链接:
+
+* https://bugs.freedesktop.org/attachment.cgi?id=61553
+* http://bugs.debian.org/688079
+* http://cgit.freedesktop.org/pycairo/commit/?id=75e82a1b3f495a3abbc78e50a5c66356d320fb15
 
 
 截图
