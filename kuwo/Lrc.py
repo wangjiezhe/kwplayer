@@ -40,7 +40,6 @@ class Lrc(Gtk.Notebook):
         # lyrics window
         self.lrc_window = Gtk.ScrolledWindow()
         self.lrc_window.get_style_context().add_class('lrc_window')
-        self.lrc_window.props.hscrollbar_policy = Gtk.PolicyType.NEVER
         self.append_page(self.lrc_window, Gtk.Label.new('Lrc'))
 
         self.lrc_buf = Gtk.TextBuffer()
