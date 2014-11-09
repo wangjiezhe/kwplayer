@@ -58,25 +58,14 @@ try:
     ldb_imported = True
 except ImportError:
     logger.debug(traceback.format_exc())
-    try:
-        # Fedora: https://github.com/wbolster/plyvel
-        from plyvel import DB as LevelDB
-        ldb_imported = True
-    except ImportError:
-        logger.debug(traceback.format_exc())
-        ldb_imported = False
+    ldb_imported = False
 
 ldb = None
 if ldb_imported:
     try:
         ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
-        # support plyvel 0.6
-        if hasattr(ldb, 'put'):
-            ldb_get = ldb.get
-            ldb_put = ldb.put
-        else:
-            ldb_get = ldb.Get
-            ldb_put = ldb.Put
+        ldb_get = ldb.Get
+        ldb_put = ldb.Put
     except Exception:
         logger.debug(traceback.format_exc())
         ldb_imported = False
