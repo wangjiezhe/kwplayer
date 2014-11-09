@@ -284,7 +284,8 @@ class OSDLrc(Gtk.ApplicationWindow):
             try:
                 region = cairo.Region()
             except AttributeError:
-                print('cairo.Region is missing, see https://github.com/LiuLang/kwplayer#qa')
+                print('cairo.Region is missing, a patch is required:',
+                      'http://bugs.debian.org/688079')
                 logger.error(traceback.format_exc())
                 return
             self.input_shape_combine_region(region)
@@ -451,11 +452,11 @@ class PreferencesDialog(Gtk.Dialog):
         box.pack_start(ColorBox(parent, _('Color:'),
                 'osd-inactivated-color'), False, False, 0)
 
-        box.pack_start(SpinBox(parent, _('Shadow X:'),
+        box.pack_start(SpinBox(parent, _('Horizontal Shadow:'),
                 'osd-inactivated-shadow-x', SHADOW_SIZE_MIN,
                 SHADOW_SIZE_MAX), False, False, 0)
 
-        box.pack_start(SpinBox(parent, _('Shadow Y:'),
+        box.pack_start(SpinBox(parent, _('Vertical Shadow:'),
                 'osd-inactivated-shadow-y', SHADOW_SIZE_MIN,
                 SHADOW_SIZE_MAX), False, False, 0)
 
@@ -480,11 +481,11 @@ class PreferencesDialog(Gtk.Dialog):
         box.pack_start(ColorBox(parent, _('Color:'),
                 'osd-activated-color'), False, False, 0)
 
-        box.pack_start(SpinBox(parent, _('Shadow X:'),
+        box.pack_start(SpinBox(parent, _('Horizontal Shadow:'),
                 'osd-activated-shadow-x', SHADOW_SIZE_MIN,
                 SHADOW_SIZE_MAX), False, False, 0)
 
-        box.pack_start(SpinBox(parent, _('Shadow Y:'),
+        box.pack_start(SpinBox(parent, _('Vertical Shadow:'),
                 'osd-activated-shadow-y', SHADOW_SIZE_MIN,
                 SHADOW_SIZE_MAX), False, False, 0)
 

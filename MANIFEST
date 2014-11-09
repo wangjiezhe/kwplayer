@@ -6,6 +6,7 @@ kuwo/Artists.py
 kuwo/Config.py
 kuwo/DES.py
 kuwo/Lrc.py
+kuwo/LrcParser.py
 kuwo/MV.py
 kuwo/Net.py
 kuwo/OSDLrc.py

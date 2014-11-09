@@ -18,7 +18,6 @@ from urllib import parse
 from urllib import request
 
 from gi.repository import GdkPixbuf
-from gi.repository import Gio
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -58,25 +57,14 @@ try:
     ldb_imported = True
 except ImportError:
     logger.debug(traceback.format_exc())
-    try:
-        # Fedora: https://github.com/wbolster/plyvel
-        from plyvel import DB as LevelDB
-        ldb_imported = True
-    except ImportError:
-        logger.debug(traceback.format_exc())
-        ldb_imported = False
+    ldb_imported = False
 
 ldb = None
 if ldb_imported:
     try:
         ldb = LevelDB(Config.CACHE_DB, create_if_missing=True)
-        # support plyvel 0.6
-        if hasattr(ldb, 'put'):
-            ldb_get = ldb.get
-            ldb_put = ldb.put
-        else:
-            ldb_get = ldb.Get
-            ldb_put = ldb.Put
+        ldb_get = ldb.Get
+        ldb_put = ldb.Put
     except Exception:
         logger.debug(traceback.format_exc())
         ldb_imported = False
@@ -176,16 +164,7 @@ def get_image(url, filepath=None):
 
     with open(filepath, 'wb') as fh:
         fh.write(image)
-    # Now, check its mime type
-    file_ = Gio.File.new_for_path(filepath)
-    file_info = file_.query_info(Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-                                 Gio.FileQueryInfoFlags.NONE)
-    content_type = file_info.get_content_type()
-    if 'image' in content_type:
-        return filepath
-    else:
-        os.remove(filepath)
-        return None
+    return filepath
 
 def get_album(albumid):
     url = '{0}stype=albuminfo&albumid={1}'.format(SEARCH, albumid)
