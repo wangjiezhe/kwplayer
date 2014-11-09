@@ -18,7 +18,6 @@ from urllib import parse
 from urllib import request
 
 from gi.repository import GdkPixbuf
-from gi.repository import Gio
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -165,16 +164,7 @@ def get_image(url, filepath=None):
 
     with open(filepath, 'wb') as fh:
         fh.write(image)
-    # Now, check its mime type
-    file_ = Gio.File.new_for_path(filepath)
-    file_info = file_.query_info(Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-                                 Gio.FileQueryInfoFlags.NONE)
-    content_type = file_info.get_content_type()
-    if 'image' in content_type:
-        return filepath
-    else:
-        os.remove(filepath)
-        return None
+    return filepath
 
 def get_album(albumid):
     url = '{0}stype=albuminfo&albumid={1}'.format(SEARCH, albumid)
