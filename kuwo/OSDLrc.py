@@ -284,7 +284,8 @@ class OSDLrc(Gtk.ApplicationWindow):
             try:
                 region = cairo.Region()
             except AttributeError:
-                print('cairo.Region is missing, see https://github.com/LiuLang/kwplayer#qa')
+                print('cairo.Region is missing, a patch is required:',
+                      'http://bugs.debian.org/688079')
                 logger.error(traceback.format_exc())
                 return
             self.input_shape_combine_region(region)
