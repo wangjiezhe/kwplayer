@@ -452,11 +452,11 @@ class PreferencesDialog(Gtk.Dialog):
         box.pack_start(ColorBox(parent, _('Color:'),
                 'osd-inactivated-color'), False, False, 0)
 
-        box.pack_start(SpinBox(parent, _('Shadow X:'),
+        box.pack_start(SpinBox(parent, _('Horizontal Shadow:'),
                 'osd-inactivated-shadow-x', SHADOW_SIZE_MIN,
                 SHADOW_SIZE_MAX), False, False, 0)
 
-        box.pack_start(SpinBox(parent, _('Shadow Y:'),
+        box.pack_start(SpinBox(parent, _('Vertical Shadow:'),
                 'osd-inactivated-shadow-y', SHADOW_SIZE_MIN,
                 SHADOW_SIZE_MAX), False, False, 0)
 
@@ -481,11 +481,11 @@ class PreferencesDialog(Gtk.Dialog):
         box.pack_start(ColorBox(parent, _('Color:'),
                 'osd-activated-color'), False, False, 0)
 
-        box.pack_start(SpinBox(parent, _('Shadow X:'),
+        box.pack_start(SpinBox(parent, _('Horizontal Shadow:'),
                 'osd-activated-shadow-x', SHADOW_SIZE_MIN,
                 SHADOW_SIZE_MAX), False, False, 0)
 
-        box.pack_start(SpinBox(parent, _('Shadow Y:'),
+        box.pack_start(SpinBox(parent, _('Vertical Shadow:'),
                 'osd-activated-shadow-y', SHADOW_SIZE_MIN,
                 SHADOW_SIZE_MAX), False, False, 0)
 

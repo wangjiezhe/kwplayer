@@ -1,3 +1,17 @@
+3.4.6 - 2014.11.9
+* Feature: rewrite lrc parser
+* Feature: support AppIndicator in Ubuntu Unity desktop
+* Feature: update OSD lryic style
+* Feature: use GtkMenuButton
+* Feature: add auto-hide-tab option
+* plyvel removed
+* Gio.File.query_info() removed in Net.py
+* Fixed: ValueError: invalid path when deleting songs from playlist
+* Fixed: NoneType has not attribute `songs` in playlist
+* Fixed: handle play button signal in song list
+* Fixed: do not switch to current activated playlist automatically
+* i18n updated
+
 3.4.5 - 2014.10.31
 * Feature: add OSD lyric
 * Feature: add some ations
