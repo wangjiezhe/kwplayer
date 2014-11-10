@@ -5,20 +5,23 @@
 # Use of this source code is governed by GPLv3 license that can be found
 # in the LICENSE file.
 
+import os
 import sys
+import time
+
 import dbus
 from gi.repository import Gtk
 
-
 BUS_NAME = 'org.mpris.MediaPlayer2.kwplayer'
+LOG_INTERVAL = 30 * 86400  # 30 days
 MPRIS_PATH = '/org/mpris/MediaPlayer2'
 ROOT_IFACE = 'org.mpris.MediaPlayer2'
 
 def check_loaded():
-    '''Check kwplayer is loaded or not.
+    '''Check kwplayer is running.
     
-    If kwplayer is running, raise kwplayer window and return True,
-    otherwise return False.'''
+    If kwplayer is running, raise kwplayer window and returns True,
+    otherwise returns False.'''
     sb = dbus.SessionBus()
     try:
         kw_proxy = sb.get_object(BUS_NAME, MPRIS_PATH)
@@ -30,6 +33,19 @@ def check_loaded():
 
 def load_app():
     from kuwo.App import App
+    # handle errors
+    logfile = os.path.expanduser('~/.config/kuwo/kwplayer-stderr.log')
+    dirname = os.path.dirname(logfile)
+    if not os.path.exists(dirname):
+        try:
+            os.makedirs(dirname)
+        except Exception:
+            sys.exit(1)
+    if (os.path.exists(logfile) and
+            time.time() - os.stat(logfile).st_ctime > LOG_INTERVAL):
+        os.remove(logfile)
+    sys.stderr = open(logfile, 'a')
+
     app = App()
     sys.exit(app.run(sys.argv))
 
