@@ -682,26 +682,36 @@ class PlayList(Gtk.Box):
             Gdk.Window.process_all_updates()
 
         def _on_disk_error(widget, song_path, eror=None):
-            self.stop_caching_daemon()
-            GLib.idle_add(Widgets.filesystem_error, self.app.window, song_path)
+            def on_disk_error():
+                logger.warn('Playlist.on_disk_error: %s, %s' %
+                            (song_path, error))
+                self.stop_caching_daemon()
+                Widgets.filesystem_error(self.app.window, song_path)
+            GLib.idle_add(on_disk_error)
 
         def _on_network_error(widget, song_link, error=None):
-            self.stop_caching_daemon()
-            GLib.idle_add(Widgets.network_error, self.app.window,
-                          _('Failed to cache song'))
+            def on_network_error():
+                logger.warn('Playlist.on_network_error: %s, %s' %
+                            (song_link, error))
+                self.stop_caching_daemon()
+                Widgets.network_error(self.app.window,
+                                      _('Failed to cache song'))
+            GLib.idle_add(on_network_error)
 
         def _on_chunk_received(widget, percent):
-            GLib.idle_add(do_on_chunk_received, percent)
-
-        def do_on_chunk_received(percent):
-            self.cache_local_count += 1
-            self.cache_speed_label.set_text('{0} %'.format(int(percent * 100)))
+            def on_chunk_received():
+                self.cache_local_count += 1
+                self.cache_speed_label.set_text(
+                        '{0} %'.format(int(percent * 100)))
+            GLib.idle_add(on_chunk_received)
 
         def _on_downloaded(widget, song_path, error=None):
-            if song_path:
-                GLib.idle_add(_remove_song)
-            if self.cache_enabled:
-                GLib.idle_add(self.do_cache_song_pool)
+            def on_downloaded():
+                if song_path:
+                    _remove_song()
+                if self.cache_enabled:
+                    self.do_cache_song_pool()
+            GLib.idle_add(on_downloaded)
 
         if not self.cache_enabled:
             return

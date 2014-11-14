@@ -851,6 +851,8 @@ class AsyncSong(GObject.GObject):
                     Utils.iconvtag(song_path, song)
                     return
                 else:
+                    logger.warn('Net.received_size: %s, content_length: %s' %
+                                (received_size, content_length))
                     self.emit('network-error', song_link)
                 # remove temp file
                 if os.path.exists(tmp_song_path):
