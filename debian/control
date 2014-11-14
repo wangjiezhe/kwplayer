@@ -27,8 +27,8 @@ Depends: python3 (>= 3.2),
          python3-dbus,
          python3-gi,
          python3-gi-cairo,
-         python3-leveldb,
          python3-ply
+Recommends: python3-leveldb, python3-mutagen
 Description: Music player for Linux users
  Rewrite of kuwo player, a popup music player on Windows platform.
  It provides high quality music resources from kuwo.cn.
