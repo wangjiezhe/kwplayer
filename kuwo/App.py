@@ -14,11 +14,13 @@ from gi.repository import GdkPixbuf
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
+from gi.repository import Notify
 
 from kuwo import Config
 # ~/.config/kuwo and ~/.cache/kuwo need to be created at first time
 Config.check_first()
 _ = Config._
+Notify.init(Config.APPNAME)
 from kuwo.log import logger
 from kuwo import Widgets
 from kuwo.Artists import Artists
@@ -74,6 +76,8 @@ class App:
         self.window.add(box)
 
         self.osdlrc = OSDLrc(self)
+        self.notify = None
+        self.init_notify()
 
         self.player = Player(self)
         box.pack_start(self.player, False, False, 0)
@@ -335,3 +339,22 @@ class App:
             GLib.timeout_add(100, self.player.playbin.expose)
             #GLib.idle_add(self.player.playbin.expose)
             self.notebook.set_show_tabs(False)
+
+    def init_notify(self):
+        try:
+            self.notify = Notify.Notification.new(Config.APPNAME, '',
+                                                  Config.NAME)
+        except Exception:
+            logger.warn('App.init_notify: %s' % traceback.format_exc())
+            self.notify = None
+
+    # Open API
+    def toast(self, text):
+        '''在用户界面显示一个消息通知.
+
+        可以使用系统提供的Notification工具, 也可以在窗口的最下方滚动弹出
+        这个消息
+        '''
+        if self.notify:
+            self.notify.update(Config.APPNAME, text, Config.NAME)
+            self.notify.show()

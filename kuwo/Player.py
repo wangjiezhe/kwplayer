@@ -664,7 +664,8 @@ class Player(Gtk.Box):
 
     def on_playbin_error(self, playbin, error_msg):
         logger.warn('Player.on_playbin_error(): %s.' % error_msg)
-        self.load_next()
+        self.app.toast('Player Error: %s' % error_msg)
+        self.stop_player()
 
     def on_playbin_mute_changed(self, playbin, mute):
         self.update_gtk_volume_value_cb()
