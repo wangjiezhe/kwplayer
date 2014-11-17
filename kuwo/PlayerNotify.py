@@ -6,7 +6,6 @@
 
 from gi.repository import GLib
 from gi.repository import Notify
-Notify.init('kwplayer')
 
 from kuwo import Config
 _ = Config._
