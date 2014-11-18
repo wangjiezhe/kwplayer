@@ -185,8 +185,8 @@ class Search(Gtk.Box):
                     ])
                     tree_iters.append(tree_iter)
                     urls.append(artist['PICPATH'])
-                Net.update_artist_logos(self.liststore_artists, 0,
-                                        tree_iters, urls)
+                Net.async_call(Net.update_artist_logos, self.liststore_artists,
+                               0, tree_iters, urls)
             else:
                 logger.error('show_artists(): %s, %s' %
                              (self.artists_total, error))
@@ -218,8 +218,8 @@ class Search(Gtk.Box):
                     ])
                     tree_iters.append(tree_iter)
                     urls.append(album['pic'])
-                Net.update_album_covers(self.liststore_albums, 0,
-                                        tree_iters, urls)
+                Net.async_call(Net.update_album_covers, self.liststore_albums,
+                               0, tree_iters, urls)
             else:
                 logger.error('show_albums: %s, %s' % (self.albums_total, error))
 
