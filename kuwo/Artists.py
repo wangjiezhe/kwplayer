@@ -10,6 +10,7 @@ import time
 
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
+import html2text
 
 from kuwo import Config
 _ = Config._
@@ -671,7 +672,7 @@ class Artists(Gtk.Box):
             self.artist_info_constellation.set(info, 'constellation')
             if info and 'info' in info:
                 self.artist_info_textbuffer.set_text(
-                        Widgets.escape(info['info']))
+                        html2text.html2text(info['info']))
             else:
                 self.artist_info_textbuffer.set_text('')
 

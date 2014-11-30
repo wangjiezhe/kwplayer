@@ -408,7 +408,7 @@ class PlayList(Gtk.Box):
         toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR)
         toolbar.props.show_arrow = False
         toolbar.props.toolbar_style = Gtk.ToolbarStyle.ICONS
-        toolbar.props.icon_size = 1
+        toolbar.props.icon_size = Gtk.IconSize.MENU
         add_btn = Gtk.ToolButton()
         add_btn.set_name('Add')
         add_btn.set_tooltip_text(_('Add a new playlist'))

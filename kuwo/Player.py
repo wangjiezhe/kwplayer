@@ -24,8 +24,8 @@ from kuwo.log import logger
 _ = Config._
 # Gdk.EventType.2BUTTON_PRESS is an invalid variable
 GDK_2BUTTON_PRESS = 5
-# set toolbar icon size to Gtk.IconSize.DND
-ICON_SIZE = 5
+#ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
+ICON_SIZE = Gtk.IconSize.DND
 
 
 class PlayType:
