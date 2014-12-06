@@ -28,8 +28,12 @@ kuwo/__init__.py
 kuwo/log.py
 share/applications/kwplayer.desktop
 share/icons/hicolor/128x128/apps/kwplayer.png
+share/icons/hicolor/16x16/apps/kwplayer.png
 share/icons/hicolor/24x24/apps/kwplayer.png
 share/icons/hicolor/256x256/apps/kwplayer.png
+share/icons/hicolor/32x32/apps/kwplayer.png
+share/icons/hicolor/48x48/apps/kwplayer.png
+share/icons/hicolor/512x512/apps/kwplayer.png
 share/icons/hicolor/64x64/apps/kwplayer.png
 share/icons/hicolor/scalable/apps/kwplayer.svg
 share/kwplayer/icons/anonymous.png
