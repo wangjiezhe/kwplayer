@@ -915,8 +915,8 @@ class PlayList(Gtk.Box):
     def new_playlist_menu(self, menu=None):
         '''根据当前的播放列表, 重新构建弹出的菜单'''
         if menu:
-            while menu.get_children():
-                menu.remove(menu.get_children()[0])
+            for child in menu.get_children()[:]:
+                menu.remove(child)
         else:
             menu  = Gtk.Menu()
 
