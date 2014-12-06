@@ -4,5 +4,5 @@
 
 # kuwo python lib placeholder
 
-__version__ = '3.4.6'
+__version__ = '3.4.7'
 __doc__ = 'Music player for Linux users'
