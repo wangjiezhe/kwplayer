@@ -154,7 +154,6 @@ class Player(Gtk.Box):
         toolbar.insert(self.favorite_btn, 8)
 
         osd_lrc_btn = Gtk.ToggleToolButton()
-        osd_lrc_btn.set_icon_name('accessories-text-editor-symbolic')
         osd_lrc_btn.props.related_action = self.app.osdlrc.show_window_action
         toolbar.insert(osd_lrc_btn, 9)
 
