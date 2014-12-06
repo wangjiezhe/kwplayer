@@ -1,3 +1,11 @@
+kwplayer (3.4.8-1) stable; urgency=low
+
+  * Fixed: media-subtitles-symbolic is missing in ubuntu 14.04
+  * Update app logo
+
+ -- Liu Lang <gsushzhsosgsu@gmail.com>  Sat, 06 Dec 2014 23:03:06 +0800
+
+
 kwplayer (3.4.7-1) stable; urgency=low
 
   * Use default icon theme

@@ -29,6 +29,7 @@ kuwo/log.py
 share/applications/kwplayer.desktop
 share/icons/hicolor/128x128/apps/kwplayer.png
 share/icons/hicolor/16x16/apps/kwplayer.png
+share/icons/hicolor/22x22/apps/kwplayer.png
 share/icons/hicolor/24x24/apps/kwplayer.png
 share/icons/hicolor/256x256/apps/kwplayer.png
 share/icons/hicolor/32x32/apps/kwplayer.png
@@ -40,6 +41,7 @@ share/kwplayer/icons/anonymous.png
 share/kwplayer/icons/lrc-background.jpg
 share/kwplayer/icons/hicolor/scalable/actions/download-symbolic.svg
 share/kwplayer/icons/hicolor/scalable/actions/favorite.svg
+share/kwplayer/icons/hicolor/scalable/actions/media-view-subtitles-symbolic.svg
 share/kwplayer/icons/hicolor/scalable/apps/kwplayer.svg
 share/kwplayer/icons/hicolor/scalable/mimetypes/video-x-generic-symbolic.svg
 share/kwplayer/icons/hicolor/scalable/places/user-trash-symbolic.svg

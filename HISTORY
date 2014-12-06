@@ -1,3 +1,7 @@
+3.4.8 - 2014.12.7
+* Fixed: media-subtitles-symbolic is missing in Ubuntu 14.04
+* Update app logo
+
 3.4.7 - 2014.12.6
 * Use default icon theme
 * Remove GtkMenuButton in Song list
