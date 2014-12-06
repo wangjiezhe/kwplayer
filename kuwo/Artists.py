@@ -147,12 +147,13 @@ class Artists(Gtk.Box):
         artists_left_box.pack_start(self.pref_combo, False, False, 0)
 
         # favirote artists
-        self.fav_yes_img = Gtk.Image.new_from_pixbuf(app.theme['favorite'])
-        self.fav_no_img = Gtk.Image.new_from_pixbuf(app.theme['no-favorite'])
+        self.fav_yes_img = Gtk.Image.new_from_icon_name('favorite',
+                Gtk.IconSize.BUTTON)
+        self.fav_no_img = Gtk.Image.new_from_icon_name(
+                'emblem-favorite-symbolic', Gtk.IconSize.BUTTON)
         fav_artists_btn = Gtk.Button(_('Favorite'))
         fav_artists_btn.props.margin_top = 20
-        fav_artists_btn.props.image = Gtk.Image.new_from_pixbuf(
-                app.theme['favorite'])
+        fav_artists_btn.props.image = self.fav_yes_img
         if not Config.GTK_LE_36:
             fav_artists_btn.props.always_show_image = True
         fav_artists_btn.connect('clicked', self.on_fav_artists_btn_clicked)
@@ -269,7 +270,7 @@ class Artists(Gtk.Box):
         artist_info_box.pack_start(artist_info_hbox, False, False, 0)
 
         self.artist_info_pic = Gtk.Image()
-        self.artist_info_pic.set_from_pixbuf(app.theme['anonymous'])
+        self.artist_info_pic.set_from_pixbuf(Config.ANONYMOUS_PIXBUF)
         self.artist_info_pic.props.xalign = 0
         self.artist_info_pic.props.yalign = 0
         artist_info_hbox.pack_start(self.artist_info_pic, False, False, 0)
@@ -390,7 +391,7 @@ class Artists(Gtk.Box):
             for artist in artists:
                 _info = ' '.join([artist['music_num'], _(' songs'), ])
                 tree_iter = self.artists_liststore.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(artist['name']),
                     int(artist['id']),
                     _info,
@@ -529,7 +530,7 @@ class Artists(Gtk.Box):
             tree_iters = []
             for album in albums:
                 tree_iter = self.artist_albums_liststore.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(album['name']),
                     int(album['albumid']),
                     Widgets.unescape(album['artist']),
@@ -573,7 +574,7 @@ class Artists(Gtk.Box):
             tree_iters = []
             for mv in mvs:
                 tree_iter = self.artist_mv_liststore.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(mv['name']),
                     Widgets.unescape(mv['artist']),
                     '',
@@ -621,7 +622,7 @@ class Artists(Gtk.Box):
             for artist in artists:
                 _info = ''.join([artist['songnum'], _(' songs'), ])
                 tree_iter = self.artist_similar_liststore.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(artist['name']),
                     int(artist['id']),
                     _info,
@@ -750,7 +751,7 @@ class Artists(Gtk.Box):
                 pix = GdkPixbuf.Pixbuf.new_from_file_at_size(info['pic'],
                                                              100, 100)
             else:
-                pix = self.app.theme['anonymous']
+                pix = Config.ANONYMOUS_PIXBUF,
             tip = Widgets.escape(info.get('info', ''))
             self.fav_artists_liststore.append([pix, info['name'],
                                                artist_id, tip])

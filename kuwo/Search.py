@@ -178,7 +178,7 @@ class Search(Gtk.Box):
                 urls, tree_iters = [], []
                 for artist in artists:
                     tree_iter = self.liststore_artists.append([
-                        self.app.theme['anonymous'],
+                        Config.ANONYMOUS_PIXBUF,
                         Widgets.unescape(artist['ARTIST']),
                         int(artist['ARTISTID']),
                         Widgets.unescape(artist['COUNTRY']),
@@ -209,7 +209,7 @@ class Search(Gtk.Box):
                     tooltip = Widgets.escape(album.get('info',
                                              album['name']))
                     tree_iter = self.liststore_albums.append([
-                        self.app.theme['anonymous'],
+                        Config.ANONYMOUS_PIXBUF,
                         Widgets.unescape(album['name']),
                         int(album['albumid']),
                         Widgets.unescape(album['artist']),

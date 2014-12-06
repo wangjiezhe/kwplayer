@@ -140,7 +140,7 @@ class OSDLrc(Gtk.ApplicationWindow):
         self.show_window_action = Gtk.ToggleAction('show-window-action',
                 _('Show OSD Window'), _('Show OSD Window'), None)
         self.show_window_action.set_icon_name(
-                'accessories-text-editor-symbolic')
+                'media-view-subtitles-symbolic')
         self.show_window_action.connect('toggled',
                 self.on_show_window_action_toggled)
 

@@ -228,7 +228,7 @@ class Radio(Gtk.Box):
         tree_iters = []
         for radio in radios:
             tree_iter = self.liststore_radios.append([
-                self.app.theme['anonymous'],
+                Config.ANONYMOUS_PIXBUF,
                 Widgets.unescape(radio['disname']), 
                 int(radio['sourceid'].split(',')[0]),
                 Widgets.unescape(radio['info']),

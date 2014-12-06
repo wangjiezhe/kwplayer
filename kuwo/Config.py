@@ -11,7 +11,6 @@ import sys
 import traceback
 
 from gi.repository import GdkPixbuf
-from gi.repository import GLib
 from gi.repository import Gtk
 
 import kuwo
@@ -41,7 +40,11 @@ AUTHORS = ['LiuLang <gsushzhsosgsu@gmail.com>', ]
 COPYRIGHT = 'Copyright (c) 2013-2014 LiuLang'
 DESCRIPTION = _('Music player for linux users')
 
-ICON_PATH = os.path.join(PREF, 'kuwo', 'themes', 'default')
+ICON_PATH = os.path.join(PREF, NAME, 'icons')
+LRC_BACKGROUND_IMG = os.path.join(ICON_PATH, 'lrc-background.jpg')
+ANONYMOUS_IMG = os.path.join(ICON_PATH, 'anonymous.png')
+ANONYMOUS_PIXBUF = GdkPixbuf.Pixbuf.new_from_file(ANONYMOUS_IMG)
+
 HOME_DIR = os.path.expanduser('~')
 CACHE_DIR = os.path.join(HOME_DIR, '.cache', 'kuwo')
 # used for small logos(100x100)
@@ -58,9 +61,6 @@ PLS_JSON = os.path.join(CACHE_DIR, 'pls.json')
 RADIO_JSON = os.path.join(CACHE_DIR, 'radio.json')
 # favorite artists list.
 FAV_ARTISTS_JSON = os.path.join(CACHE_DIR, 'fav_artists.json')
-
-THEME_DIR = os.path.join(PREF, 'kuwo', 'themes', 'default')
-LRC_BACKGROUND_IMG = os.path.join(THEME_DIR, 'lrc-background.jpg')
 
 
 class ShortcutMode:
@@ -168,24 +168,3 @@ def load_conf():
 def dump_conf(conf):
     with open(_conf_file, 'w') as fh:
         fh.write(json.dumps(conf, indent=2))
-
-def load_theme():
-    theme_file = os.path.join(THEME_DIR, 'images.json')
-    try:
-        with open(theme_file) as fh:
-            theme = json.loads(fh.read())
-    except ValueError:
-        logger.critical(traceback.format_exc())
-        sys.exit(1)
-
-    theme_pix = {}
-    theme_path = {}
-    for img_name in theme:
-        filepath = os.path.join(THEME_DIR, theme[img_name])
-        try:
-            theme_pix[img_name] = GdkPixbuf.Pixbuf.new_from_file(filepath)
-            theme_path[img_name] = filepath
-        except GLib.GError:
-            logger.critical(traceback.format_exc())
-            sys.exit(1)
-    return (theme_pix, theme_path)

@@ -74,7 +74,7 @@ class MV(Gtk.Box):
             tree_iters = []
             for node in nodes:
                 tree_iter = self.liststore_nodes.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(node['disname']),
                     int(node['sourceid']),
                     Widgets.unescape(node['info']),
@@ -107,7 +107,7 @@ class MV(Gtk.Box):
             tree_iters = []
             for song in songs:
                 tree_iter = self.liststore_songs.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(song['name']),
                     Widgets.unescape(song['artist']),
                     Widgets.unescape(song['album']),

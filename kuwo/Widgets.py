@@ -206,12 +206,7 @@ class ControlBox(Gtk.Box):
         button_play.connect('clicked', self.on_button_play_clicked)
         self.pack_start(button_play, False, False, 0)
 
-        # GtkMenuButton is new in Gtk3.6
-        if Gtk.MINOR_VERSION > 4:
-            button_add = Gtk.MenuButton(_('Add to Playlist'))
-            button_add.props.popup = Gtk.Menu()
-        else:
-            button_add = Gtk.Button(_('Add to Playlist'))
+        button_add = Gtk.Button(_('Add to Playlist'))
         button_add.connect('clicked', self.on_button_add_clicked)
         self.pack_start(button_add, False, False, 0)
 
@@ -236,15 +231,11 @@ class ControlBox(Gtk.Box):
 
     def on_button_add_clicked(self, button):
         songs = [song_row_to_dict(s) for s in self.liststore]
-        if Gtk.MINOR_VERSION > 4:
-            menu = button.props.popup
-            self.app.playlist.new_playlist_menu(menu)
-            menu.songs = songs
-        else:
-            self.menu = self.app.playlist.new_playlist_menu()
-            self.menu.songs = songs
-            self.menu.popup(None, None, None, None, 1,
-                            Gtk.get_current_event_time())
+        self.menu = self.app.playlist.new_playlist_menu()
+        self.menu.show_all()
+        self.menu.songs = songs
+        self.menu.popup(None, None, None, None, 1,
+                        Gtk.get_current_event_time())
 
     def on_button_cache_clicked(self, button):
         songs = [song_row_to_dict(s) for s in self.liststore if s[0]]
@@ -258,25 +249,17 @@ class MVControlBox(Gtk.Box):
         self.liststore = liststore
         self.app = app
 
-        if Gtk.MINOR_VERSION > 4:
-            button_add = Gtk.MenuButton(_('Add to Playlist'))
-            button_add.props.popup = Gtk.Menu()
-        else:
-            button_add = Gtk.Button(_('Add to Playlist'))
+        button_add = Gtk.Button(_('Add to Playlist'))
         button_add.connect('clicked', self.on_button_add_clicked)
         self.pack_start(button_add, False, False, 0)
 
     def on_button_add_clicked(self, button):
         songs = [song_row_to_dict(s) for s in self.liststore]
-        if Gtk.MINOR_VERSION > 4:
-            menu = button.props.popup
-            self.app.playlist.new_playlist_menu(menu)
-            menu.songs = songs
-        else:
-            self.menu = self.app.playlist.new_playlist_menu()
-            self.menu.songs = songs
-            self.menu.popup(None, None, None, None, 1,
-                            Gtk.get_current_event_time())
+        self.menu = self.app.playlist.new_playlist_menu()
+        self.menu.show_all()
+        self.menu.songs = songs
+        self.menu.popup(None, None, None, None, 1,
+                        Gtk.get_current_event_time())
 
 
 class IconView(Gtk.IconView):
@@ -345,13 +328,13 @@ class TreeViewSongs(Gtk.TreeView):
         album = Gtk.CellRendererText()
         col_album = TreeViewColumnText('Album', album, text=self.COL_ALBUM)
         self.append_column(col_album)
-        play = Gtk.CellRendererPixbuf(pixbuf=app.theme['play'])
+        play = Gtk.CellRendererPixbuf(icon_name='emblem-music-symbolic')
         col_play = TreeViewColumnIcon('Play', play)
         self.append_column(col_play)
-        add = Gtk.CellRendererPixbuf(pixbuf=app.theme['add'])
+        add = Gtk.CellRendererPixbuf(icon_name='list-add-symbolic')
         col_add = TreeViewColumnIcon('Add', add)
         self.append_column(col_add)
-        cache = Gtk.CellRendererPixbuf(pixbuf=app.theme['cache'])
+        cache = Gtk.CellRendererPixbuf(icon_name='download-symbolic')
         col_cache = TreeViewColumnIcon('Cache', cache)
         self.append_column(col_cache)
 

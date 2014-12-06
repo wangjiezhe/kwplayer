@@ -54,15 +54,17 @@ class App:
         self.app.connect('activate', self.on_app_activate)
         self.app.connect('shutdown', self.on_app_shutdown)
 
-        self.conf = Config.load_conf()
-        self.theme, self.theme_path = Config.load_theme()
-
     def on_app_startup(self, app):
+        self.conf = Config.load_conf()
+        self.icon_theme = Gtk.IconTheme.get_default()
+        self.icon_theme.append_search_path(Config.ICON_PATH)
+
+        GLib.set_application_name(Config.APPNAME)
         self.window = Gtk.ApplicationWindow(application=app)
         self.window.set_default_size(*self.conf['window-size'])
         self.window.set_title(Config.APPNAME)
+        self.window.set_default_icon_name(Config.NAME)
         self.window.props.hide_titlebar_when_maximized = True
-        self.window.set_icon(self.theme['app-logo'])
         app.add_window(self.window)
         self.window.connect('check-resize', self.on_main_window_resized)
         self.window.connect('delete-event', self.on_main_window_deleted)
@@ -286,8 +288,7 @@ class App:
             self.status_icon.set_menu(menu)
             self.status_icon.set_status(AppIndicator.IndicatorStatus.ACTIVE)
         else: 
-            self.status_icon = Gtk.StatusIcon()
-            self.status_icon.set_from_pixbuf(self.theme['app-logo'])
+            self.status_icon = Gtk.StatusIcon.new_from_icon_name(Config.NAME)
             # left click
             self.status_icon.connect('activate', on_status_icon_activate)
             # right click
