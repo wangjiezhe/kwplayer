@@ -68,7 +68,7 @@ class Player(Gtk.Box):
         event_pic.connect('button-press-event', self.on_pic_pressed)
         self.pack_start(event_pic, False, False, 0)
 
-        self.artist_pic = Gtk.Image.new_from_pixbuf(app.theme['anonymous'])
+        self.artist_pic = Gtk.Image.new_from_pixbuf(Config.ANONYMOUS_PIXBUF)
         event_pic.add(self.artist_pic)
 
         control_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -147,7 +147,7 @@ class Player(Gtk.Box):
 
         self.favorite_btn = Gtk.ToolButton()
         self.favorite_btn.set_label(_('Favorite'))
-        self.favorite_btn.set_icon_name('no-favorite')
+        self.favorite_btn.set_icon_name('emblem-favorite-symbolic')
         self.favorite_btn.set_tooltip_text(_('Add to Favorite playlist'))
         self.favorite_btn.props.margin_left = 10
         self.favorite_btn.connect('clicked', self.on_favorite_btn_clicked)
@@ -458,7 +458,7 @@ class Player(Gtk.Box):
                                                              100, 100)
                 self.artist_pic.set_from_pixbuf(pix)
             else:
-                self.meta_artUrl = self.app.theme_path['anonymous']
+                self.meta_artUrl = Config.ANONYMOUS_IMG
             self.notify.refresh()
             self.dbus.update_meta()
             
@@ -476,7 +476,7 @@ class Player(Gtk.Box):
                 name, artist, album)
         self.label.set_label(label)
         self.app.window.set_title(name)
-        self.artist_pic.set_from_pixbuf(self.app.theme['anonymous'])
+        self.artist_pic.set_from_pixbuf(Config.ANONYMOUS_PIXBUF)
         Net.async_call(Net.get_artist_info, song['artistid'], song['artist'],
                        callback=_update_pic)
 
@@ -604,7 +604,7 @@ class Player(Gtk.Box):
         if self.get_favorite_status():
             self.favorite_btn.set_icon_name('favorite')
         else:
-            self.favorite_btn.set_icon_name('no-favorite')
+            self.favorite_btn.set_icon_name('emblem-favorite-symbolic')
 
     def get_favorite_status(self):
         return self.app.playlist.check_song_in_playlist(self.curr_song,
@@ -617,7 +617,7 @@ class Player(Gtk.Box):
                                                     'Favorite'):
             self.app.playlist.remove_song_from_playlist(self.curr_song,
                                                         'Favorite')
-            self.favorite_btn.set_icon_name('no-favorite')
+            self.favorite_btn.set_icon_name('emblem-favorite-symbolic')
         else:
             self.app.playlist.add_song_to_playlist(self.curr_song, 'Favorite')
             self.favorite_btn.set_icon_name('favorite')
@@ -643,7 +643,7 @@ class Player(Gtk.Box):
         dialog.set_modal(True)
         dialog.set_transient_for(self.app.window)
         dialog.set_program_name(Config.APPNAME)
-        dialog.set_logo(self.app.theme['app-logo'])
+        dialog.set_logo_icon_name(Config.NAME)
         dialog.set_version(Config.VERSION)
         dialog.set_comments(Config.DESCRIPTION)
         dialog.set_copyright(Config.COPYRIGHT)

@@ -104,7 +104,7 @@ class TopCategories(Gtk.Box):
                 if node['disname'].endswith('专区'):
                     continue
                 tree_iter = self.liststore_main.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(node['disname']),
                     int(node['id']),
                     Widgets.unescape(node['info']),
@@ -152,7 +152,7 @@ class TopCategories(Gtk.Box):
                 else:
                     tooltip = Widgets.set_tooltip(node['name'], node['info'])
                 tree_iter = self.liststore_sub1.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(node['name']),
                     int(node[id_]),
                     Widgets.unescape(node['info']),
@@ -209,7 +209,7 @@ class TopCategories(Gtk.Box):
             tree_iters = []
             for node in nodes:
                 tree_iter = self.liststore_sub2.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(node['name']),
                     int(node['sourceid']),
                     Widgets.unescape(node['info']),

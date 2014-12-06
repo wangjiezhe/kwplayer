@@ -89,7 +89,7 @@ class Themes(Gtk.Box):
             tree_iters = []
             for node in nodes:
                 tree_iter = self.liststore_main.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(node['name']),
                     int(node['nid']),
                     Widgets.unescape(node['info']),
@@ -119,7 +119,7 @@ class Themes(Gtk.Box):
             tree_iters = []
             for node in nodes:
                 tree_iter = self.liststore_sub.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(node['name']),
                     int(node['sourceid']),
                     Widgets.unescape(node['info']),

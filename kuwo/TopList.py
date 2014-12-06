@@ -71,7 +71,7 @@ class TopList(Gtk.Box):
             tree_iters = []
             for node in nodes:
                 tree_iter = self.liststore_nodes.append([
-                    self.app.theme['anonymous'],
+                    Config.ANONYMOUS_PIXBUF,
                     Widgets.unescape(node['name']),
                     int(node['sourceid']),
                     Widgets.unescape(node['info']),
