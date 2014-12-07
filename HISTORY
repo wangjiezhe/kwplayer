@@ -1,3 +1,19 @@
+3.4.8 - 2014.12.7
+* Fixed: media-subtitles-symbolic is missing in Ubuntu 14.04
+* Update app logo
+
+3.4.7 - 2014.12.6
+* Use default icon theme
+* Remove GtkMenuButton in Song list
+* Remove favorite.png from global hicolor icon theme
+* Rename kuwo/ to kwplayer/
+* Update OSD icon
+* Add python3-html2text to dependencies
+* Add toast() function
+* Add python-mutagen to dependencies
+* Add debian/
+* Log all exceptions to file
+
 3.4.6 - 2014.11.9
 * Feature: rewrite lrc parser
 * Feature: support AppIndicator in Ubuntu Unity desktop
