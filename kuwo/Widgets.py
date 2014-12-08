@@ -230,7 +230,7 @@ class ControlBox(Gtk.Box):
         self.app.playlist.play_songs(songs)
 
     def on_button_add_clicked(self, button):
-        songs = [song_row_to_dict(s) for s in self.liststore]
+        songs = [song_row_to_dict(s) for s in self.liststore if s[0]]
         self.menu = self.app.playlist.new_playlist_menu()
         self.menu.show_all()
         self.menu.songs = songs
@@ -254,7 +254,7 @@ class MVControlBox(Gtk.Box):
         self.pack_start(button_add, False, False, 0)
 
     def on_button_add_clicked(self, button):
-        songs = [song_row_to_dict(s) for s in self.liststore]
+        songs = [song_row_to_dict(s) for s in self.liststore if s[0]]
         self.menu = self.app.playlist.new_playlist_menu()
         self.menu.show_all()
         self.menu.songs = songs
