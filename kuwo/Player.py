@@ -5,6 +5,7 @@
 # in the LICENSE file.
 
 import sys
+import time
 
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
@@ -59,6 +60,8 @@ class Player(Gtk.Box):
         self.adj_timeout = 0
         self.recommend_imgs = None
         self.curr_song = None
+        self.fullscreen_sid = 0
+        self.fullscreen_timestamp = 0
 
         # use this to keep Net.AsyncSong object
         self.async_song = None
@@ -565,21 +568,55 @@ class Player(Gtk.Box):
     # Fullscreen
     def toggle_fullscreen(self):
         '''Switch between fullscreen and unfullscreen mode.'''
+
+        def hide_control_panel_and_label(timestamp):
+            if (timestamp == self.fullscreen_timestamp and
+                    self.fullscreen_sid > 0):
+                self.hide()
+                GLib.timeout_add(100, self.playbin.expose)
+                self.app.notebook.set_show_tabs(False)
+
+        def on_window_motion_notified(window, event):
+            if self.fullscreen_sid == 0:
+                return
+            lower = 70
+            upper = window.get_size()[1] - 40
+            if lower < event.y < upper:
+                return
+            else:
+                self.show_all()
+                self.app.notebook.set_show_tabs(True)
+
+            # Delay 2 seconds to hide them
+            if button.get_active():
+                self.fullscreen_timestamp = time.time()
+                GLib.timeout_add(100, self.playbin.expose)
+                GLib.timeout_add(2000, hide_control_panel_and_label,
+                                 self.fullscreen_timestamp)
+
         window = self.app.window
         button = self.fullscreen_btn
         if not button.get_active():
         # unfullscreen
+            window.unfullscreen()
             button.set_icon_name('view-fullscreen-symbolic')
             window.realize()
-            window.unfullscreen()
-            #self.playbin.expose()
+            self.playbin.expose()
+            self.show()
+            self.app.notebook.set_show_tabs(True)
+            self.fullscreen_sid = 0
         else:
         # fullscreen
-            button.set_icon_name('view-restore-symbolic')
             self.app.popup_page(self.app.lrc.app_page)
             window.realize()
             window.fullscreen()
-            #self.playbin.expose_fullscreen()
+            button.set_icon_name('view-restore-symbolic')
+            self.playbin.expose_fullscreen()
+
+            self.hide()
+            self.app.notebook.set_show_tabs(False)
+            self.fullscreen_sid = window.connect('motion-notify-event',
+                                                 on_window_motion_notified)
 
     def on_window_key_pressed(self, widget, event):
         # press Esc to exit fullscreen mode
@@ -587,8 +624,7 @@ class Player(Gtk.Box):
             self.fullscreen_btn.set_active(False)
         # press F11 to toggle fullscreen mode
         elif event.keyval == Gdk.KEY_F11:
-            self.fullscreen_btn.set_active(
-                    not self.fullscreen_btn.get_active())
+            self.fullscreen_btn.set_active(not self.fullscreen_btn.get_active())
 
     def on_fullscreen_button_toggled(self, button):
         self.toggle_fullscreen()

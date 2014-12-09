@@ -148,11 +148,6 @@ class Preferences(Gtk.Dialog):
         status_button.connect('toggled', self.on_status_button_toggled)
         generic_box.pack_start(status_button, False, False, 0)
 
-        control_button = Gtk.CheckButton(_('Auto hide control panel'))
-        control_button.set_active(app.conf['auto-hide-tabs'])
-        control_button.connect('toggled', self.on_control_button_toggled)
-        generic_box.pack_start(control_button, False, False, 0)
-
         notify_button = Gtk.CheckButton(_('Show kwplayer on lock screen'))
         notify_button.set_tooltip_text(
             _('Only works with gdm3/gnome3.8+\n') + 
@@ -333,9 +328,6 @@ class Preferences(Gtk.Dialog):
     # generic tab signal handlers
     def on_status_button_toggled(self, button):
         self.app.conf['use-status-icon'] = button.get_active()
-
-    def on_control_button_toggled(self, button):
-        self.app.conf['auto-hide-tabs'] = button.get_active()
 
     def on_notify_button_toggled(self, button):
         self.app.conf['use-notify'] = button.get_active()
