@@ -104,8 +104,6 @@ class App:
 
     def on_app_shutdown(self, app):
         Config.dump_conf(self.conf)
-        if self.player.default_cursor:
-            self.window.get_window().set_cursor(self.player.default_cursor)
 
     def run(self, argv):
         self.app.run(argv)
@@ -113,6 +111,8 @@ class App:
     def quit(self):
         gdk_win = self.window.get_window()
         if gdk_win and not gdk_win.is_destroyed():
+            if self.player.default_cursor:
+                gdk_win.set_cursor(self.player.default_cursor)
             self.window.destroy()
         self.shortcut.quit()
         self.app.quit()
