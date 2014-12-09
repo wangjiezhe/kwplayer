@@ -104,6 +104,8 @@ class App:
 
     def on_app_shutdown(self, app):
         Config.dump_conf(self.conf)
+        if self.player.default_cursor:
+            self.window.get_window().set_cursor(self.player.default_cursor)
 
     def run(self, argv):
         self.app.run(argv)

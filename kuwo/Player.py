@@ -62,6 +62,8 @@ class Player(Gtk.Box):
         self.curr_song = None
         self.fullscreen_sid = 0
         self.fullscreen_timestamp = 0
+        self.default_cursor = None
+        self.blank_cursor = Gdk.Cursor.new(Gdk.CursorType.BLANK_CURSOR)
 
         # use this to keep Net.AsyncSong object
         self.async_song = None
@@ -570,6 +572,8 @@ class Player(Gtk.Box):
         '''Switch between fullscreen and unfullscreen mode.'''
 
         def hide_control_panel_and_label(timestamp):
+            if self.fullscreen_sid > 0:
+                gdk_window.set_cursor(self.blank_cursor)
             if (timestamp == self.fullscreen_timestamp and
                     self.fullscreen_sid > 0):
                 self.hide()
@@ -577,25 +581,32 @@ class Player(Gtk.Box):
                 self.app.notebook.set_show_tabs(False)
 
         def on_window_motion_notified(window, event):
+            window.get_window().set_cursor(self.default_cursor)
             if self.fullscreen_sid == 0:
                 return
             lower = 70
             upper = window.get_size()[1] - 40
             if lower < event.y < upper:
-                return
+                GLib.timeout_add(2000,
+                        lambda *args: gdk_window.set_cursor(self.blank_cursor))
             else:
                 self.show_all()
                 self.app.notebook.set_show_tabs(True)
 
             # Delay 2 seconds to hide them
-            if button.get_active():
-                self.fullscreen_timestamp = time.time()
-                GLib.timeout_add(100, self.playbin.expose)
-                GLib.timeout_add(2000, hide_control_panel_and_label,
-                                 self.fullscreen_timestamp)
+            self.fullscreen_timestamp = time.time()
+            GLib.timeout_add(100, self.playbin.expose)
+            GLib.timeout_add(2000, hide_control_panel_and_label,
+                             self.fullscreen_timestamp)
 
         window = self.app.window
+        gdk_window = window.get_window()
         button = self.fullscreen_btn
+        if not self.default_cursor:
+            self.default_cursor = gdk_window.get_cursor()
+        if not self.default_cursor:
+            self.default_cursor = Gdk.Cursor.new(Gdk.CursorType.ARROW)
+
         if not button.get_active():
         # unfullscreen
             window.unfullscreen()
@@ -605,6 +616,7 @@ class Player(Gtk.Box):
             self.show()
             self.app.notebook.set_show_tabs(True)
             self.fullscreen_sid = 0
+            gdk_window.set_cursor(self.default_cursor)
         else:
         # fullscreen
             self.app.popup_page(self.app.lrc.app_page)
@@ -615,6 +627,7 @@ class Player(Gtk.Box):
 
             self.hide()
             self.app.notebook.set_show_tabs(False)
+            gdk_window.set_cursor(self.blank_cursor)
             self.fullscreen_sid = window.connect('motion-notify-event',
                                                  on_window_motion_notified)
 
