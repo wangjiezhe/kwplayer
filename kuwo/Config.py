@@ -84,7 +84,6 @@ SHORT_CUT_I18N = {
 _default_conf = {
     'version': VERSION,
     'window-size': (960, 680),
-    'auto-hide-tabs': False, # 自动隐去notebook标签
     'song-dir': os.path.join(CACHE_DIR, 'song'),
     'mv-dir': os.path.join(CACHE_DIR, 'mv'),
     'volume': 0.08,

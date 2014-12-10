@@ -7,16 +7,23 @@
 import json
 import os
 import time
+import traceback
 
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
-import html2text
 
 from kuwo import Config
 _ = Config._
 from kuwo import Net
 from kuwo import Widgets
 from kuwo.log import logger
+
+try:
+    import html2text
+    html2text_imported = True
+except ImportError:
+    logger.warn(traceback.exec())
+    html2text_imported = False
 
 
 class InfoLabel(Gtk.Label):
@@ -672,8 +679,12 @@ class Artists(Gtk.Box):
             self.artist_info_gender.set(info, 'gender',)
             self.artist_info_constellation.set(info, 'constellation')
             if info and 'info' in info:
-                self.artist_info_textbuffer.set_text(
-                        html2text.html2text(info['info']))
+                if html2text_imported:
+                    self.artist_info_textbuffer.set_text(
+                            html2text.html2text(info['info']))
+                else:
+                    self.artist_info_textbuffer.set_text(
+                            Widgets.escape(info['info']))
             else:
                 self.artist_info_textbuffer.set_text('')
 

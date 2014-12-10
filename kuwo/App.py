@@ -6,7 +6,6 @@
 
 import os
 import sys
-import time
 import traceback
 
 from gi.repository import Gdk
@@ -71,8 +70,6 @@ class App:
 
         self.accel_group = Gtk.AccelGroup()
         self.window.add_accel_group(self.accel_group)
-        self.fullscreen_sid = 0
-        self.fullscreen_timestamp = 0
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.window.add(box)
@@ -107,6 +104,8 @@ class App:
 
     def on_app_shutdown(self, app):
         Config.dump_conf(self.conf)
+        if self.player.default_cursor:
+            self.window.get_window().set_cursor(self.player.default_cursor)
 
     def run(self, argv):
         self.app.run(argv)
@@ -298,48 +297,6 @@ class App:
         if page not in self.tab_first_show:
             page.first()
             self.tab_first_show.append(page)
-
-        if page_num == 0 and self.conf['auto-hide-tabs']:
-            # fullscreen
-            self.player.hide()
-            self.notebook.set_show_tabs(False)
-            self.fullscreen_sid = self.window.connect('motion-notify-event',
-                    self.on_window_motion_notified)
-        else:
-            # unfullscreen
-            self.player.show()
-            self.notebook.set_show_tabs(True)
-            self.fullscreen_sid = 0
-
-    def reset_notebook_tabs(self):
-        if not self.conf['auto-hide-tabs']:
-            self.player.show_all()
-            self.notebook.set_show_tabs(True)
-            self.fullscreen_sid = 0
-
-    def on_window_motion_notified(self, window, event):
-        if (self.notebook.get_current_page() != 0 or
-                not self.conf['auto-hide-tabs']):
-            return
-        lower = 70
-        upper = self.window.get_size()[1] - 40
-        if lower < event.y < upper:
-            return
-        else:
-            self.player.show_all()
-            self.notebook.set_show_tabs(True)
-        # delay 2 seconds and hide them
-        self.fullscreen_timestamp = time.time()
-        GLib.timeout_add(100, self.player.playbin.expose)
-        GLib.timeout_add(2000, self.hide_control_panel_and_label,
-                         self.fullscreen_timestamp)
-
-    def hide_control_panel_and_label(self, timestamp):
-        if timestamp == self.fullscreen_timestamp and self.fullscreen_sid > 0:
-            self.player.hide()
-            GLib.timeout_add(100, self.player.playbin.expose)
-            #GLib.idle_add(self.player.playbin.expose)
-            self.notebook.set_show_tabs(False)
 
     def init_notify(self):
         try:
