@@ -423,7 +423,7 @@ class OSDLrc(Gtk.ApplicationWindow):
 class PreferencesDialog(Gtk.Dialog):
 
     def __init__(self, parent):
-        super().__init__(_('OSD Styles'), parent, 0,
+        super().__init__(_('OSD Styles'), parent.app.window, 0,
                          (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE))
         self.parent = parent
         self.set_modal(False)
