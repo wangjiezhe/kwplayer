@@ -1,3 +1,9 @@
+kwplayer (3.4.9-2) stable; urgency=medium
+
+  * Fixed: use regexp as a fallback mode while parse lyrics
+
+ -- Liu Lang <gsushzhsosgsu@gmail.com>  Thu, 01 Jan 2015 07:24:24 +0800
+
 kwplayer (3.4.9-1) stable; urgency=medium
 
   * Fixed: ply.lex.LexError: Scanning error. Illegal character '['
