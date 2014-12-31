@@ -21,7 +21,6 @@ __all__ = ['parse_lrc']
 
 def parse_lrc(lrc_txt):
     '''解析歌词'''
-    return parser_lex(lrc_txt)
     try:
         return parser_lex(lrc_txt)
     except lex.LrcError:
