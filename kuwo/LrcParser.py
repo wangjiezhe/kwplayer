@@ -9,6 +9,7 @@
 import re
 import traceback
 
+
 from kuwo.log import logger
 
 try:
@@ -20,6 +21,7 @@ __all__ = ['parse_lrc']
 
 def parse_lrc(lrc_txt):
     '''解析歌词'''
+    return parser_lex(lrc_txt)
     try:
         return parser_lex(lrc_txt)
     except lex.LrcError:
@@ -28,6 +30,7 @@ def parse_lrc(lrc_txt):
         # lex is unavailable
         pass
     finally:
+        logger.debug('LrcParser: fallback to regexp parser')
         return parser_re(lrc_txt)
 
 def time_tag_to_nano(time_tags):
@@ -46,13 +49,6 @@ def time_tag_to_nano(time_tags):
 
 def sort_lrc_tags(lrc_obj):
     '''从小到大对时间标记进行排序'''
-#    lrc_obj = [[-4, ''], [-3, ''], [-2, ''], ] + lrc_obj
-#    last_time = lrc_obj[-1][0]
-#    if last_time <= 0:
-#        logger.error('LrcParser.parser_re(): %s.' % last_time)
-#        return None
-#    for i in range(last_time, last_time * 2 + 5, last_time // 4 + 1):
-#        lrc_obj.append([i, ''])
     return sorted(lrc_obj, key=lambda item: item[0])
 
 def parser_lex(lrc_txt):
@@ -74,8 +70,12 @@ def parser_lex(lrc_txt):
         r'\n'
         token.lexer.lineno += 1
 
+    def t_null(token):
+        r'[^\w+.*]'
+        pass
+
     def t_error(token):
-        logger.debug('LrcParser.parser_lex.t_error: %s', token.value)
+        logger.warn('LrcParser.parser_lex.t_error: %s', token.value)
 
     lrc_lex = lex.lex()
     lrc_lex.input(lrc_txt)
@@ -87,7 +87,7 @@ def parser_lex(lrc_txt):
         else:
             for time_tag in time_tags:
                 lrc_obj.append([time_tag_to_nano(time_tag), token.value])
-            time_lst.clear()
+            time_tags.clear()
     return sort_lrc_tags(lrc_obj)
 
 def parser_re(lrc_txt):
