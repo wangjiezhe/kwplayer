@@ -1,3 +1,9 @@
+kwplayer (3.4.9-3) stable; urgency=medium
+
+  * Fixed: gir1.2-gstreamer0.10 is missing in debian 7
+
+ -- Liu Lang <gsushzhsosgsu@gmail.com>  Fri, 02 Jan 2015 10:03:00 +0800
+
 kwplayer (3.4.9-2) stable; urgency=medium
 
   * Fixed: use regexp as a fallback mode while parse lyrics
