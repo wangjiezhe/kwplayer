@@ -25,9 +25,10 @@ def parse_lrc(lrc_txt):
         return parser_lex(lrc_txt)
     except lex.LrcError:
         logger.error(traceback.format_exc())
-        return parser_re(lrc_txt)
     except NameError:
         # lex is unavailable
+        pass
+    finally:
         logger.debug('LrcParser: fallback to regexp parser')
         return parser_re(lrc_txt)
 
@@ -56,7 +57,7 @@ def parser_lex(lrc_txt):
     )
 
     def t_TIME(token):
-        r'\[\d{2}:\d{2}(?:\.\d{1,3})\]'
+        r'\[\d{1,2}:\d{1,2}(?:\.\d{1,3})\]'
         token.value = token.value[1:-1]
         return token
 
