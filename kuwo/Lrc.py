@@ -120,7 +120,7 @@ class Lrc(Gtk.Notebook):
         self.old_line_iter = None
         self.old_timestamp = -5
         if not lrc_txt:
-            self.lrc_buf.set_text(_('No lrc available'))
+            self.lrc_buf.set_text(_('No lyrics available'))
             self.lrc_obj = None
             self.app.osdlrc.set_lrc(self.lrc_obj)
             return
@@ -128,7 +128,7 @@ class Lrc(Gtk.Notebook):
         self.app.osdlrc.set_lrc(self.lrc_obj)
         if not self.lrc_obj:
             logger.warn('set_lrc(): failed to parse lrc.')
-            self.lrc_buf.set_text(_('No lrc available'))
+            self.lrc_buf.set_text(_('No lyrics available'))
             return
         lrc_content = [l[1] for l in self.lrc_obj]
 
