@@ -1,3 +1,26 @@
+kwplayer (3.4.9-3) stable; urgency=medium
+
+  * Fixed: gir1.2-gstreamer0.10 is missing in debian 7
+
+ -- Liu Lang <gsushzhsosgsu@gmail.com>  Fri, 02 Jan 2015 10:03:00 +0800
+
+kwplayer (3.4.9-2) stable; urgency=medium
+
+  * Fixed: use regexp as a fallback mode while parse lyrics
+
+ -- Liu Lang <gsushzhsosgsu@gmail.com>  Thu, 01 Jan 2015 07:24:24 +0800
+
+kwplayer (3.4.9-1) stable; urgency=medium
+
+  * Fixed: ply.lex.LexError: Scanning error. Illegal character '['
+  * Fixed: gnome-shell crashes when OSDLrc.PreferencesDialog close
+  * Fixed: NoneType has no attribute set_cursor() in App
+  * Fixed: Autohide cursor in fullscreen mode
+  * Fixed: html2text module is unavailable in Fedora 20 and Fedora 21
+  * Remove auto-hide option
+
+ -- Liu Lang <gsushzhsosgsu@gmail.com>  Thu, 01 Jan 2015 06:57:20 +0800
+
 kwplayer (3.4.8-1) stable; urgency=low
 
   * Fixed: media-subtitles-symbolic is missing in ubuntu 14.04

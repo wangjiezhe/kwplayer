@@ -1,3 +1,11 @@
+3.4.9 - 2014.1.1
+* Fixed: ply.lex.LexError: Scanning error. Illegal character '['
+* Fixed: gnome-shell crashes when OSDLrc.PreferencesDialog close
+* Fixed: NoneType has no attribute set_cursor() in App
+* Fixed: Autohide cursor in fullscreen mode
+* Fixed: html2text module is unavailable in Fedora 20 and Fedora 21
+* Remove auto-hide option
+
 3.4.8 - 2014.12.7
 * Fixed: media-subtitles-symbolic is missing in Ubuntu 14.04
 * Update app logo

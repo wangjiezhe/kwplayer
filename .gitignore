@@ -6,3 +6,4 @@ kuwo/__pycache__/
 *.swp
 tags
 .idea
+kuwo_test/
