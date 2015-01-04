@@ -23,12 +23,8 @@ def parse_lrc(lrc_txt):
     '''解析歌词'''
     try:
         return parser_lex(lrc_txt)
-    except lex.LrcError:
+    except (lex.LrcError, NameError):
         logger.error(traceback.format_exc())
-    except NameError:
-        # lex is unavailable
-        pass
-    finally:
         logger.debug('LrcParser: fallback to regexp parser')
         return parser_re(lrc_txt)
 
@@ -41,10 +37,9 @@ def time_tag_to_nano(time_tags):
     else:
         mm, ss, ml = time_tags
     if not ml:
-        curr_time = int(mm) * 60 + int(ss)
+        return (int(mm) * 60 + int(ss)) * 10 ** 9
     else:
-        curr_time = int(mm) * 60 + int(ss) + float(ml)
-    return int(curr_time * 10 ** 9)
+        return ((int(mm) * 60 + int(ss)) * 1000 + int(ml)) * 10 ** 6
 
 def sort_lrc_tags(lrc_obj):
     '''从小到大对时间标记进行排序'''
