@@ -491,7 +491,7 @@ class Artists(Gtk.Box):
         def _append_artist_songs(songs_args, error=None):
             if error or not songs_args or not songs_args[1]:
                 logger.error('append_artist_songs(): %s, %s' %
-                             (self.artist_songs_total, error))
+                             (songs_args, error))
                 return
             songs, self.artist_songs_total = songs_args
             for song in songs:
@@ -531,7 +531,7 @@ class Artists(Gtk.Box):
             albums, self.artist_albums_total = albums_args
             if error or self.artist_albums_total == 0:
                 logger.error('append_arttist_albums(): %s, %s' %
-                             (self.artist_albums_taotal, error))
+                             (self.artist_albums_total, error))
                 return
             urls = []
             tree_iters = []
