@@ -33,7 +33,10 @@ def time_tag_to_nano(time_tags):
     if isinstance(time_tags, str):
         mm = time_tags[:2]
         ss = time_tags[3:5]
-        ml = time_tags[6:]
+        if len(time_tags) > 6:
+            ml = time_tags[6:]
+        else:
+            ml = None
     else:
         mm, ss, ml = time_tags
     if not ml:
@@ -52,7 +55,7 @@ def parser_lex(lrc_txt):
     )
 
     def t_TIME(token):
-        r'\[\d{1,2}:\d{1,2}(?:\.\d{1,3})\]'
+        r'\[\d{1,2}:\d{1,2}(\.\d{1,3})?\]'
         token.value = token.value[1:-1]
         return token
 
