@@ -137,6 +137,13 @@ class Lrc(Gtk.Notebook):
         self.lrc_buf.set_text('\n'.join(lrc_content))
         self.lrc_window.get_vadjustment().set_value(0)
 
+    def reset_tags(self):
+        if not self.lrc_obj:
+            return
+        iter_start = self.lrc_buf.get_start_iter()
+        iter_end = self.lrc_buf.get_end_iter()
+        self.lrc_buf.remove_tag(self.highlighted_tag, iter_start, iter_end)
+
     def sync_lrc(self, timestamp):
         if not self.lrc_obj or len(self.lrc_obj) <= self.old_line_num + 1:
             return

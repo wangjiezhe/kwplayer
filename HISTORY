@@ -1,3 +1,10 @@
+3.5.1 - 2014.1.9
+* Fixed: remove all highlighted tags in lyric when a new position is seeked
+* Fixed: Artists has no attribute self.artist_songs_taotal
+* Fixed: App object has no attribute reset_notebook_tabs
+* Fixed: convert time tag to nanoseconds
+* Handle [00:11] tag in lrc file
+
 3.4.9 - 2014.1.1
 * Fixed: ply.lex.LexError: Scanning error. Illegal character '['
 * Fixed: gnome-shell crashes when OSDLrc.PreferencesDialog close

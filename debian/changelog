@@ -1,3 +1,13 @@
+kwplayer (3.5.1-1) stable; urgency=medium
+
+  * Fixed: remove all highlighted tags in lyric when a new position is seeked
+  * Fixed: Artists has no attribute self.artist_songs_taotal
+  * Fixed: App object has no attribute reset_notebook_tabs
+  * Fixed: convert time tag to nanoseconds
+  * Handle [00:11] tag in lrc file
+
+ -- Liu Lang <gsushzhsosgsu@gmail.com>  Fri, 09 Jan 2015 22:47:05 +0800
+
 kwplayer (3.4.9-3) stable; urgency=medium
 
   * Fixed: gir1.2-gstreamer0.10 is missing in debian 7
