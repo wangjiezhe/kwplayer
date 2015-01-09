@@ -442,6 +442,7 @@ class Player(Gtk.Box):
             button.set_icon_name('media-playlist-repeat-symbolic')
 
     def on_scale_change_value(self, scale, scroll_type, value):
+        self.app.lrc.reset_tags()
         self.seek_cb(value)
 
     def on_volume_value_changed(self, volume_button, volume):
