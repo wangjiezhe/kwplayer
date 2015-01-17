@@ -90,6 +90,7 @@ _default_conf = {
     'audio': 2,  # 320k mp3
     'video': 1,  # mp4 high
     'use-status-icon': True,
+    'background-img-repeat': True,  # repeat background image to fill the window
     'use-notify': False,
     'use-dark-theme': False,
     'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
