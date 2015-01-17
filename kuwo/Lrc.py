@@ -198,8 +198,8 @@ class Lrc(Gtk.Notebook):
         css = '\n'.join([
             'GtkScrolledWindow.lrc_window {',
                 "background-image: url('{0}');".format(self.lrc_background),
+                "background-size:{0};".format(self.app.conf['background-img-size']),
                 "background-position:center;",
-                "background-size:contain;",  #'cover'
         ])
         if not self.app.conf['background-img-repeat']:
             css = '\n'.join([

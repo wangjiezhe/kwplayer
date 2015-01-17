@@ -91,6 +91,7 @@ _default_conf = {
     'video': 1,  # mp4 high
     'use-status-icon': True,
     'background-img-repeat': True,  # repeat background image to fill the window
+    'background-img-size': 'cover',  # contain: background<=window, cover:background>=window
     'use-notify': False,
     'use-dark-theme': False,
     'lrc-text-color': 'rgba(46, 52, 54, 0.999)',
