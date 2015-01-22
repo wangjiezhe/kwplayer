@@ -22,7 +22,7 @@ try:
     import html2text
     html2text_imported = True
 except ImportError:
-    logger.warn(traceback.exec())
+    logger.warn(traceback.format_exc())
     html2text_imported = False
 
 
