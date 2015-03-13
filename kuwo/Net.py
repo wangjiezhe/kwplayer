@@ -749,7 +749,7 @@ def get_song_link(song, conf, use_mv=False):
     song_link = '/'.join(song_list[:3] + song_list[5:])
     # update song path
     song_path = ''.join([os.path.splitext(song_path)[0],
-                         os.path.splitext(song_link)[1]])
+            os.path.splitext(parse.urlparse(song_link).path)[1]])
     if os.path.exists(song_path):
         return (True, '', song_path)
     return (False, song_link, song_path)
