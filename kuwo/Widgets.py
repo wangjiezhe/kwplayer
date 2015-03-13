@@ -192,7 +192,7 @@ class ControlBox(Gtk.Box):
     '''用于控制liststore的显示方式, 比如`全选`'''
 
     def __init__(self, liststore, app, select_all=True):
-        super().__init__(spacing=5)
+        super().__init__(spacing=0)
         self.liststore = liststore
         self.app = app
 

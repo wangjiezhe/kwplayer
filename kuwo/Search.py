@@ -38,7 +38,7 @@ class Search(Gtk.Box):
         self.albums_page = 0
         self.albums_total = 0
 
-        box_top = Gtk.Box(spacing=5)
+        box_top = Gtk.Box(spacing=0)
         self.pack_start(box_top, False, False, 0)
 
         if Config.GTK_LE_36:
@@ -110,7 +110,7 @@ class Search(Gtk.Box):
         albums_tab.add(iconview_albums)
 
     def after_init(self):
-        self.control_box.hide()
+        pass
 
     def first(self):
         pass
