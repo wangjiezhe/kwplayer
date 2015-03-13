@@ -90,6 +90,17 @@ def async_call(func, *args, callback=None):
     thread.daemon = True
     thread.start()
 
+def cleanup_temp_files(path):
+    def cleanup(ext):
+        if not os.path.exists(path) or not os.path.isdir(path):
+            return
+        os.chdir(path)
+        for filename in os.listdir():
+            if filename.endswith(ext):
+                os.remove(filename)
+    cleanup('.part')
+    cleanup('kwplayer_ar')
+
 def hash_byte(_str):
     return hashlib.sha512(_str.encode()).digest()
 

@@ -21,6 +21,7 @@ Config.check_first()
 _ = Config._
 Notify.init(Config.APPNAME)
 from kuwo.log import logger
+from kuwo import Net
 from kuwo import Widgets
 from kuwo.Artists import Artists
 from kuwo.Lrc import Lrc
@@ -101,6 +102,10 @@ class App:
         self.search.after_init()
         self.shortcut = Shortcut(self.player)
         self.osdlrc.after_init()
+
+        # Cleanup temporary media files
+        Net.cleanup_temp_files(self.conf['song-dir'])
+        Net.cleanup_temp_files(self.conf['mv-dir'])
 
     def on_app_shutdown(self, app):
         Config.dump_conf(self.conf)
