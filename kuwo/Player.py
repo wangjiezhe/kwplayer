@@ -498,7 +498,7 @@ class Player(Gtk.Box):
         self.recommend_imgs = None
         def _on_list_received(imgs, error=None):
             if error or not imgs or len(imgs) < 10:
-                logger.warn('get_recommend_lists(): %s, %s' % (imgs, error))
+                logger.debug('get_recommend_lists(): %s, %s' % (imgs, error))
                 self.recommend_imgs = None
             else:
                 self.recommend_imgs = imgs.strip().splitlines()
