@@ -88,7 +88,10 @@ class PlayerNotify:
         #hint = 'transient'
         notify.set_hint(hint, GLib.Variant.new_boolean(True))
 
-        notify.show()
+        try:
+            notify.show()
+        except GLib.Error:
+            pass
 
     def on_prev_action_activated(self, *args):
         self.player.load_prev_cb()

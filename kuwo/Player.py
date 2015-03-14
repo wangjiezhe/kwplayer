@@ -395,7 +395,7 @@ class Player(Gtk.Box):
         if self.play_type == PlayType.MV:
             return True
         self.app.lrc.sync_lrc(offset)
-        if self.recommend_imgs and len(self.recommend_imgs) > 0:
+        if self.recommend_imgs:
             # change lyrics background image every 20 seconds
             div, mod = divmod(int(offset / 10**9), 20)
             if mod == 0:
@@ -498,10 +498,10 @@ class Player(Gtk.Box):
         self.recommend_imgs = None
         def _on_list_received(imgs, error=None):
             if error or not imgs or len(imgs) < 10:
-                logger.warn('get_recommend_lists(): %s, %s' % (imgs, error))
+                logger.debug('get_recommend_lists(): %s, %s' % (imgs, error))
                 self.recommend_imgs = None
             else:
-                self.recommend_imgs = imgs.splitlines()
+                self.recommend_imgs = imgs.strip().splitlines()
 
         Net.async_call(Net.get_recommend_lists, self.curr_song['artist'],
                        callback=_on_list_received)

@@ -159,7 +159,8 @@ class Lrc(Gtk.Notebook):
 
         # backward seeking
         if timestamp < self.old_timestamp:
-            while timestamp < self.lrc_obj[line_num][0]:
+            while (line_num > len(self.lrc_obj) or
+                   timestamp < self.lrc_obj[line_num][0]):
                 line_num -= 1
         else:
         # forward seeking

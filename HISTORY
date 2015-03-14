@@ -1,3 +1,13 @@
+3.5.2 - 2014.3.14
+* Fixed: IndexError in Lrc.py
+* Fixed: strip blank links while updating LRC background images
+* Fixed: catch GLib.Error Exception in PlayerNotify
+* Fixed: remove `kwplayer_ar` from song path
+* Fixed: AttributeError, `module` object has no attribue `exec
+* Remove margins between control buttons
+* Cleanup temporary media files at startup
+* Add gstreamer1.0-plugins-bad and gir1.2-gtk-3.0 to dependencies
+
 3.5.1 - 2014.1.9
 * Fixed: remove all highlighted tags in lyric when a new position is seeked
 * Fixed: Artists has no attribute self.artist_songs_taotal

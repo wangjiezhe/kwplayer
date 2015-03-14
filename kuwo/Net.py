@@ -90,6 +90,17 @@ def async_call(func, *args, callback=None):
     thread.daemon = True
     thread.start()
 
+def cleanup_temp_files(path):
+    def cleanup(ext):
+        if not os.path.exists(path) or not os.path.isdir(path):
+            return
+        os.chdir(path)
+        for filename in os.listdir():
+            if filename.endswith(ext):
+                os.remove(filename)
+    cleanup('.part')
+    cleanup('kwplayer_ar')
+
 def hash_byte(_str):
     return hashlib.sha512(_str.encode()).digest()
 
@@ -749,7 +760,7 @@ def get_song_link(song, conf, use_mv=False):
     song_link = '/'.join(song_list[:3] + song_list[5:])
     # update song path
     song_path = ''.join([os.path.splitext(song_path)[0],
-                         os.path.splitext(song_link)[1]])
+            os.path.splitext(parse.urlparse(song_link).path)[1]])
     if os.path.exists(song_path):
         return (True, '', song_path)
     return (False, song_link, song_path)
