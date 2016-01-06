@@ -10,7 +10,6 @@ import sys
 import time
 
 import dbus
-from gi.repository import Gtk
 
 BUS_NAME = 'org.mpris.MediaPlayer2.kwplayer'
 LOG_INTERVAL = 30 * 86400  # 30 days
@@ -19,7 +18,7 @@ ROOT_IFACE = 'org.mpris.MediaPlayer2'
 
 def check_loaded():
     '''Check kwplayer is running.
-    
+
     If kwplayer is running, raise kwplayer window and returns True,
     otherwise returns False.'''
     sb = dbus.SessionBus()
