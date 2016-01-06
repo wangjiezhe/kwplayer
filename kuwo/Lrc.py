@@ -8,8 +8,10 @@ import os
 import re
 import time
 
+import gi
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
+gi.require_version('GdkX11', '3.0')
 from gi.repository import GdkX11
 from gi.repository import Gtk
 

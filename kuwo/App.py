@@ -8,11 +8,15 @@ import os
 import sys
 import traceback
 
+import gi
+gi.require_version('Gdk', '3.0')
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GLib
 from gi.repository import GObject
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
+gi.require_version('Notify', '0.7')
 from gi.repository import Notify
 
 from kuwo import Config
@@ -37,6 +41,7 @@ from kuwo.TopCategories import TopCategories
 from kuwo.TopList import TopList
 try:
     # Ubuntu Unity uses AppIndicator instead of Gtk.StatusIcon
+    gi.require_version('AppIndicator3', '0.1')
     from gi.repository import AppIndicator3 as AppIndicator
 except ImportError:
     logger.debug(traceback.format_exc())

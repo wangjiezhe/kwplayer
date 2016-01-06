@@ -6,4 +6,5 @@ kuwo/__pycache__/
 *.swp
 tags
 .idea
+.ropeproject/
 kuwo_test/

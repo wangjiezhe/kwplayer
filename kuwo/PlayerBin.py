@@ -7,10 +7,13 @@
 import sys
 import traceback
 
+import gi
 from gi.repository import Gdk
 from gi.repository import GLib
 from gi.repository import GObject
+gi.require_version('Gst', '1.0')
 from gi.repository import Gst
+gi.require_version('GstVideo', '1.0')
 from gi.repository import GstVideo
 from gi.repository import Gtk
 
